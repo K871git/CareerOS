@@ -1,0 +1,767 @@
+{
+  "info": {
+    "_postman_id": "careeros-api-v1",
+    "name": "CareerOS API",
+    "description": "Complete REST API collection for CareerOS — Software Engineering Career Growth Platform.\n\n**Setup:**\n1. Import this collection\n2. Confirm `base_url` variable = `http://localhost:8000/api`\n3. Run **Login** — token is auto-saved to `{{token}}`\n4. Run requests top-to-bottom per folder\n\n**Collection variables auto-set by test scripts:**\n- `token` — set after Login\n- `attempt_id` — set after Submit MCQ Assessment\n- `theory_answer_id` — set after Submit Theory Answer",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "track_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "subject_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "topic_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "topic_id_oop",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "lesson_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "attempt_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "theory_question_id",
+      "value": "11",
+      "type": "string"
+    },
+    {
+      "key": "theory_answer_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{
+      "key": "token",
+      "value": "{{token}}",
+      "type": "string"
+    }]
+  },
+  "item": [
+
+    {
+      "name": "00 — Health",
+      "item": [{
+        "name": "Health Check",
+        "request": {
+          "auth": {
+            "type": "noauth"
+          },
+          "method": "GET",
+          "header": [{
+            "key": "Accept",
+            "value": "application/json"
+          }],
+          "url": {
+            "raw": "{{base_url}}/health",
+            "host": ["{{base_url}}"],
+            "path": ["health"]
+          },
+          "description": "Public endpoint. Expected: 200 {\"status\":\"ok\",\"service\":\"CareerOS API\"}"
+        }
+      }]
+    },
+
+    {
+      "name": "01 — Authentication",
+      "item": [{
+          "name": "Register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@careeros.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "register"]
+            },
+            "description": "Create a new account. Expected: 201 with user object.\n\nValidation rules:\n- name: required, max 255\n- email: required, unique\n- password: required, min 8, confirmed"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const json = pm.response.json();",
+                "if (pm.response.code === 200 && json.token) {",
+                "    pm.collectionVariables.set('token', json.token);",
+                "    console.log('Token saved. First 20 chars:', json.token.substring(0, 20));",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"test@careeros.com\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "login"]
+            },
+            "description": "Login and get Sanctum token. Token is automatically saved to {{token}} by the test script.\n\nExpected: 200 with token string."
+          }
+        },
+        {
+          "name": "Get Authenticated User (me)",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "me"]
+            },
+            "description": "Returns the currently authenticated user.\n\nExpected: 200 with id, name, email."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "logout"]
+            },
+            "description": "Revokes the current Sanctum token. After logout, all requests return 401 until you login again."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "02 — Profile",
+      "item": [{
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "profile"]
+            },
+            "description": "Returns the authenticated user's profile. Returns null data if no profile has been created yet."
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"bio\": \"Aspiring full-stack developer focused on Laravel and React.\",\n    \"target_role\": \"Full Stack Developer\",\n    \"experience_level\": \"junior\",\n    \"github_url\": \"https://github.com/testuser\",\n    \"linkedin_url\": \"https://linkedin.com/in/testuser\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "profile"]
+            },
+            "description": "Create or update the authenticated user's profile.\n\nexperience_level options: junior, mid, senior"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "03 — Career Assessment",
+      "item": [{
+          "name": "Store Career Assessment",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"target_role\": \"Full Stack Developer\",\n    \"skills\": [\n        { \"skill_id\": 1, \"level\": \"intermediate\", \"score\": 65 },\n        { \"skill_id\": 2, \"level\": \"beginner\",     \"score\": 40 },\n        { \"skill_id\": 3, \"level\": \"intermediate\", \"score\": 70 },\n        { \"skill_id\": 7, \"level\": \"beginner\",     \"score\": 35 }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/career-assessment",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "career-assessment"]
+            },
+            "description": "Submit initial career assessment with skill self-ratings.\n\nskill_id examples: 1=PHP, 2=Laravel, 3=JavaScript, 7=MySQL\nlevel options: beginner, intermediate, advanced\nscore: 0-100"
+          }
+        },
+        {
+          "name": "Get Career Assessment",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/career-assessment",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "career-assessment"]
+            },
+            "description": "Retrieve the user's current career assessment with all rated skills."
+          }
+        },
+        {
+          "name": "Update Career Assessment",
+          "request": {
+            "method": "PUT",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"target_role\": \"Backend Engineer\",\n    \"skills\": [\n        { \"skill_id\": 1,  \"level\": \"advanced\",     \"score\": 80 },\n        { \"skill_id\": 2,  \"level\": \"intermediate\",  \"score\": 65 },\n        { \"skill_id\": 8,  \"level\": \"beginner\",      \"score\": 30 },\n        { \"skill_id\": 9,  \"level\": \"intermediate\",  \"score\": 55 }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/career-assessment",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "career-assessment"]
+            },
+            "description": "Update career assessment. Existing skill records are updated (not duplicated). New skill_ids are added."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "04 — Learning Tracks",
+      "item": [{
+          "name": "Get All Tracks",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/tracks",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "tracks"]
+            },
+            "description": "Returns all 3 learning tracks: Full Stack Web Development, Backend Developer, Frontend Developer."
+          }
+        },
+        {
+          "name": "Get Single Track",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/tracks/{{track_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "tracks", "{{track_id}}"]
+            },
+            "description": "Get a single learning track by ID. {{track_id}} defaults to 1 (Full Stack Web Development).\n\n404 if track not found."
+          }
+        },
+        {
+          "name": "Get Subjects for Track",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/tracks/{{track_id}}/subjects",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "tracks", "{{track_id}}", "subjects"]
+            },
+            "description": "Returns all subjects under a given track. Track 1 has 4 subjects: PHP Fundamentals, Laravel Framework, Database & MySQL, REST API Design."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "05 — Subjects & Topics",
+      "item": [{
+          "name": "Get Topics for Subject",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/subjects/{{subject_id}}/topics",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "subjects", "{{subject_id}}", "topics"]
+            },
+            "description": "Returns all topics under a given subject. Subject 1 (PHP Fundamentals) has 4 topics: PHP Variables, PHP Functions, PHP OOP, PHP Error Handling."
+          }
+        },
+        {
+          "name": "Get Lessons for Topic",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/topics/{{topic_id}}/lessons",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "topics", "{{topic_id}}", "lessons"]
+            },
+            "description": "Returns all lessons under a given topic. Each lesson has title, estimated_minutes but NOT content (content only on single lesson view)."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "06 — Lessons",
+      "item": [{
+        "name": "Get Single Lesson (full content)",
+        "request": {
+          "method": "GET",
+          "header": [{
+            "key": "Accept",
+            "value": "application/json"
+          }],
+          "url": {
+            "raw": "{{base_url}}/v1/lessons/{{lesson_id}}",
+            "host": ["{{base_url}}"],
+            "path": ["v1", "lessons", "{{lesson_id}}"]
+          },
+          "description": "Returns the full lesson with content field. This is the only endpoint that returns lesson content — the list view intentionally omits it."
+        }
+      }]
+    },
+
+    {
+      "name": "07 — MCQ Assessment",
+      "item": [{
+          "name": "Get MCQ Questions for Topic",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/topics/{{topic_id}}/questions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "topics", "{{topic_id}}", "questions"]
+            },
+            "description": "Returns MCQ questions for the topic. Each question has an options array with id and option_text.\n\nNOTE: is_correct is intentionally hidden from this response. Copy the option IDs for use in Submit Assessment."
+          }
+        },
+        {
+          "name": "Submit MCQ Assessment",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const json = pm.response.json();",
+                "if (pm.response.code === 201 && json.data && json.data.id) {",
+                "    pm.collectionVariables.set('attempt_id', json.data.id.toString());",
+                "    console.log('Attempt ID saved:', json.data.id);",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"answers\": [\n        { \"question_id\": 1, \"selected_option_id\": 2 },\n        { \"question_id\": 2, \"selected_option_id\": 7 }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/assessments/submit",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "assessments", "submit"]
+            },
+            "description": "Submit answers for MCQ questions. Score is calculated server-side — client option selections are never trusted as correct/incorrect.\n\nIMPORTANT: Replace question_id and selected_option_id values with actual IDs from the GET questions response.\n\nExpected: 201 with score, total_questions, percentage, and full answer review.\n\nattempt_id is auto-saved to {{attempt_id}} by the test script."
+          }
+        },
+        {
+          "name": "Get Assessment Result",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/assessments/{{attempt_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "assessments", "{{attempt_id}}"]
+            },
+            "description": "Retrieve a completed assessment attempt with full review: correct answers, explanations, is_correct per answer.\n\n403 if attempt belongs to another user.\n404 if attempt not found."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "08 — Theory Questions",
+      "item": [{
+          "name": "Get Theory Questions for Topic",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/topics/{{topic_id_oop}}/theory-questions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "topics", "{{topic_id_oop}}", "theory-questions"]
+            },
+            "description": "Returns THEORY type questions for a topic. {{topic_id_oop}} defaults to 3 (PHP OOP) which has 2 theory questions.\n\nNOTE: explanation field is intentionally hidden from this response."
+          }
+        },
+        {
+          "name": "Submit Theory Answer",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const json = pm.response.json();",
+                "if (pm.response.code === 201 && json.data && json.data.id) {",
+                "    pm.collectionVariables.set('theory_answer_id', json.data.id.toString());",
+                "    console.log('Theory Answer ID saved:', json.data.id);",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"answer\": \"Dependency Injection is a design pattern where an object receives its dependencies from outside rather than creating them internally. This promotes loose coupling, makes classes easier to unit test by allowing mocks, and follows the Dependency Inversion Principle from SOLID. In Laravel, DI is handled by the Service Container.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/theory-questions/{{theory_question_id}}/submit",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "theory-questions", "{{theory_question_id}}", "submit"]
+            },
+            "description": "Submit a written answer for a theory question.\n\n{{theory_question_id}} defaults to 11 (first theory question — Dependency Injection).\n\nValidation: answer must be 20–5000 characters.\n\nRe-submitting the same question resets status to pending_review (updateOrCreate).\n\nStatus will be pending_review until an instructor marks it reviewed.\n\ntheory_answer_id is auto-saved to {{theory_answer_id}} by the test script."
+          }
+        },
+        {
+          "name": "Get Theory Answer",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/theory-answers/{{theory_answer_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "theory-answers", "{{theory_answer_id}}"]
+            },
+            "description": "Retrieve a submitted theory answer.\n\nWhile status = pending_review: score, feedback, explanation are all null.\nWhen status = reviewed: score, feedback, and model explanation are revealed.\n\n403 if answer belongs to another user."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "09 — Progress Tracking",
+      "item": [{
+          "name": "Complete a Lesson",
+          "request": {
+            "method": "POST",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/lessons/{{lesson_id}}/complete",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "lessons", "{{lesson_id}}", "complete"]
+            },
+            "description": "Mark a lesson as COMPLETED. Idempotent — calling it twice is safe (just updates completed_at).\n\nReturns the UserProgress record with lesson_title and completed_at."
+          }
+        },
+        {
+          "name": "Get Progress Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/progress",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "progress"]
+            },
+            "description": "Returns the user's overall learning dashboard.\n\nIncludes:\n- summary: total_lessons, completed_lessons, percentage across ALL tracks\n- tracks[]: per-track breakdown with total/completed/percentage"
+          }
+        },
+        {
+          "name": "Get Track Progress (drill-down)",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/tracks/{{track_id}}/progress",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "tracks", "{{track_id}}", "progress"]
+            },
+            "description": "Returns full drill-down progress for one track:\n\ntrack → subjects[] → topics[] → lessons[]\n\nEach level shows total_lessons, completed_lessons, percentage.\nEach lesson shows status (NOT_STARTED | IN_PROGRESS | COMPLETED) and completed_at."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "10 — Error Cases",
+      "item": [{
+          "name": "401 — No token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/tracks",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "tracks"]
+            },
+            "description": "Send request without Authorization header. Expected: 401 Unauthenticated."
+          }
+        },
+        {
+          "name": "404 — Track not found",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Accept",
+              "value": "application/json"
+            }],
+            "url": {
+              "raw": "{{base_url}}/v1/tracks/9999",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "tracks", "9999"]
+            },
+            "description": "Request a track that does not exist. Expected: 404 Not Found."
+          }
+        },
+        {
+          "name": "422 — Validation failure (short theory answer)",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"answer\": \"Too short\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/theory-questions/{{theory_question_id}}/submit",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "theory-questions", "{{theory_question_id}}", "submit"]
+            },
+            "description": "Submit an answer shorter than 20 characters. Expected: 422 with validation error message."
+          }
+        },
+        {
+          "name": "422 — Validation failure (register missing fields)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"not-an-email\",\n    \"password\": \"short\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "register"]
+            },
+            "description": "Register with invalid data. Expected: 422 with per-field validation errors."
+          }
+        }
+      ]
+    }
+
+  ]
+}
