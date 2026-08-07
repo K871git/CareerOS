@@ -14,7 +14,7 @@ export function useRegister() {
         onSuccess: ({ data: res }) => {
             login(res.data.user, res.data.token);
             toast.success('Account created! Welcome to CareerOS.');
-            navigate('/');
+            navigate('/dashboard');
         },
         onError: (error: any) => {
             const message = error.response?.data?.message ?? 'Registration failed. Please try again.';
