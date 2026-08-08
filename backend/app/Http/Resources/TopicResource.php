@@ -15,6 +15,9 @@ class TopicResource extends JsonResource
             'slug'          => $this->slug,
             'description'   => $this->description,
             'display_order' => $this->display_order,
+            'is_locked'     => (bool) ($this->resource->is_locked ?? false),
+            'is_completed'  => (bool) ($this->resource->is_completed ?? false),
+            'best_score'    => (int) ($this->resource->best_score ?? 0),
         ];
     }
 }

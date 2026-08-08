@@ -60,6 +60,32 @@ class ProgressController extends Controller
         ]);
     }
 
+    public function recentActivity(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+
+        $recent = UserProgress::where('user_id', $userId)
+            ->where('status', 'COMPLETED')
+            ->with(['lesson.topic.subject'])
+            ->orderByDesc('completed_at')
+            ->limit(10)
+            ->get();
+
+        $activities = $recent->map(fn ($progress) => [
+            'id'           => $progress->id,
+            'type'         => 'lesson_completed',
+            'description'  => 'Completed: ' . $progress->lesson->title,
+            'subject_name' => $progress->lesson->topic->subject->title ?? null,
+            'created_at'   => $progress->completed_at?->toISOString() ?? $progress->updated_at->toISOString(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Recent activity retrieved successfully.',
+            'data'    => $activities,
+        ]);
+    }
+
     public function completeLesson(Request $request, Lesson $lesson): JsonResponse
     {
         $progress = UserProgress::updateOrCreate(

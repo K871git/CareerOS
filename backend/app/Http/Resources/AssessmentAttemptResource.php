@@ -15,6 +15,8 @@ class AssessmentAttemptResource extends JsonResource
 
         return [
             'id'              => $this->id,
+            'topic_id'        => $this->topic_id,
+            'subject_id'      => $this->topic?->subject_id,
             'score'           => $score,
             'total_questions' => $total,
             'percentage'      => $percentage,

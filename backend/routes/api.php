@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\V1\QuestionController;
 use App\Http\Controllers\Api\V1\SubjectController;
 use App\Http\Controllers\Api\V1\ProgressController;
 use App\Http\Controllers\Api\V1\TheoryQuestionController;
+use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\SkillController;
 use App\Http\Controllers\Api\V1\TopicController;
 
 Route::prefix('v1/auth')->group(function () {
@@ -61,7 +63,12 @@ Route::middleware('auth:sanctum')
         Route::post('theory-questions/{question}/submit', [TheoryQuestionController::class, 'submit']);
         Route::get('theory-answers/{answer}', [TheoryQuestionController::class, 'show']);
 
+        Route::get('skills', [SkillController::class, 'index']);
+
+        Route::get('dashboard', [DashboardController::class, 'overview']);
+
         Route::get('progress', [ProgressController::class, 'index']);
+        Route::get('activity/recent', [ProgressController::class, 'recentActivity']);
         Route::post('lessons/{lesson}/complete', [ProgressController::class, 'completeLesson']);
         Route::get('tracks/{track}/progress', [ProgressController::class, 'trackProgress']);
     });

@@ -17,7 +17,12 @@ class QuestionController extends Controller
 {
     public function index(Topic $topic): JsonResponse
     {
-        $questions = $topic->questions()->with('options')->get();
+        $questions = $topic->questions()
+            ->where('type', 'MCQ')
+            ->with('options')
+            ->inRandomOrder()
+            ->limit(10)
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -57,8 +62,11 @@ class QuestionController extends Controller
             ];
         }
 
+        $topicId = $questions->first()?->topic_id;
+
         $attempt = AssessmentAttempt::create([
             'user_id'         => $user->id,
+            'topic_id'        => $topicId,
             'score'           => $score,
             'total_questions' => count($records),
             'started_at'      => now(),
@@ -69,7 +77,7 @@ class QuestionController extends Controller
             AssessmentAnswer::create(array_merge($record, ['attempt_id' => $attempt->id]));
         }
 
-        $attempt->load(['answers.question.options', 'answers.selectedOption']);
+        $attempt->load(['answers.question.options', 'answers.selectedOption', 'topic']);
 
         return response()->json([
             'success' => true,
@@ -87,7 +95,7 @@ class QuestionController extends Controller
             ], 403);
         }
 
-        $attempt->load(['answers.question.options', 'answers.selectedOption']);
+        $attempt->load(['answers.question.options', 'answers.selectedOption', 'topic']);
 
         return response()->json([
             'success' => true,

@@ -14,7 +14,7 @@ export function useLogin() {
         onSuccess: ({ data: res }) => {
             login(res.data.user, res.data.token);
             toast.success('Welcome back!');
-            navigate('/');
+            navigate('/dashboard');
         },
         onError: (error: any) => {
             const message = error.response?.data?.message ?? 'Login failed. Please try again.';
