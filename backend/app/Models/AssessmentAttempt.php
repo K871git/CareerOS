@@ -10,6 +10,7 @@ class AssessmentAttempt extends Model
 {
     protected $fillable = [
         'user_id',
+        'topic_id',
         'score',
         'total_questions',
         'started_at',
@@ -24,6 +25,11 @@ class AssessmentAttempt extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function topic(): BelongsTo
+    {
+        return $this->belongsTo(Topic::class);
     }
 
     public function answers(): HasMany

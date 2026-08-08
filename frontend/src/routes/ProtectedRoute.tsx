@@ -5,7 +5,7 @@ export default function ProtectedRoute() {
     const { state } = useAuth();
 
     if (!state.isAuthenticated) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/auth/login" replace />;
     }
 
     return <Outlet />;

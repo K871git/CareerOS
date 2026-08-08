@@ -16,6 +16,19 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(SkillSeeder::class);
+        $this->call(PhpPracticeSeeder::class);
+        $this->call(PhpJuniorQuestionsSeeder::class);
+        $this->call(PhpIntermediateQuestionsSeeder::class);
+        $this->call(PhpAdvancedQuestionsSeeder::class);
+        $this->call(JsJuniorQuestionsSeeder::class);
+        $this->call(JsIntermediateQuestionsSeeder::class);
+        $this->call(JsAdvancedQuestionsSeeder::class);
+        $this->call(LaravelJuniorQuestionsSeeder::class);
+        $this->call(LaravelIntermediateQuestionsSeeder::class);
+        $this->call(LaravelAdvancedQuestionsSeeder::class);
+        $this->call(ReactJuniorQuestionsSeeder::class);
+        $this->call(ReactIntermediateQuestionsSeeder::class);
+        $this->call(ReactAdvancedQuestionsSeeder::class);
         $this->call(LearningTrackSeeder::class);
         $this->call(SubjectSeeder::class);
         $this->call(TopicSeeder::class);

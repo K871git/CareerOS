@@ -3,6 +3,7 @@ import {
     LayoutDashboard,
     BookOpen,
     Target,
+    BookMarked,
     TrendingUp,
     User,
     LogOut,
@@ -21,6 +22,7 @@ const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard',       to: '/dashboard' },
     { icon: BookOpen,        label: 'Learning Tracks',  to: '/tracks' },
     { icon: Target,          label: 'Practice',          to: '/practice' },
+    { icon: BookMarked,      label: 'Theory',            to: '/theory' },
     { icon: TrendingUp,      label: 'Progress',          to: '/progress' },
     { icon: User,            label: 'Profile',           to: '/profile' },
 ];

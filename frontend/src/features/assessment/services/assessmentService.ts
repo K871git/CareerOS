@@ -1,9 +1,13 @@
 import api from '../../../api/axios';
-import type { ApiResponse, CareerAssessment, Skill } from '../../../types/api';
+import type { ApiResponse, CareerAssessment, Skill, MCQQuestion, AssessmentAttemptResult } from '../../../types/api';
 
 export interface AssessmentPayload {
     target_role: string;
     skills: { skill_id: number; level: string; score: number }[];
+}
+
+export interface MCQSubmitPayload {
+    answers: { question_id: number; selected_option_id: number }[];
 }
 
 export const assessmentService = {
@@ -18,4 +22,13 @@ export const assessmentService = {
 
     update: (data: AssessmentPayload) =>
         api.put<ApiResponse<CareerAssessment>>('/v1/career-assessment', data),
+
+    getQuestions: (topicId: number) =>
+        api.get<ApiResponse<MCQQuestion[]>>(`/v1/topics/${topicId}/questions`),
+
+    submitAttempt: (data: MCQSubmitPayload) =>
+        api.post<ApiResponse<AssessmentAttemptResult>>('/v1/assessments/submit', data),
+
+    getAttemptResult: (attemptId: number) =>
+        api.get<ApiResponse<AssessmentAttemptResult>>(`/v1/assessments/${attemptId}`),
 };

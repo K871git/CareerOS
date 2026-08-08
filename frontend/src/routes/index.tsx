@@ -11,6 +11,17 @@ import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
 import CareerAssessmentPage from '../features/assessment/pages/CareerAssessmentPage';
+import LearningTracksPage from '../features/learning/pages/LearningTracksPage';
+import TrackDetailsPage from '../features/learning/pages/TrackDetailsPage';
+import TopicPage from '../features/learning/pages/TopicPage';
+import LessonPage from '../features/learning/pages/LessonPage';
+import PracticeHomePage from '../features/practice/pages/PracticeHomePage';
+import PracticeLevelPage from '../features/practice/pages/PracticeLevelPage';
+import PracticeSessionPage from '../features/practice/pages/PracticeSessionPage';
+import AssessmentResultPage from '../features/assessment/pages/AssessmentResultPage';
+import TheoryQuestionsPage from '../features/theory/pages/TheoryQuestionsPage';
+import TheoryAnswerPage from '../features/theory/pages/TheoryAnswerPage';
+import ProgressPage from '../features/progress/pages/ProgressPage';
 
 const router = createBrowserRouter([
     // Auth routes — each page handles its own card layout
@@ -40,10 +51,20 @@ const router = createBrowserRouter([
             {
                 element: <DashboardLayout />,
                 children: [
-                    { path: '/dashboard', element: <DashboardPage /> },
+                    { path: '/dashboard',  element: <DashboardPage /> },
                     { path: '/profile',    element: <ProfilePage /> },
                     { path: '/assessment', element: <CareerAssessmentPage /> },
-                    // Future: /tracks, /practice, /progress
+                    { path: '/tracks',                                        element: <LearningTracksPage /> },
+                    { path: '/tracks/:trackId',                               element: <TrackDetailsPage /> },
+                    { path: '/tracks/:trackId/subjects/:subjectId',           element: <TopicPage /> },
+                    { path: '/lessons/:lessonId',                             element: <LessonPage /> },
+                    { path: '/practice',                                      element: <PracticeHomePage /> },
+                    { path: '/practice/subjects/:subjectId',                  element: <PracticeLevelPage /> },
+                    { path: '/practice/topics/:topicId',                      element: <PracticeSessionPage /> },
+                    { path: '/practice/results/:attemptId',                   element: <AssessmentResultPage /> },
+                    { path: '/theory',                                        element: <TheoryQuestionsPage /> },
+                    { path: '/theory/answers/:answerId',                      element: <TheoryAnswerPage /> },
+                    { path: '/progress',                                      element: <ProgressPage /> },
                 ],
             },
         ],
