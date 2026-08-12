@@ -4,67 +4,45 @@
 
 .sidebar {
   width: 240px;
-  min-height: 100vh;
+  height: calc(100vh - 60px);
   background: #fff;
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   position: fixed;
-  top: 0;
+  top: 60px;
   left: 0;
   z-index: 50;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition:
+    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s ease;
 }
 
-/* --- Header row (brand + close btn) --------------------------------- */
+/* --- Mobile close button (hidden on desktop) --- */
 
-.sidebar-header {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.25rem;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  flex: 1;
-  min-width: 0;
-}
-
-.sidebar-brand-text {
-  font-size: 1.125rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.sidebar-close-btn {
+.sidebar-mobile-close {
   display: none;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  margin-left: 0.5rem;
+  width: 30px;
+  height: 30px;
   background: transparent;
   border: none;
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background var(--ease), color var(--ease);
   font-family: inherit;
+  z-index: 1;
+  transition: background var(--ease), color var(--ease);
 }
 
-.sidebar-close-btn:hover {
+.sidebar-mobile-close:hover {
   background: var(--gray-100);
   color: var(--text-primary);
 }
@@ -72,7 +50,7 @@
 /* --- Nav section ---------------------------------------------------- */
 
 .sidebar-section {
-  padding: 1.25rem 0.875rem 0.5rem;
+  padding: 1rem 0.875rem 0.5rem;
   flex: 1;
 }
 
@@ -85,6 +63,7 @@
   padding: 0 0.625rem;
   margin-bottom: 0.5rem;
   display: block;
+  white-space: nowrap;
 }
 
 .sidebar-nav-item {
@@ -99,6 +78,7 @@
   text-decoration: none;
   transition: background var(--ease), color var(--ease);
   margin-bottom: 0.125rem;
+  white-space: nowrap;
 }
 
 .sidebar-nav-item:hover {
@@ -107,9 +87,10 @@
 }
 
 .sidebar-nav-item.active {
-  background: rgba(79, 70, 229, 0.08);
+  background: rgba(79, 70, 229, 0.09);
   color: var(--primary);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--primary);
 }
 
 .sidebar-nav-icon {
@@ -126,11 +107,17 @@
   color: var(--primary);
 }
 
+.sidebar-nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* --- Footer --------------------------------------------------------- */
 
 .sidebar-footer {
   padding: 1rem;
   border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .sidebar-user {
@@ -140,6 +127,31 @@
   padding: 0.5rem 0.625rem;
   border-radius: var(--radius-md);
   margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+/* Desktop collapse button — right side of user panel */
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--gray-100);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .sidebar-avatar {
@@ -159,6 +171,7 @@
 .sidebar-user-info {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .sidebar-user-name {
@@ -192,6 +205,8 @@
   cursor: pointer;
   transition: background var(--ease), color var(--ease);
   font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .sidebar-logout-btn:hover:not(:disabled) {
@@ -208,10 +223,71 @@
   cursor: not-allowed;
 }
 
-/* --- Mobile --------------------------------------------------------- */
+/* ====================================================================
+   Desktop — collapsed icon rail (64px)
+   ==================================================================== */
+
+@media (min-width: 769px) {
+  .sidebar.collapsed {
+    width: 64px;
+  }
+
+  .sidebar.collapsed .sidebar-section {
+    padding: 1rem 0.625rem 0.5rem;
+  }
+
+  .sidebar.collapsed .sidebar-section-label {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-nav-item {
+    justify-content: center;
+    padding: 0.5625rem 0.625rem;
+    gap: 0;
+  }
+
+  .sidebar.collapsed .sidebar-nav-label {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-footer {
+    padding: 0.75rem 0.625rem;
+  }
+
+  .sidebar.collapsed .sidebar-user {
+    justify-content: center;
+    padding: 0.5rem;
+    gap: 0;
+    margin-bottom: 0.375rem;
+  }
+
+  .sidebar.collapsed .sidebar-user-info {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-collapse-btn {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-logout-btn {
+    justify-content: center;
+    padding: 0.5rem;
+    gap: 0;
+  }
+
+  .sidebar.collapsed .sidebar-logout-btn .sidebar-nav-label {
+    display: none;
+  }
+}
+
+/* ====================================================================
+   Mobile / Tablet — slide-in drawer overlay
+   ==================================================================== */
 
 @media (max-width: 768px) {
   .sidebar {
+    top: 0;
+    height: 100vh;
     transform: translateX(-100%);
     box-shadow: none;
   }
@@ -221,7 +297,18 @@
     box-shadow: var(--shadow-xl);
   }
 
-  .sidebar-close-btn {
+  /* Show X close button on mobile */
+  .sidebar-mobile-close {
     display: flex;
+  }
+
+  /* Extra top padding to clear the close button */
+  .sidebar-section {
+    padding-top: 3rem;
+  }
+
+  /* Hide desktop-only collapse button */
+  .sidebar-collapse-btn {
+    display: none;
   }
 }

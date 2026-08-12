@@ -16,9 +16,8 @@ export function useLogin() {
             toast.success('Welcome back!');
             navigate('/dashboard');
         },
-        onError: (error: any) => {
-            const message = error.response?.data?.message ?? 'Login failed. Please try again.';
-            toast.error(message);
+        onError: () => {
+            // error is displayed inline in the form
         },
     });
 }

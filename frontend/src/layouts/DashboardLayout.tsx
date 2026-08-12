@@ -5,24 +5,47 @@ import Navbar from '../components/layout/Navbar';
 import './dashboard.css';
 
 export default function DashboardLayout() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+        return localStorage.getItem('sidebar_collapsed') === 'true';
+    });
+
+    const toggleCollapse = () => {
+        setSidebarCollapsed((prev) => {
+            const next = !prev;
+            localStorage.setItem('sidebar_collapsed', String(next));
+            return next;
+        });
+    };
 
     return (
-        <div className="dash-root">
-            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className={`dash-root${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+            <Navbar
+                collapsed={sidebarCollapsed}
+                onToggleCollapse={toggleCollapse}
+                onMenuToggle={() => setSidebarOpen((prev) => !prev)}
+            />
 
-            {sidebarOpen && (
-                <div
-                    className="sidebar-overlay"
-                    onClick={() => setSidebarOpen(false)}
-                    aria-hidden="true"
+            <div className="dash-body">
+                <Sidebar
+                    isOpen={sidebarOpen}
+                    onClose={() => setSidebarOpen(false)}
+                    collapsed={sidebarCollapsed}
+                    onToggleCollapse={toggleCollapse}
                 />
-            )}
 
-            <div className="dash-main">
-                <Navbar onMenuToggle={() => setSidebarOpen((prev) => !prev)} />
-                <main className="dash-content">
-                    <Outlet />
+                {sidebarOpen && (
+                    <div
+                        className="sidebar-overlay"
+                        onClick={() => setSidebarOpen(false)}
+                        aria-hidden="true"
+                    />
+                )}
+
+                <main className="dash-main">
+                    <div className="dash-content">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>

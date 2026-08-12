@@ -15,7 +15,7 @@ export function useLogout() {
             logout();
             queryClient.clear();
             toast.success('Logged out successfully.');
-            navigate('/auth/login');
+            navigate('/?modal=login');
         },
     });
 }

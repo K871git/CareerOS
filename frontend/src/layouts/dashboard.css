@@ -4,25 +4,34 @@
 
 .dash-root {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: var(--bg-subtle);
+}
+
+/* Row below the navbar: sidebar + content */
+.dash-body {
+  flex: 1;
+  display: flex;
+  position: relative;
 }
 
 .dash-main {
   flex: 1;
   margin-left: 240px;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
   min-width: 0;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-collapsed .dash-main {
+  margin-left: 64px;
 }
 
 .dash-content {
-  flex: 1;
   padding: 2rem;
 }
 
-/* --- Overlay (mobile only) ------------------------------------------ */
+/* --- Overlay (mobile drawer backdrop) ------------------------------------------ */
 
 .sidebar-overlay {
   position: fixed;
@@ -42,7 +51,8 @@
 /* --- Mobile --------------------------------------------------------- */
 
 @media (max-width: 768px) {
-  .dash-main {
+  .dash-main,
+  .sidebar-collapsed .dash-main {
     margin-left: 0;
   }
 

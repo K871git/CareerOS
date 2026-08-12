@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 
-Route::get('/health', fn () => response()->json([
+Route::get('/health', fn() => response()->json([
     'status'  => 'ok',
     'service' => 'CareerOS API',
 ]));
+
 use App\Http\Controllers\Api\V1\CareerAssessmentController;
 use App\Http\Controllers\Api\V1\LearningTrackController;
 use App\Http\Controllers\Api\V1\LessonController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\V1\QuestionController;
 use App\Http\Controllers\Api\V1\SubjectController;
 use App\Http\Controllers\Api\V1\ProgressController;
 use App\Http\Controllers\Api\V1\TheoryQuestionController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\SkillController;
 use App\Http\Controllers\Api\V1\TopicController;
 
@@ -63,6 +65,8 @@ Route::middleware('auth:sanctum')
         Route::get('theory-answers/{answer}', [TheoryQuestionController::class, 'show']);
 
         Route::get('skills', [SkillController::class, 'index']);
+
+        Route::get('dashboard', [DashboardController::class, 'overview']);
 
         Route::get('progress', [ProgressController::class, 'index']);
         Route::get('activity/recent', [ProgressController::class, 'recentActivity']);

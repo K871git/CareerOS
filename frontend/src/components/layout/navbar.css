@@ -8,18 +8,155 @@
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 1.75rem;
   position: sticky;
   top: 0;
   z-index: 40;
   flex-shrink: 0;
 }
 
-.dash-navbar-left {
+/* -----------------------------------------------------------------------
+   Sidebar zone — same width as sidebar, visually aligns above it.
+   ----------------------------------------------------------------------- */
+
+.dash-navbar-sidebar-zone {
+  width: 240px;
+  height: 100%;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: flex-start;
+  padding: 0 1.25rem;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-collapsed .dash-navbar-sidebar-zone {
+  width: 64px;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Mobile hamburger — hidden on desktop, no shared class to avoid cascade conflicts */
+.dash-navbar-menu-btn {
+  display: none; /* shown only inside @media max-width:768px */
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--ease), color var(--ease);
+}
+
+.dash-navbar-menu-btn:hover {
+  background: var(--gray-100);
+  color: var(--text-primary);
+}
+
+/* -----------------------------------------------------------------------
+   Collapsed brand — graduation cap that reveals expand arrow on hover.
+   Hidden in expanded state; shown in collapsed state.
+   ----------------------------------------------------------------------- */
+
+.dash-navbar-brand-collapsed {
+  display: none; /* hidden when expanded */
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--ease);
+}
+
+.sidebar-collapsed .dash-navbar-brand-collapsed {
+  display: flex;
+}
+
+.dash-navbar-brand-collapsed:hover {
+  background: rgba(79, 70, 229, 0.07);
+}
+
+/* Graduation cap — visible by default, fades on hover */
+.dash-navbar-brand-icon {
+  color: var(--primary);
+  filter: drop-shadow(0 0 5px rgba(79, 70, 229, 0.3));
+  transition: opacity 0.18s ease;
+  flex-shrink: 0;
+}
+
+.dash-navbar-brand-collapsed:hover .dash-navbar-brand-icon {
+  opacity: 0;
+}
+
+/* Expand arrow — hidden by default, fades in on hover */
+.dash-navbar-brand-expand {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 17px;
+  height: 17px;
+  color: var(--primary);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.dash-navbar-brand-collapsed:hover .dash-navbar-brand-expand {
+  opacity: 1;
+}
+
+/* -----------------------------------------------------------------------
+   Expanded brand — "CareerOS" text link.
+   Shown in expanded state; hidden in collapsed state.
+   ----------------------------------------------------------------------- */
+
+.dash-navbar-brand-expanded {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: opacity var(--ease-fast);
+}
+
+.dash-navbar-brand-expanded:hover {
+  opacity: 0.82;
+}
+
+.sidebar-collapsed .dash-navbar-brand-expanded {
+  display: none;
+}
+
+.dash-navbar-brand-text {
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+}
+
+/* -----------------------------------------------------------------------
+   Right content area
+   ----------------------------------------------------------------------- */
+
+.dash-navbar-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.75rem;
+  min-width: 0;
 }
 
 .dash-navbar-title {
@@ -33,6 +170,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  margin-left: auto;
 }
 
 .dash-navbar-icon-btn {
@@ -69,14 +207,39 @@
   padding: 0 0.5rem;
 }
 
-/* Hamburger — hidden on desktop, visible on mobile */
-.dash-navbar-menu-btn {
-  display: none;
-}
+/* ====================================================================
+   Mobile / Tablet
+   ==================================================================== */
 
 @media (max-width: 768px) {
+  /* Sidebar zone becomes auto-width, no border */
+  .dash-navbar-sidebar-zone,
+  .sidebar-collapsed .dash-navbar-sidebar-zone {
+    width: auto;
+    padding: 0 0.5rem 0 0.75rem;
+    border-right: none;
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+
+  /* Show hamburger, hide desktop-only elements */
   .dash-navbar-menu-btn {
     display: flex;
+  }
+
+  .dash-navbar-brand-collapsed,
+  .sidebar-collapsed .dash-navbar-brand-collapsed {
+    display: none;
+  }
+
+  /* Always show CareerOS text on mobile */
+  .dash-navbar-brand-expanded,
+  .sidebar-collapsed .dash-navbar-brand-expanded {
+    display: flex;
+  }
+
+  .dash-navbar-content {
+    padding: 0 1rem;
   }
 }
 
