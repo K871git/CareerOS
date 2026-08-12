@@ -16,9 +16,8 @@ export function useRegister() {
             toast.success('Account created! Welcome to CareerOS.');
             navigate('/dashboard');
         },
-        onError: (error: any) => {
-            const message = error.response?.data?.message ?? 'Registration failed. Please try again.';
-            toast.error(message);
+        onError: () => {
+            // error is displayed inline in the form
         },
     });
 }

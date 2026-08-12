@@ -23,9 +23,15 @@ api.interceptors.response.use(
         const status = error.response?.status as number | undefined;
 
         if (status === 401) {
-            localStorage.removeItem('careeros_token');
-            localStorage.removeItem('careeros_user');
-            window.location.href = '/auth/login';
+            // Don't redirect when the login/register endpoints themselves return 401
+            // (wrong credentials) — let the form handle the error inline.
+            const url: string = error.config?.url ?? '';
+            const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
+            if (!isAuthEndpoint) {
+                localStorage.removeItem('careeros_token');
+                localStorage.removeItem('careeros_user');
+                window.location.href = '/?modal=login';
+            }
             return Promise.reject(error);
         }
 

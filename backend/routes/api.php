@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 
-Route::get('/health', fn () => response()->json([
+Route::get('/health', fn() => response()->json([
     'status'  => 'ok',
     'service' => 'CareerOS API',
 ]));
+
 use App\Http\Controllers\Api\V1\CareerAssessmentController;
 use App\Http\Controllers\Api\V1\LearningTrackController;
 use App\Http\Controllers\Api\V1\LessonController;

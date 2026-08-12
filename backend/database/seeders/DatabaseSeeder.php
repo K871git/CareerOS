@@ -29,6 +29,9 @@ class DatabaseSeeder extends Seeder
         $this->call(ReactJuniorQuestionsSeeder::class);
         $this->call(ReactIntermediateQuestionsSeeder::class);
         $this->call(ReactAdvancedQuestionsSeeder::class);
+        $this->call(PythonJuniorQuestionsSeeder::class);
+        $this->call(PythonIntermediateQuestionsSeeder::class);
+        $this->call(PythonAdvancedQuestionsSeeder::class);
         $this->call(LearningTrackSeeder::class);
         $this->call(SubjectSeeder::class);
         $this->call(TopicSeeder::class);

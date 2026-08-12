@@ -1,13 +1,9 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import AuthLayout from '../layouts/AuthLayout';
 import GuestLayout from '../layouts/GuestLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
 import HomePage from '../pages/HomePage';
 import NotFoundPage from '../pages/NotFoundPage';
-import LoginPage from '../features/auth/pages/LoginPage';
-import RegisterPage from '../features/auth/pages/RegisterPage';
-import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
 import CareerAssessmentPage from '../features/assessment/pages/CareerAssessmentPage';
@@ -24,26 +20,21 @@ import TheoryAnswerPage from '../features/theory/pages/TheoryAnswerPage';
 import ProgressPage from '../features/progress/pages/ProgressPage';
 
 const router = createBrowserRouter([
-    // Auth routes — each page handles its own card layout
-    {
-        path: '/auth',
-        element: <AuthLayout />,
-        children: [
-            { index: true, element: <Navigate to="/auth/login" replace /> },
-            { path: 'login', element: <LoginPage /> },
-            { path: 'register', element: <RegisterPage /> },
-            { path: 'forgot-password', element: <ForgotPasswordPage /> },
-        ],
-    },
-    // Public routes — header + footer
+    // Old auth paths — redirect to landing page modal
+    { path: '/auth/login',          element: <Navigate to="/?modal=login" replace /> },
+    { path: '/auth/register',       element: <Navigate to="/?modal=register" replace /> },
+    { path: '/auth/forgot-password',element: <Navigate to="/?modal=login" replace /> },
+    { path: '/auth',                element: <Navigate to="/?modal=login" replace /> },
+
+    // Public routes — landing page with modal auth
     {
         path: '/',
         element: <GuestLayout />,
         children: [
             { index: true, element: <HomePage /> },
-            { path: 'login', element: <Navigate to="/auth/login" replace /> },
         ],
     },
+
     // Protected routes — sidebar dashboard layout
     {
         element: <ProtectedRoute />,
@@ -69,6 +60,7 @@ const router = createBrowserRouter([
             },
         ],
     },
+
     // 404
     { path: '*', element: <NotFoundPage /> },
 ]);
