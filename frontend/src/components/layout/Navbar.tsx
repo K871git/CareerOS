@@ -5,12 +5,11 @@ import './navbar.css';
 
 interface NavbarProps {
     title?: string;
-    collapsed: boolean;
     onToggleCollapse: () => void;
     onMenuToggle: () => void;
 }
 
-export default function Navbar({ title, collapsed, onToggleCollapse, onMenuToggle }: NavbarProps) {
+export default function Navbar({ title, onToggleCollapse, onMenuToggle }: NavbarProps) {
     const { state } = useAuth();
 
     return (

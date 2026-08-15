@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\TheoryQuestionController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\SkillController;
 use App\Http\Controllers\Api\V1\TopicController;
+use App\Http\Controllers\Api\V1\LevelController;
 
 Route::prefix('v1/auth')->group(function () {
 
@@ -52,6 +53,14 @@ Route::middleware('auth:sanctum')
     ->group(function () {
         Route::apiResource('tracks', LearningTrackController::class)->only(['index', 'show']);
         Route::get('tracks/{track}/subjects', [SubjectController::class, 'index']);
+
+        // Level system — by-slug must come before model-bound {subject} routes
+        Route::get('subjects/by-slug/{slug}', [LevelController::class, 'bySlug']);
+        Route::get('subjects/{subject}/levels', [LevelController::class, 'index']);
+        Route::get('subjects/{subject}/levels/{level}/topics', [LevelController::class, 'topics']);
+        Route::get('subjects/{subject}/levels/{level}/exam', [LevelController::class, 'examQuestions']);
+        Route::post('subjects/{subject}/levels/{level}/exam', [LevelController::class, 'submitExam']);
+
         Route::get('subjects/{subject}/topics', [TopicController::class, 'index']);
         Route::get('topics/{topic}/lessons', [LessonController::class, 'index']);
         Route::get('lessons/{lesson}', [LessonController::class, 'show']);
@@ -73,3 +82,8 @@ Route::middleware('auth:sanctum')
         Route::post('lessons/{lesson}/complete', [ProgressController::class, 'completeLesson']);
         Route::get('tracks/{track}/progress', [ProgressController::class, 'trackProgress']);
     });
+
+
+    /**
+     *   
+     */

@@ -14,8 +14,8 @@ class PythonIntermediateQuestionsSeeder extends Seeder
     public function run(): void
     {
         $track = LearningTrack::firstOrCreate(
-            ['slug' => 'full-stack-web-development'],
-            ['title' => 'Full Stack Web Development', 'display_order' => 1]
+            ['slug' => 'backend-engineering'],
+            ['title' => 'Backend Engineering', 'display_order' => 3]
         );
 
         Subject::firstOrCreate(

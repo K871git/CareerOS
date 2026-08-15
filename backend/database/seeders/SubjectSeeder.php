@@ -12,7 +12,7 @@ class SubjectSeeder extends Seeder
         $trackId = fn (string $slug) => DB::table('learning_tracks')->where('slug', $slug)->value('id');
 
         $subjects = [
-            // Full Stack Web Development
+            // Full Stack Web Development — core language foundations
             [
                 'learning_track_id' => $trackId('full-stack-web-development'),
                 'title'             => 'PHP Fundamentals',
@@ -22,40 +22,35 @@ class SubjectSeeder extends Seeder
             ],
             [
                 'learning_track_id' => $trackId('full-stack-web-development'),
-                'title'             => 'Laravel Framework',
-                'slug'              => 'laravel-framework',
-                'description'       => 'Routing, controllers, models, migrations, Eloquent ORM, and APIs.',
-                'display_order'     => 2,
-            ],
-            [
-                'learning_track_id' => $trackId('full-stack-web-development'),
-                'title'             => 'React & TypeScript',
-                'slug'              => 'react-and-typescript',
-                'description'       => 'Component architecture, hooks, state management, and TypeScript integration.',
-                'display_order'     => 3,
-            ],
-            [
-                'learning_track_id' => $trackId('full-stack-web-development'),
                 'title'             => 'Databases & SQL',
                 'slug'              => 'databases-and-sql',
                 'description'       => 'MySQL fundamentals, schema design, indexing, and query optimization.',
-                'display_order'     => 4,
+                'display_order'     => 2,
             ],
+
             // Backend Engineering
+            [
+                'learning_track_id' => $trackId('backend-engineering'),
+                'title'             => 'Laravel Framework',
+                'slug'              => 'laravel-framework',
+                'description'       => 'Routing, controllers, models, migrations, Eloquent ORM, and APIs.',
+                'display_order'     => 1,
+            ],
             [
                 'learning_track_id' => $trackId('backend-engineering'),
                 'title'             => 'REST API Design',
                 'slug'              => 'rest-api-design',
                 'description'       => 'RESTful principles, versioning, authentication, and API best practices.',
-                'display_order'     => 1,
+                'display_order'     => 2,
             ],
             [
                 'learning_track_id' => $trackId('backend-engineering'),
                 'title'             => 'System Design',
                 'slug'              => 'system-design',
                 'description'       => 'Scalability, load balancing, caching, microservices, and distributed systems.',
-                'display_order'     => 2,
+                'display_order'     => 3,
             ],
+
             // Frontend Engineering
             [
                 'learning_track_id' => $trackId('frontend-engineering'),
@@ -70,6 +65,13 @@ class SubjectSeeder extends Seeder
                 'slug'              => 'react-fundamentals',
                 'description'       => 'JSX, components, props, state, lifecycle, and the virtual DOM.',
                 'display_order'     => 2,
+            ],
+            [
+                'learning_track_id' => $trackId('frontend-engineering'),
+                'title'             => 'React & TypeScript',
+                'slug'              => 'react-and-typescript',
+                'description'       => 'Component architecture, hooks, state management, and TypeScript integration.',
+                'display_order'     => 3,
             ],
         ];
 

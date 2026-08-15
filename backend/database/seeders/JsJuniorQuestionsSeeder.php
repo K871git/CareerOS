@@ -14,11 +14,11 @@ class JsJuniorQuestionsSeeder extends Seeder
     public function run(): void
     {
         $track = LearningTrack::firstOrCreate(
-            ['slug' => 'full-stack-web-development'],
+            ['slug' => 'frontend-engineering'],
             [
-                'title'         => 'Full Stack Web Development',
-                'description'   => 'Master modern full stack web development from front-end to back-end.',
-                'display_order' => 1,
+                'title'         => 'Frontend Engineering',
+                'description'   => 'Frontend engineering — JavaScript, React, and modern web technologies.',
+                'display_order' => 2,
             ]
         );
 

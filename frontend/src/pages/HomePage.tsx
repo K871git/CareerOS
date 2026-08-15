@@ -6,21 +6,21 @@ import './home.css';
 const features = [
     {
         icon: <BookOpen size={22} />,
-        title: 'Structured Learning Tracks',
+        title: 'A Learning Path That Makes Sense',
         description:
-            'Follow curated paths from fundamentals to advanced topics. Each track is broken into subjects, topics, and bite-sized lessons.',
+            'No more random tutorials or scattered blog posts. Follow curated tracks — subjects, topics, and bite-sized lessons in the exact order that builds real understanding.',
     },
     {
         icon: <Target size={22} />,
-        title: 'Real Interview Practice',
+        title: 'Practice What Interviewers Actually Ask',
         description:
-            'Practice MCQ and theory questions modeled after actual interviews at top tech companies. Instant scoring and detailed feedback.',
+            'MCQ and theory questions built around real interview patterns. Instant scoring and detailed feedback — every session makes you sharper, not just busier.',
     },
     {
         icon: <TrendingUp size={22} />,
-        title: 'Progress Tracking',
+        title: 'A Mirror for Your Weak Areas',
         description:
-            'See exactly where you stand across every track, subject, and topic. Know your weak areas and fix them systematically.',
+            'See exactly where you stand across every subject and topic. Stop wasting time on what you already know — fix what is actually holding you back.',
     },
 ];
 
@@ -35,19 +35,19 @@ const steps = [
         number: '01',
         title: 'Assess Your Level',
         description:
-            'Take a quick career assessment to identify where you stand — skills, experience, and goals all in one place.',
+            'Take a quick career assessment to pinpoint where you stand — your skills, experience, and target role captured in one place.',
     },
     {
         number: '02',
         title: 'Follow Your Track',
         description:
-            'Get a structured learning path with curated subjects, topics, and bite-sized lessons tailored to your level.',
+            'Get a structured path tailored to your level. No more wondering what to study — the track tells you exactly what to do next.',
     },
     {
         number: '03',
-        title: 'Practice & Improve',
+        title: 'Practice & Track Growth',
         description:
-            'Solve MCQ and theory questions, see scores instantly, and track improvement across all weak areas systematically.',
+            'Solve real interview questions, see scores instantly, and watch your weak areas shrink — systematically, not randomly.',
     },
 ];
 
@@ -57,7 +57,7 @@ const audiences = [
         label: 'Placement Students',
         badge: 'Freshers',
         description:
-            'Crack campus placements at top product companies. Cover every topic that shows up — from core CS to full-stack web development.',
+            'Crack campus placements at top product companies. Cover every topic that shows up — from core CS to full-stack development — with a track built for freshers.',
         perks: ['Campus-focused question bank', 'Fundamentals to advanced', 'Track your readiness'],
     },
     {
@@ -65,7 +65,7 @@ const audiences = [
         label: 'Junior Engineers',
         badge: '0–2 years',
         description:
-            'Fill knowledge gaps, sharpen fundamentals, and prepare confidently for your first mid-level interview.',
+            'Fill the gaps that experience has not covered yet. Sharpen your fundamentals and walk into your first mid-level interview with real confidence — not hope.',
         perks: ['Gap analysis across topics', 'Real-world engineering concepts', 'Interview-style practice'],
     },
     {
@@ -73,7 +73,7 @@ const audiences = [
         label: 'Mid-level Engineers',
         badge: '2–5 years',
         description:
-            'Prove your seniority. Tackle hard questions, advanced system concepts, and benchmark your skills before switching roles.',
+            'Prove your seniority. Tackle advanced questions, system concepts, and benchmark exactly where you stand before your next role switch.',
         perks: ['Advanced & hard-level questions', 'System design coverage', 'Weak area targeting'],
     },
 ];
@@ -81,6 +81,12 @@ const audiences = [
 const techs = [
     'JavaScript', 'TypeScript', 'React', 'PHP', 'Laravel', 'Python',
     'SQL', 'Data Structures', 'Algorithms', 'System Design', 'REST APIs', 'OOP',
+];
+
+const valueProps = [
+    { icon: CheckCircle, label: 'Structured learning tracks' },
+    { icon: Target, label: 'Real interview questions' },
+    { icon: TrendingUp, label: 'Measurable progress' },
 ];
 
 export default function HomePage() {
@@ -92,6 +98,7 @@ export default function HomePage() {
             <section className="hero">
                 <div className="hero-blob hero-blob-1" />
                 <div className="hero-blob hero-blob-2" />
+                <div className="hero-blob hero-blob-3" />
                 <div className="hero-inner">
                     <div className="hero-badge">
                         <span className="hero-badge-dot" />
@@ -99,22 +106,21 @@ export default function HomePage() {
                     </div>
 
                     <h1 className="hero-title">
-                        Accelerate Your{' '}
-                        <span className="hero-title-gradient">Software Engineering</span>
-                        <br />Career
+                        The Smarter Way to Build{' '}
+                        <span className="hero-title-gradient">Interview Confidence</span>
                     </h1>
 
                     <p className="hero-description">
-                        Master interviews, learn real-world engineering concepts, and track your growth — all in one focused platform built for developers.
+                        Preparation without a system is just noise. CareerOS gives you a structured path — learn the right concepts, practice real questions, and track your progress until the interview feels like a formality.
                     </p>
 
-                    <div className="hero-actions">
-                        <button className="btn-primary" onClick={() => openModal('register')}>
-                            Get started free <ArrowRight size={16} />
-                        </button>
-                        <button className="btn-ghost" onClick={() => openModal('login')}>
-                            Sign in
-                        </button>
+                    <div className="hero-value-row">
+                        {valueProps.map(({ icon: Icon, label }) => (
+                            <span key={label} className="hero-value-item">
+                                <Icon size={15} className="hero-value-icon" />
+                                {label}
+                            </span>
+                        ))}
                     </div>
 
                     <div className="hero-stats">
@@ -133,7 +139,7 @@ export default function HomePage() {
                 <div className="section-inner">
                     <div className="section-header">
                         <span className="section-label section-label--light">How it works</span>
-                        <h2 className="section-title section-title--light">Three steps to interview-ready</h2>
+                        <h2 className="section-title section-title--light">From scattered to structured — in three steps</h2>
                         <p className="section-description section-description--light">
                             No fluff, no confusion. A clear system that takes you from where you are to where you need to be.
                         </p>
@@ -154,10 +160,10 @@ export default function HomePage() {
             <section className="features">
                 <div className="section-inner">
                     <div className="section-header">
-                        <span className="section-label">Why CareerOS</span>
-                        <h2 className="section-title">Everything you need to land the job</h2>
+                        <span className="section-label">What you get</span>
+                        <h2 className="section-title">Everything you need. Nothing you don't.</h2>
                         <p className="section-description">
-                            Built specifically for software engineers — not a generic quiz platform, but a focused career growth system.
+                            Built specifically for software engineers — not a generic quiz app, but a focused system that respects your time and rewards your effort.
                         </p>
                     </div>
                     <div className="features-grid">
@@ -177,9 +183,9 @@ export default function HomePage() {
                 <div className="section-inner">
                     <div className="section-header">
                         <span className="section-label">Built for you</span>
-                        <h2 className="section-title">For developers at every level</h2>
+                        <h2 className="section-title">For developers at every stage</h2>
                         <p className="section-description">
-                            Whether you're preparing for your first job or your next senior role, CareerOS meets you where you are.
+                            Whether you are preparing for your first job or your next senior role, CareerOS meets you exactly where you are.
                         </p>
                     </div>
                     <div className="audience-grid">
@@ -208,7 +214,7 @@ export default function HomePage() {
             {/* Technologies */}
             <section className="tech-section">
                 <div className="tech-section-inner">
-                    <p className="tech-label">Technologies & topics covered</p>
+                    <p className="tech-label">Technologies &amp; topics covered</p>
                     <div className="tech-tags">
                         {techs.map((t) => (
                             <span className="tech-tag" key={t}>{t}</span>
@@ -223,9 +229,9 @@ export default function HomePage() {
                     <div className="feature-icon" style={{ margin: '0 auto 1.5rem' }}>
                         <Zap size={22} />
                     </div>
-                    <h2 className="cta-title">Ready to level up your career?</h2>
+                    <h2 className="cta-title">Your time is worth the investment.</h2>
                     <p className="cta-description">
-                        Join engineers who are preparing smarter — not just harder. Create your free account and start your first track today.
+                        Every hour on CareerOS builds real confidence — not just completed checkboxes. Start your first track for free and see what a system actually feels like.
                     </p>
                     <button className="btn-primary" onClick={() => openModal('register')}>
                         Create free account <ArrowRight size={16} />

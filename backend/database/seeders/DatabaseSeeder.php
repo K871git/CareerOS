@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
         $this->call(QuestionSeeder::class);
         $this->call(QuestionOptionSeeder::class);
         $this->call(TheoryQuestionSeeder::class);
+        $this->call(JsLearningSeeder::class);
 
         User::firstOrCreate(
             ['email' => 'test@example.com'],

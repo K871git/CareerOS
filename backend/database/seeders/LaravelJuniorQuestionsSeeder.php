@@ -14,8 +14,8 @@ class LaravelJuniorQuestionsSeeder extends Seeder
     public function run(): void
     {
         $track = LearningTrack::firstOrCreate(
-            ['slug' => 'full-stack-web-development'],
-            ['title' => 'Full Stack Web Development', 'description' => 'Full stack web development track.', 'display_order' => 1]
+            ['slug' => 'backend-engineering'],
+            ['title' => 'Backend Engineering', 'description' => 'Backend engineering track.', 'display_order' => 3]
         );
 
         $subject = Subject::firstOrCreate(
