@@ -14,8 +14,8 @@ class JsIntermediateQuestionsSeeder extends Seeder
     public function run(): void
     {
         $track = LearningTrack::firstOrCreate(
-            ['slug' => 'full-stack-web-development'],
-            ['title' => 'Full Stack Web Development', 'description' => 'Full stack web development track.', 'display_order' => 1]
+            ['slug' => 'frontend-engineering'],
+            ['title' => 'Frontend Engineering', 'description' => 'Frontend engineering track.', 'display_order' => 2]
         );
 
         $subject = Subject::firstOrCreate(

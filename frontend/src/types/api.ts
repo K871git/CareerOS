@@ -49,9 +49,23 @@ export interface Topic {
     slug: string;
     description: string;
     display_order: number;
+    level: number;
     is_locked: boolean;
     is_completed: boolean;
     best_score: number;
+}
+
+export interface LevelStatus {
+    level: number;
+    locked: boolean;
+    completed: boolean;
+    score: number | null;
+}
+
+export interface ExamResult {
+    score: number;
+    total: number;
+    passed: boolean;
 }
 
 export interface Lesson {

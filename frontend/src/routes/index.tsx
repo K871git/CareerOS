@@ -8,10 +8,16 @@ import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
 import CareerAssessmentPage from '../features/assessment/pages/CareerAssessmentPage';
 import LearningTracksPage from '../features/learning/pages/LearningTracksPage';
+import LearningCategoryPage from '../features/learning/pages/LearningCategoryPage';
+import SubjectLevelsPage from '../features/learning/pages/SubjectLevelsPage';
+import LevelContentPage from '../features/learning/pages/LevelContentPage';
+import LevelExamPage from '../features/learning/pages/LevelExamPage';
 import TrackDetailsPage from '../features/learning/pages/TrackDetailsPage';
 import TopicPage from '../features/learning/pages/TopicPage';
 import LessonPage from '../features/learning/pages/LessonPage';
 import PracticeHomePage from '../features/practice/pages/PracticeHomePage';
+import PracticeFsdPage from '../features/practice/pages/PracticeFsdPage';
+import PracticeFsdArenaPage from '../features/practice/pages/PracticeFsdArenaPage';
 import PracticeLevelPage from '../features/practice/pages/PracticeLevelPage';
 import PracticeSessionPage from '../features/practice/pages/PracticeSessionPage';
 import AssessmentResultPage from '../features/assessment/pages/AssessmentResultPage';
@@ -45,11 +51,20 @@ const router = createBrowserRouter([
                     { path: '/dashboard',  element: <DashboardPage /> },
                     { path: '/profile',    element: <ProfilePage /> },
                     { path: '/assessment', element: <CareerAssessmentPage /> },
+                    // Learning — new level-based structure
+                    { path: '/learning',                                                          element: <LearningTracksPage /> },
+                    { path: '/learning/:category',                                                element: <LearningCategoryPage /> },
+                    { path: '/learning/:category/:subjectSlug',                                   element: <SubjectLevelsPage /> },
+                    { path: '/learning/:category/:subjectSlug/:level',                            element: <LevelContentPage /> },
+                    { path: '/learning/:category/:subjectSlug/:level/exam',                       element: <LevelExamPage /> },
+                    // Legacy track routes — kept for backward compatibility
                     { path: '/tracks',                                        element: <LearningTracksPage /> },
                     { path: '/tracks/:trackId',                               element: <TrackDetailsPage /> },
                     { path: '/tracks/:trackId/subjects/:subjectId',           element: <TopicPage /> },
                     { path: '/lessons/:lessonId',                             element: <LessonPage /> },
                     { path: '/practice',                                      element: <PracticeHomePage /> },
+                    { path: '/practice/fsd',                                  element: <PracticeFsdPage /> },
+                    { path: '/practice/fsd/:arena',                           element: <PracticeFsdArenaPage /> },
                     { path: '/practice/subjects/:subjectId',                  element: <PracticeLevelPage /> },
                     { path: '/practice/topics/:topicId',                      element: <PracticeSessionPage /> },
                     { path: '/practice/results/:attemptId',                   element: <AssessmentResultPage /> },

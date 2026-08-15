@@ -1,159 +1,488 @@
 /* ====================================================================
-   Practice Home — Hero & How-it-Works
+   Practice — Shared layout
    ==================================================================== */
 
-.prac-hero {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.75rem;
+.practice-page {
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-.prac-hero-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
-  background: var(--gradient-brand);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-brand);
-}
-
-.prac-hero-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-  line-height: 1.2;
-  margin-bottom: 0.25rem;
-}
-
-.prac-hero-desc {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-/* ---- How-it-Works strip -------------------------------------------- */
-
-.prac-how-it-works {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.25rem;
-  background: rgba(99, 102, 241, 0.04);
-  border: 1px solid rgba(99, 102, 241, 0.12);
-  border-radius: var(--radius-lg);
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-}
-
-.prac-how-step {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.84rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.prac-how-num {
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-full);
-  background: var(--primary);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.prac-how-arrow {
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  flex-shrink: 0;
+.practice-inner {
+  /* inherits dash-content padding */
 }
 
 /* ====================================================================
-   Track Section + Subject Cards
+   Practice Home — Header
    ==================================================================== */
 
-.prac-track-section {
-  margin-bottom: 2.25rem;
+.prac-home-header {
+  margin-bottom: 1.5rem;
 }
 
-.prac-track-title {
-  font-size: 0.7rem;
+.prac-home-title {
+  font-size: 1.6rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 0.875rem;
+  letter-spacing: -0.025em;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  margin-bottom: 0.3rem;
 }
 
-.prac-subjects-grid {
+.prac-home-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* ====================================================================
+   Practice Home — Category grid
+   ==================================================================== */
+
+.prac-cat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 0.875rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
-.prac-subject-card {
+.prac-cat-card {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.375rem;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.625rem;
   background: #fff;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: 14px;
   text-decoration: none;
-  transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease-fast);
+  min-height: 88px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
 }
 
-.prac-subject-card:hover {
+.prac-cat-card--active {
+  background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
+  border-color: rgba(99, 102, 241, 0.28);
+}
+
+.prac-cat-card--active:hover {
   border-color: var(--primary);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 6px 22px rgba(99, 102, 241, 0.15);
   transform: translateY(-2px);
 }
 
-.prac-subject-title {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-  margin-bottom: 0.375rem;
+.prac-cat-card--soon {
+  background: #fff;
 }
 
-.prac-subject-desc {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin: 0;
-}
-
-.prac-subject-meta {
+.prac-cat-icon {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  color: var(--text-muted);
+  justify-content: center;
+  border: 1px solid var(--border);
 }
 
-.prac-subject-levels {
-  font-size: 0.75rem;
-  font-weight: 600;
+.prac-cat-card--active .prac-cat-icon {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.14));
+  border-color: rgba(99, 102, 241, 0.24);
   color: var(--primary);
-  background: rgba(99, 102, 241, 0.08);
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-full);
+}
+
+.prac-cat-card--soon .prac-cat-icon {
+  background: var(--gray-50);
+  color: var(--text-secondary);
+}
+
+.prac-cat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.prac-cat-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+  margin-bottom: 0.3rem;
+  line-height: 1.3;
+}
+
+.prac-cat-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.prac-cat-cta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--gradient-brand);
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.28);
+  transition: opacity 0.15s ease, transform 0.12s ease;
+}
+
+.prac-cat-card--active:hover .prac-cat-cta {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.prac-soon-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #b45309;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.14));
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* ====================================================================
-   Level Page — Breadcrumb & Header
+   FSD Overview — Header
+   ==================================================================== */
+
+.prac-fsd-header {
+  margin-bottom: 2rem;
+}
+
+.prac-fsd-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  margin-bottom: 0.375rem;
+}
+
+.prac-fsd-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* ====================================================================
+   FSD Overview — Arena grid (3-column cards with colored headers)
+   ==================================================================== */
+
+.prac-arena-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.prac-arena-card {
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: box-shadow 0.18s ease, transform 0.13s ease, border-color 0.15s ease;
+}
+
+.prac-arena-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Colored gradient header section */
+.prac-arena-head {
+  padding: 1.625rem 1.5rem 1.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative circle in card header */
+.prac-arena-head::after {
+  content: '';
+  position: absolute;
+  right: -25px; top: -35px;
+  width: 130px; height: 130px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Language Arena — indigo */
+.prac-arena-card--languages .prac-arena-head {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+}
+.prac-arena-card--languages:hover {
+  border-color: #6366f1;
+  box-shadow: 0 8px 30px rgba(79, 70, 229, 0.25);
+}
+.prac-arena-card--languages .prac-arena-chip {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.09);
+}
+.prac-arena-card--languages .prac-arena-cta {
+  color: #4f46e5;
+}
+
+/* Frontend — purple/violet */
+.prac-arena-card--frontend .prac-arena-head {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+}
+.prac-arena-card--frontend:hover {
+  border-color: #a855f7;
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25);
+}
+.prac-arena-card--frontend .prac-arena-chip {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.09);
+}
+.prac-arena-card--frontend .prac-arena-cta {
+  color: #7c3aed;
+}
+
+/* Backend — teal/cyan */
+.prac-arena-card--backend .prac-arena-head {
+  background: linear-gradient(135deg, #0f766e 0%, #0891b2 100%);
+}
+.prac-arena-card--backend:hover {
+  border-color: #0891b2;
+  box-shadow: 0 8px 30px rgba(8, 145, 178, 0.22);
+}
+.prac-arena-card--backend .prac-arena-chip {
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.09);
+}
+.prac-arena-card--backend .prac-arena-cta {
+  color: #0f766e;
+}
+
+.prac-arena-icon {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.prac-arena-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.015em;
+  position: relative;
+  z-index: 1;
+}
+
+/* White body section */
+.prac-arena-body {
+  flex: 1;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.prac-arena-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 0.875rem;
+  flex: 1;
+}
+
+.prac-arena-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.prac-arena-chip {
+  font-size: 0.69rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  letter-spacing: 0.01em;
+  /* color + background set per arena variant above */
+}
+
+.prac-arena-footer {
+  padding: 0.875rem 1.5rem;
+  background: #fff;
+  border-top: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.prac-arena-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: gap 0.13s ease;
+  /* color set per arena variant above */
+}
+
+.prac-arena-card:hover .prac-arena-cta {
+  gap: 0.5rem;
+}
+
+/* ====================================================================
+   FSD Arena — Technology grid
+   ==================================================================== */
+
+.prac-tech-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.prac-tech-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem 1.125rem;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease, background 0.15s ease;
+}
+
+.prac-tech-card--active {
+  background: rgba(79, 70, 229, 0.02);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.prac-tech-card--active:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 18px rgba(99, 102, 241, 0.15);
+  background: rgba(79, 70, 229, 0.05);
+  transform: translateY(-1px);
+}
+
+.prac-tech-card--soon {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.prac-tech-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.prac-tech-card--active .prac-tech-icon {
+  color: var(--primary);
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.14));
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.prac-tech-card--active:hover .prac-tech-icon {
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
+}
+
+.prac-tech-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.prac-tech-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.prac-tech-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #059669;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.16));
+  padding: 0.18rem 0.5rem;
+  border-radius: 4px;
+  display: inline-flex;
+  width: fit-content;
+}
+
+/* ====================================================================
+   Language Brand Badge — replaces generic icon in Language Arena
+   ==================================================================== */
+
+/* Strip the default icon box styling when holding a lang badge */
+.prac-tech-icon--lang,
+.prac-tech-card--active .prac-tech-icon--lang,
+.prac-tech-card--active:hover .prac-tech-icon--lang {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* The colored badge itself */
+.lang-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  flex-shrink: 0;
+  /* font-size is set inline per badge length */
+}
+
+.prac-tech-arrow {
+  font-size: 1rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.15s ease, transform 0.12s ease;
+}
+
+.prac-tech-card--active:hover .prac-tech-arrow {
+  color: var(--primary);
+  transform: translateX(3px);
+}
+
+/* ====================================================================
+   Breadcrumb — shared across all practice pages
    ==================================================================== */
 
 .prac-breadcrumb {
@@ -179,6 +508,10 @@
   color: var(--text-muted);
 }
 
+/* ====================================================================
+   Level Page — Header
+   ==================================================================== */
+
 .prac-level-header {
   margin-bottom: 2rem;
 }
@@ -187,7 +520,11 @@
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--text-primary);
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
   margin-bottom: 0.375rem;
 }
 
@@ -220,7 +557,7 @@
 
 .prac-level-card:hover:not(.prac-level-card--locked) {
   border-color: var(--primary);
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12);
+  box-shadow: 0 4px 20px rgba(99,102,241,0.12);
 }
 
 .prac-level-card--locked {
@@ -229,22 +566,18 @@
 }
 
 .prac-level-card--completed {
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16,185,129,0.3);
 }
 
 .prac-level-card--completed:hover {
   border-color: #10b981;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 4px 20px rgba(16,185,129,0.1);
 }
-
-/* ---- Card top strip ------------------------------------------------ */
 
 .prac-level-strip {
   height: 5px;
   width: 100%;
 }
-
-/* ---- Card body ----------------------------------------------------- */
 
 .prac-level-body {
   padding: 1.375rem;
@@ -272,9 +605,9 @@
   letter-spacing: -0.02em;
 }
 
-.prac-level-icon--1 { background: rgba(99, 102, 241, 0.12); color: var(--primary); }
-.prac-level-icon--2 { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
-.prac-level-icon--3 { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+.prac-level-icon--1 { background: rgba(99,102,241,0.12); color: var(--primary); }
+.prac-level-icon--2 { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+.prac-level-icon--3 { background: rgba(245,158,11,0.12); color: #d97706; }
 
 .prac-lock-badge {
   display: flex;
@@ -288,7 +621,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.2rem 0.5rem;
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16,185,129,0.1);
   color: #059669;
   border-radius: var(--radius-full);
   font-size: 0.68rem;
@@ -311,8 +644,6 @@
   line-height: 1.5;
   flex: 1;
 }
-
-/* ---- Score bar ----------------------------------------------------- */
 
 .prac-score-row {
   display: flex;
@@ -354,8 +685,6 @@
   color: var(--text-primary);
   flex-shrink: 0;
 }
-
-/* ---- Card footer --------------------------------------------------- */
 
 .prac-level-footer {
   padding: 0.875rem 1.375rem;
@@ -425,31 +754,47 @@
    Responsive
    ==================================================================== */
 
-@media (max-width: 860px) {
-  .prac-level-grid {
+@media (max-width: 960px) {
+  .prac-arena-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
-  .prac-how-it-works {
-    gap: 0.375rem;
-    padding: 0.875rem 1rem;
+@media (max-width: 860px) {
+  .prac-tech-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .prac-how-arrow {
-    display: none;
+  .prac-level-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .prac-hero-card {
+    flex-wrap: wrap;
+  }
+
+  .prac-hero-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .prac-arena-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .prac-cs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .prac-tech-grid {
+    grid-template-columns: 1fr;
   }
 
   .prac-level-grid {
     grid-template-columns: 1fr;
-  }
-
-  .prac-subjects-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .prac-hero-title {
-    font-size: 1.25rem;
   }
 }

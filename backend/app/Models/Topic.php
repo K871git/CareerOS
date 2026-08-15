@@ -14,6 +14,7 @@ class Topic extends Model
         'slug',
         'description',
         'display_order',
+        'level',
     ];
 
     public function subject(): BelongsTo

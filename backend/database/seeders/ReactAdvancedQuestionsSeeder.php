@@ -14,8 +14,8 @@ class ReactAdvancedQuestionsSeeder extends Seeder
     public function run(): void
     {
         $track = LearningTrack::firstOrCreate(
-            ['slug' => 'full-stack-web-development'],
-            ['title' => 'Full Stack Web Development', 'display_order' => 1]
+            ['slug' => 'frontend-engineering'],
+            ['title' => 'Frontend Engineering', 'display_order' => 2]
         );
 
         $subject = Subject::firstOrCreate(
