@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Clock, CheckCircle2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import toast from 'react-hot-toast';
 import { useLesson, useCompleteLesson } from '../hooks/useLearning';
 import '../learning.css';
@@ -81,15 +83,9 @@ export default function LessonPage() {
                 <div className="lesson-divider" />
 
                 {/* Content */}
-                <div className="lesson-content">
+                <div className="lesson-content lesson-md">
                     {lesson.content
-                        ? lesson.content.split('\n').map((line, i) =>
-                              line.trim() === '' ? (
-                                  <br key={i} />
-                              ) : (
-                                  <p key={i}>{line}</p>
-                              )
-                          )
+                        ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{lesson.content}</ReactMarkdown>
                         : <p className="lesson-content-empty">No content available for this lesson yet.</p>}
                 </div>
 

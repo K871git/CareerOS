@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Navbar from '../components/layout/Navbar';
 import './dashboard.css';
 
 export default function DashboardLayout() {
+    const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
         return localStorage.getItem('sidebar_collapsed') === 'true';
@@ -21,7 +22,6 @@ export default function DashboardLayout() {
     return (
         <div className={`dash-root${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
             <Navbar
-                collapsed={sidebarCollapsed}
                 onToggleCollapse={toggleCollapse}
                 onMenuToggle={() => setSidebarOpen((prev) => !prev)}
             />
@@ -43,7 +43,7 @@ export default function DashboardLayout() {
                 )}
 
                 <main className="dash-main">
-                    <div className="dash-content">
+                    <div key={location.key} className="dash-content page-enter">
                         <Outlet />
                     </div>
                 </main>

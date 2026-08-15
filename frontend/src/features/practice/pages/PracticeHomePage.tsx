@@ -1,117 +1,116 @@
 import { Link } from 'react-router-dom';
-import { Target, ChevronRight } from 'lucide-react';
-import { useTracks, useSubjects } from '../../learning/hooks/useLearning';
-import type { LearningTrack, Subject } from '../../../types/api';
+import {
+    Globe, Wifi, LayoutTemplate, RefreshCcw,
+    Cpu, Database, GitBranch, Code2,
+} from 'lucide-react';
 import '../practice.css';
 
-function SubjectCard({ subject, trackTitle }: { subject: Subject; trackTitle: string }) {
-    return (
-        <Link
-            to={`/practice/subjects/${subject.id}`}
-            state={{ subjectTitle: subject.title, trackTitle }}
-            className="prac-subject-card"
-        >
-            <div>
-                <h3 className="prac-subject-title">{subject.title}</h3>
-                <p className="prac-subject-desc">
-                    {subject.description || 'Level-based interview practice questions.'}
-                </p>
-            </div>
-            <div className="prac-subject-meta">
-                <span className="prac-subject-levels">3 Levels</span>
-                <ChevronRight size={15} />
-            </div>
-        </Link>
-    );
-}
-
-function TrackSection({ track }: { track: LearningTrack }) {
-    const { data: subjects = [], isLoading } = useSubjects(track.id);
-
-    const practiceSubjects = subjects.filter((s) => s.mcq_question_count >= 10);
-
-    if (isLoading) {
-        return (
-            <div className="prac-track-section">
-                <div className="skeleton" style={{ height: 14, width: 160, borderRadius: 6, marginBottom: 14 }} />
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.875rem' }}>
-                    {[0, 1].map((i) => (
-                        <div key={i} className="skeleton" style={{ height: 120, borderRadius: 14 }} />
-                    ))}
-                </div>
-            </div>
-        );
-    }
-
-    if (practiceSubjects.length === 0) return null;
-
-    return (
-        <div className="prac-track-section">
-            <p className="prac-track-title">{track.title}</p>
-            <div className="prac-subjects-grid">
-                {practiceSubjects.map((s) => (
-                    <SubjectCard key={s.id} subject={s} trackTitle={track.title} />
-                ))}
-            </div>
-        </div>
-    );
-}
+const CATEGORIES = [
+    {
+        id: 'fsd',
+        title: 'Full Stack Development',
+        desc: 'Languages, frontend frameworks, and backend technologies.',
+        icon: Globe,
+        to: '/practice/fsd',
+        available: true,
+    },
+    {
+        id: 'networking',
+        title: 'Networking',
+        desc: 'TCP/IP, HTTP, DNS, OSI model, and network protocols.',
+        icon: Wifi,
+        available: false,
+    },
+    {
+        id: 'system-design',
+        title: 'System Design',
+        desc: 'Scalability, load balancing, caching, and distributed systems.',
+        icon: LayoutTemplate,
+        available: false,
+    },
+    {
+        id: 'sdlc',
+        title: 'SDLC',
+        desc: 'Software development life cycle, Agile, Scrum, and methodologies.',
+        icon: RefreshCcw,
+        available: false,
+    },
+    {
+        id: 'os',
+        title: 'Operating Systems',
+        desc: 'Processes, threads, memory management, and system calls.',
+        icon: Cpu,
+        available: false,
+    },
+    {
+        id: 'databases',
+        title: 'Databases',
+        desc: 'SQL, normalization, indexing, transactions, and NoSQL.',
+        icon: Database,
+        available: false,
+    },
+    {
+        id: 'git',
+        title: 'Git & Version Control',
+        desc: 'Branching, merging, rebasing, and collaboration workflows.',
+        icon: GitBranch,
+        available: false,
+    },
+    {
+        id: 'dsa',
+        title: 'Data Structures & Algorithms',
+        desc: 'Arrays, trees, graphs, sorting, searching, and complexity.',
+        icon: Code2,
+        available: false,
+    },
+] as const;
 
 export default function PracticeHomePage() {
-    const { data: tracks = [], isLoading } = useTracks();
-
     return (
         <div className="practice-page">
             <div className="practice-inner">
-                {/* Hero */}
-                <div className="prac-hero">
-                    <div className="prac-hero-icon">
-                        <Target size={22} />
-                    </div>
-                    <div>
-                        <h1 className="prac-hero-title">Practice Mode</h1>
-                        <p className="prac-hero-desc">
-                            Level-based interview preparation — Junior to Senior
-                        </p>
-                    </div>
+                <div className="prac-home-header">
+                    <h1 className="prac-home-title">Practice</h1>
+                    <p className="prac-home-subtitle">
+                        Select a category to begin practicing interview questions.
+                    </p>
                 </div>
 
-                {/* How it works */}
-                <div className="prac-how-it-works">
-                    <div className="prac-how-step">
-                        <span className="prac-how-num">1</span>
-                        <span>Pick a subject</span>
-                    </div>
-                    <div className="prac-how-arrow">→</div>
-                    <div className="prac-how-step">
-                        <span className="prac-how-num">2</span>
-                        <span>Start at Junior level</span>
-                    </div>
-                    <div className="prac-how-arrow">→</div>
-                    <div className="prac-how-step">
-                        <span className="prac-how-num">3</span>
-                        <span>Score 7/10 to unlock next</span>
-                    </div>
-                    <div className="prac-how-arrow">→</div>
-                    <div className="prac-how-step">
-                        <span className="prac-how-num">4</span>
-                        <span>Advance to Senior level</span>
-                    </div>
-                </div>
-
-                {/* Subjects by track */}
-                {isLoading ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                        {[0, 1].map((i) => (
-                            <div key={i}>
-                                <div className="skeleton" style={{ height: 14, width: 160, borderRadius: 6, marginBottom: 14 }} />
-                                <div className="skeleton" style={{ height: 120, borderRadius: 14 }} />
+                <div className="prac-cat-grid">
+                    {CATEGORIES.map((cat) => {
+                        const Icon = cat.icon;
+                        if (cat.available) {
+                            return (
+                                <Link
+                                    key={cat.id}
+                                    to={cat.to}
+                                    className="prac-cat-card prac-cat-card--active"
+                                >
+                                    <div className="prac-cat-icon">
+                                        <Icon size={20} strokeWidth={1.75} />
+                                    </div>
+                                    <div className="prac-cat-content">
+                                        <h3 className="prac-cat-title">{cat.title}</h3>
+                                        <p className="prac-cat-desc">{cat.desc}</p>
+                                    </div>
+                                    <span className="prac-cat-cta">Practice →</span>
+                                </Link>
+                            );
+                        }
+                        return (
+                            <div key={cat.id} className="prac-cat-card prac-cat-card--soon">
+                                <div className="prac-cat-icon">
+                                    <Icon size={20} strokeWidth={1.75} />
+                                </div>
+                                <div className="prac-cat-content">
+                                    <h3 className="prac-cat-title">{cat.title}</h3>
+                                    <p className="prac-cat-desc">{cat.desc}</p>
+                                </div>
+                                <span className="prac-soon-badge">Coming Soon</span>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    tracks.map((track) => <TrackSection key={track.id} track={track} />)
-                )}
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

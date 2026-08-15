@@ -108,7 +108,8 @@ export default function PracticeLevelPage() {
     const id = Number(subjectId);
     const location = useLocation();
     const subjectTitle = (location.state as any)?.subjectTitle as string | undefined;
-    const trackTitle = (location.state as any)?.trackTitle as string | undefined;
+    const trackTitle   = (location.state as any)?.trackTitle  as string | undefined;
+    const arenaId      = (location.state as any)?.arenaId     as string | undefined;
 
     const { data: topics = [], isLoading } = useTopics(id);
 
@@ -135,6 +136,14 @@ export default function PracticeLevelPage() {
                 {/* Breadcrumb */}
                 <div className="prac-breadcrumb">
                     <Link to="/practice" className="prac-breadcrumb-link">Practice</Link>
+                    {arenaId && (
+                        <>
+                            <span className="prac-breadcrumb-sep">›</span>
+                            <Link to="/practice/fsd" className="prac-breadcrumb-link">Full Stack Development</Link>
+                            <span className="prac-breadcrumb-sep">›</span>
+                            <Link to={`/practice/fsd/${arenaId}`} className="prac-breadcrumb-link">{trackTitle}</Link>
+                        </>
+                    )}
                     <span className="prac-breadcrumb-sep">›</span>
                     <span>{subjectTitle ?? 'Levels'}</span>
                 </div>

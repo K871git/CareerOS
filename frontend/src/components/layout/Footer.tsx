@@ -27,6 +27,18 @@ export default function Footer() {
                         <a href="#">Terms of Use</a>
                     </div>
                 </div>
+
+                <div className="footer-col">
+                    <p className="footer-col-title">Contact</p>
+                    <div className="footer-links">
+                        <span className="footer-contact-item">
+                            <span className="footer-contact-label">Built by</span>
+                            ghost-team
+                        </span>
+                        <a href="mailto:gangardekishor87@gmail.com">gangardekishor87@gmail.com</a>
+                        <span className="footer-contact-item">Wakad, Pune</span>
+                    </div>
+                </div>
             </div>
 
             <div className="footer-bottom">
