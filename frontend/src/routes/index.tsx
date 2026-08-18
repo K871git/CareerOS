@@ -6,6 +6,7 @@ import HomePage from '../pages/HomePage';
 import NotFoundPage from '../pages/NotFoundPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
+import SettingsPage from '../features/profile/pages/SettingsPage';
 import CareerAssessmentPage from '../features/assessment/pages/CareerAssessmentPage';
 import LearningTracksPage from '../features/learning/pages/LearningTracksPage';
 import LearningCategoryPage from '../features/learning/pages/LearningCategoryPage';
@@ -18,10 +19,13 @@ import LessonPage from '../features/learning/pages/LessonPage';
 import PracticeHomePage from '../features/practice/pages/PracticeHomePage';
 import PracticeFsdPage from '../features/practice/pages/PracticeFsdPage';
 import PracticeFsdArenaPage from '../features/practice/pages/PracticeFsdArenaPage';
+import PracticeDatabasesPage from '../features/practice/pages/PracticeDatabasesPage';
 import PracticeLevelPage from '../features/practice/pages/PracticeLevelPage';
 import PracticeSessionPage from '../features/practice/pages/PracticeSessionPage';
 import AssessmentResultPage from '../features/assessment/pages/AssessmentResultPage';
-import TheoryQuestionsPage from '../features/theory/pages/TheoryQuestionsPage';
+import TheoryHomePage from '../features/theory/pages/TheoryHomePage';
+import TheoryAreaPage from '../features/theory/pages/TheoryAreaPage';
+import TheoryExamPage from '../features/theory/pages/TheoryExamPage';
 import TheoryAnswerPage from '../features/theory/pages/TheoryAnswerPage';
 import ProgressPage from '../features/progress/pages/ProgressPage';
 
@@ -50,6 +54,7 @@ const router = createBrowserRouter([
                 children: [
                     { path: '/dashboard',  element: <DashboardPage /> },
                     { path: '/profile',    element: <ProfilePage /> },
+                    { path: '/settings',   element: <SettingsPage /> },
                     { path: '/assessment', element: <CareerAssessmentPage /> },
                     // Learning — new level-based structure
                     { path: '/learning',                                                          element: <LearningTracksPage /> },
@@ -65,11 +70,14 @@ const router = createBrowserRouter([
                     { path: '/practice',                                      element: <PracticeHomePage /> },
                     { path: '/practice/fsd',                                  element: <PracticeFsdPage /> },
                     { path: '/practice/fsd/:arena',                           element: <PracticeFsdArenaPage /> },
+                    { path: '/practice/databases',                            element: <PracticeDatabasesPage /> },
                     { path: '/practice/subjects/:subjectId',                  element: <PracticeLevelPage /> },
                     { path: '/practice/topics/:topicId',                      element: <PracticeSessionPage /> },
                     { path: '/practice/results/:attemptId',                   element: <AssessmentResultPage /> },
-                    { path: '/theory',                                        element: <TheoryQuestionsPage /> },
-                    { path: '/theory/answers/:answerId',                      element: <TheoryAnswerPage /> },
+                    { path: '/theory',                 element: <TheoryHomePage /> },
+                    { path: '/theory/answers/:answerId', element: <TheoryAnswerPage /> },
+                    { path: '/theory/:area',             element: <TheoryAreaPage /> },
+                    { path: '/theory/:area/:level',      element: <TheoryExamPage /> },
                     { path: '/progress',                                      element: <ProgressPage /> },
                 ],
             },

@@ -10,7 +10,7 @@
 /* --- Card ------------------------------------------------------------ */
 
 .assessment-card {
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 1.75rem;
@@ -75,7 +75,7 @@
   font-family: var(--font);
   font-size: 0.9375rem;
   color: var(--text-primary);
-  background: #fff;
+  background: var(--bg-surface);
   outline: none;
   transition: border-color var(--ease), box-shadow var(--ease);
   line-height: 1.5;
@@ -221,7 +221,7 @@
 .skill-card {
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  background: #fff;
+  background: var(--bg-surface);
   overflow: hidden;
   transition: border-color var(--ease), box-shadow var(--ease);
 }
@@ -674,7 +674,7 @@
    ==================================================================== */
 
 .topic-selector-card {
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 2rem;
@@ -715,7 +715,7 @@
   font-family: var(--font);
   font-size: 0.9375rem;
   color: var(--text-primary);
-  background: #fff;
+  background: var(--bg-surface);
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -830,7 +830,7 @@
    ==================================================================== */
 
 .q-card {
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 1.75rem;
@@ -874,7 +874,7 @@
   align-items: center;
   gap: 1rem;
   padding: 0.875rem 1.125rem;
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
   font-family: var(--font);
@@ -1022,7 +1022,7 @@
    ==================================================================== */
 
 .result-summary {
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 2.5rem 2rem;
@@ -1152,7 +1152,7 @@
 }
 
 .review-card {
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-left-width: 3px;
   border-radius: var(--radius-lg);
@@ -1333,3 +1333,19 @@
     gap: 0.5rem;
   }
 }
+
+
+/* 
+lets focus on the theory section
+where we are choosing the track and then proceed, and this is completly bad UI and also process
+instead just like previous sections here is different UI so 
+on theory Select area or field like Languages,  or Frameworks, or Networking just like previous ones
+then there are three levels as well 
+each level contains 10 questions 
+three levels 30 questions 
+user needs to be correct at least 75% for first level
+85% for next level 
+95-99% correct for third and final complete ok 
+and after theory finishes then there will additional assessment which is coming soon ok
+and user feed get updated as user progresses ok (remember we still dont touches the dashboard and progress module so first secure all the important ones and then there is analysis
+ */

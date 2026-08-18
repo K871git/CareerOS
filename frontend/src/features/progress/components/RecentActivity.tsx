@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock } from 'lucide-react';
+import { CheckCircle2, Target, Brain, Clock } from 'lucide-react';
 import type { RecentActivity } from '../../../types/api';
 import { timeAgo } from '../../../utils/time';
 
@@ -6,23 +6,43 @@ interface Props {
     items: RecentActivity[];
 }
 
+function ActivityIcon({ type }: { type: RecentActivity['type'] }) {
+    if (type === 'quiz_completed') {
+        return (
+            <div className="prog-activity-icon prog-activity-icon--quiz">
+                <Target size={15} />
+            </div>
+        );
+    }
+    if (type === 'theory_passed') {
+        return (
+            <div className="prog-activity-icon prog-activity-icon--theory">
+                <Brain size={15} />
+            </div>
+        );
+    }
+    return (
+        <div className="prog-activity-icon">
+            <CheckCircle2 size={15} />
+        </div>
+    );
+}
+
 export default function RecentActivityList({ items }: Props) {
     if (items.length === 0) {
         return (
             <div className="prog-empty">
                 <Clock size={36} className="prog-empty-icon" />
-                <p>No activity yet. Complete a lesson to see your history here.</p>
+                <p>No activity yet. Complete a lesson, quiz, or theory level to see your history here.</p>
             </div>
         );
     }
 
     return (
         <ul className="prog-activity-list">
-            {items.map((item) => (
-                <li key={item.id} className="prog-activity-item">
-                    <div className="prog-activity-icon">
-                        <CheckCircle2 size={15} />
-                    </div>
+            {items.map((item, idx) => (
+                <li key={`${item.type}-${item.created_at}-${idx}`} className="prog-activity-item">
+                    <ActivityIcon type={item.type} />
                     <div className="prog-activity-content">
                         <p className="prog-activity-desc">{item.description}</p>
                         {item.subject_name && (

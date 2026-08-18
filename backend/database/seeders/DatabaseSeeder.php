@@ -40,6 +40,22 @@ class DatabaseSeeder extends Seeder
         $this->call(QuestionOptionSeeder::class);
         $this->call(TheoryQuestionSeeder::class);
         $this->call(JsLearningSeeder::class);
+        $this->call(ReactLearningSeeder::class);
+        $this->call(TheoryLanguagesSeeder::class);
+        $this->call(PhpLearningSeeder::class);
+        $this->call(PythonLearningSeeder::class);
+        $this->call(TypeScriptLearningSeeder::class);
+        $this->call(TypeScriptPracticeSeeder::class);
+        $this->call(AngularLearningSeeder::class);
+        $this->call(LaravelLearningSeeder::class);
+        $this->call(NodeJsLearningSeeder::class);
+        $this->call(HtmlPracticeSeeder::class);
+        $this->call(CssPracticeSeeder::class);
+        $this->call(AngularPracticeSeeder::class);
+        $this->call(NodeJsPracticeSeeder::class);
+        $this->call(ExpressPracticeSeeder::class);
+        $this->call(MySqlPracticeSeeder::class);
+        $this->call(PostgreSqlPracticeSeeder::class);
 
         User::firstOrCreate(
             ['email' => 'test@example.com'],

@@ -25,7 +25,7 @@ const CATEGORIES = [
         title: 'Backend Development',
         desc: 'Design server-side applications, REST APIs, and scalable systems.',
         icon: Server,
-        active: false,
+        active: true,
     },
     {
         key: 'networking',

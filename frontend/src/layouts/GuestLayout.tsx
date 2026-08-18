@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, Navigate, Outlet, useSearchParams } from 'react-router-dom';
+import { Moon, Sun } from 'lucide-react';
 import { useAuth } from '../store/authStore';
 import { useLogout } from '../features/auth/hooks/useLogout';
+import { useTheme } from '../hooks/useTheme';
 import Footer from '../components/layout/Footer';
 import AuthModal from '../components/ui/AuthModal';
 import './layout.css';
@@ -28,6 +30,8 @@ export default function GuestLayout() {
         return <Navigate to="/dashboard" replace />;
     }
 
+    const { theme, toggleTheme } = useTheme();
+
     const openModal = (mode: 'login' | 'register') => setModalMode(mode);
     const closeModal = () => setModalMode(null);
     const ctx: GuestOutletContext = { openModal };
@@ -37,6 +41,14 @@ export default function GuestLayout() {
             <header className="header">
                 <Link to="/" className="header-brand">CareerOS</Link>
                 <nav className="header-nav">
+                    <button
+                        className="header-theme-btn"
+                        onClick={toggleTheme}
+                        aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                        title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                    >
+                        {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                    </button>
                     {state.isAuthenticated ? (
                         <>
                             <Link to="/dashboard" className="header-btn-ghost">Dashboard</Link>

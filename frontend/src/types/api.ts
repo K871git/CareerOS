@@ -85,19 +85,51 @@ export interface ProgressTrackItem {
     percentage: number;
 }
 
+export interface PracticeSubjectProgress {
+    subject_id: number;
+    subject_title: string;
+    attempts: number;
+    total_questions: number;
+    total_correct: number;
+    accuracy: number;
+}
+
+export interface TheoryAreaProgress {
+    area: string;
+    passed: number;
+    total: number;
+}
+
 export interface UserProgress {
     summary: {
         total_lessons: number;
         completed_lessons: number;
         percentage: number;
+        quizzes_taken: number;
+        accuracy: number;
+        theory_levels_passed: number;
+        theory_levels_total: number;
+        learning_levels_passed: number;
     };
     tracks: ProgressTrackItem[];
+    practice: {
+        quizzes_taken: number;
+        total_questions_answered: number;
+        total_correct: number;
+        accuracy: number;
+        by_subject: PracticeSubjectProgress[];
+    };
+    theory: {
+        levels_passed: number;
+        levels_total: number;
+        by_area: TheoryAreaProgress[];
+    };
 }
 
-export type ActivityType = 'lesson_completed' | 'question_answered' | 'track_started';
+export type ActivityType = 'lesson_completed' | 'quiz_completed' | 'theory_passed' | 'question_answered' | 'track_started';
 
 export interface RecentActivity {
-    id: number;
+    id?: number;
     type: ActivityType;
     description: string;
     subject_name?: string;
@@ -203,6 +235,23 @@ export interface DashboardSummary {
     total_correct: number;
     accuracy: number;
     avg_quiz_score: number;
+    theory_levels_passed: number;
+    learning_levels_passed: number;
+    skill_level: number;
+    skill_label: string;
+}
+
+export interface DashboardProfile {
+    target_role: string | null;
+    career_goal: string | null;
+    experience_level: string | null;
+}
+
+export interface DashboardUserSkill {
+    name: string;
+    category: string;
+    level: string;
+    score: number;
 }
 
 export interface QuizBySubject {
@@ -223,7 +272,12 @@ export interface WeakArea {
     avg_score: number;
 }
 
-export type RecommendationType = 'weak_topic' | 'get_started' | 'explore';
+export type RecommendationType =
+    | 'weak_topic'
+    | 'get_started'
+    | 'explore'
+    | 'start_theory'
+    | 'start_learning';
 
 export interface Recommendation {
     type: RecommendationType;
@@ -232,10 +286,12 @@ export interface Recommendation {
     topic_id: number | null;
     topic_slug: string | null;
     subject_title: string | null;
+    route: string;
 }
 
 export interface RecentAttempt {
     attempt_id: number;
+    topic_id: number | null;
     topic_title: string;
     subject_title: string;
     score: number;
@@ -253,11 +309,40 @@ export interface DashboardActivity {
 
 export interface DashboardOverview {
     summary: DashboardSummary;
+    profile: DashboardProfile | null;
+    user_skills: DashboardUserSkill[];
     quiz_by_subject: QuizBySubject[];
     weak_areas: WeakArea[];
     recommendations: Recommendation[];
     recent_attempts: RecentAttempt[];
     recent_activity: DashboardActivity[];
+}
+
+// --- Theory Level System ---
+
+export interface TheoryArea {
+    slug: string;
+    title: string;
+    available: boolean;
+    levels_completed: number;
+    total_levels: number;
+}
+
+export interface TheoryLevelStatus {
+    level: number;
+    locked: boolean;
+    completed: boolean;
+    score: number | null;
+    pass_threshold: number;
+    pass_percentage: number;
+}
+
+export interface TheoryExamResult {
+    score: number;
+    total: number;
+    passed: boolean;
+    threshold: number;
+    percentage: number;
 }
 
 export interface TheoryAnswer {

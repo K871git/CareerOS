@@ -112,7 +112,10 @@ export default function PracticeFsdArenaPage() {
         allSubjects.filter(s => s.mcq_question_count >= 1).map(s => [s.slug, s])
     );
 
-    const technologies: ResolvedTech[] = config.technologies.map(tech => ({
+    const technologies: ResolvedTech[] = [
+        ...config.technologies.filter(t => subjectMap.has(t.slug)),
+        ...config.technologies.filter(t => !subjectMap.has(t.slug)),
+    ].map(tech => ({
         ...tech,
         subject: subjectMap.get(tech.slug) ?? null,
     }));

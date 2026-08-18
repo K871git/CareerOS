@@ -14,7 +14,7 @@
 .auth-card {
   width: 100%;
   max-width: 440px;
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 24px;
   padding: 2.75rem 2.5rem;
   box-shadow:
@@ -96,8 +96,8 @@
   font-size: 0.9rem;
   font-family: inherit;
   color: #111827;
-  background: #f9fafb;
-  border: 1.5px solid #e5e7eb;
+  background: var(--bg-subtle);
+  border: 1.5px solid var(--border);
   border-radius: 10px;
   outline: none;
   box-sizing: border-box;
@@ -105,8 +105,8 @@
 }
 
 .auth-input:focus {
-  border-color: #4f46e5;
-  background: #ffffff;
+  border-color: var(--primary);
+  background: var(--bg-surface);
   box-shadow: 0 0 0 3.5px rgba(79, 70, 229, 0.12);
 }
 

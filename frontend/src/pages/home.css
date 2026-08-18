@@ -116,6 +116,54 @@
     filter: blur(60px);
 }
 
+/* --- Floating geometric sketch decorations -------------------------- */
+
+.hero-deco {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.hero-deco-shape {
+    position: absolute;
+    color: rgba(79, 70, 229, 0.13);
+    will-change: transform, opacity;
+    animation: hero-float var(--dur, 20s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+}
+
+@keyframes hero-float {
+    0%, 100% {
+        transform: translateY(0px) rotate(var(--r0, 0deg));
+        opacity: var(--op0, 1);
+    }
+    50% {
+        transform: translateY(var(--dy, -22px)) rotate(var(--r1, 6deg));
+        opacity: var(--op1, 0.55);
+    }
+}
+
+/* Shape positions & individual animation tweaks */
+.shape-1  { width: 72px;  top: 10%; left: 4%;   --dur: 21s; --delay:  0s;   --dy: -26px; --r0: -6deg;  --r1:  4deg;  --op0: 1;    --op1: 0.5; }
+.shape-2  { width: 46px;  top:  7%; left: 80%;  --dur: 17s; --delay:  2.5s; --dy: -18px; --r0: 12deg;  --r1: -4deg;  --op0: 1;    --op1: 0.6; }
+.shape-3  { width: 58px;  top: 66%; left: 3%;   --dur: 23s; --delay:  4s;   --dy: -30px; --r0:  0deg;  --r1: 11deg;  --op0: 0.9;  --op1: 0.4; }
+.shape-4  { width: 36px;  top: 74%; left: 88%;  --dur: 19s; --delay:  1s;   --dy: -20px; --r0: -8deg;  --r1:  5deg;  --op0: 1;    --op1: 0.5; }
+.shape-5  { width: 28px;  top: 22%; left: 90%;  --dur: 15s; --delay:  6s;   --dy: -16px; --r0:  5deg;  --r1:-10deg;  --op0: 1;    --op1: 0.6; }
+.shape-6  { width: 52px;  top: 52%; left: 93%;  --dur: 25s; --delay:  3s;   --dy: -28px; --r0:-12deg;  --r1:  0deg;  --op0: 0.85; --op1: 0.4; }
+.shape-7  { width: 34px;  top: 38%; left: 2%;   --dur: 18s; --delay:  8s;   --dy: -14px; --r0:  0deg;  --r1: 14deg;  --op0: 1;    --op1: 0.55; }
+.shape-8  { width: 48px;  top: 82%; left: 55%;  --dur: 22s; --delay:  5.5s; --dy: -12px; --r0: 20deg;  --r1:  6deg;  --op0: 0.8;  --op1: 0.35; }
+.shape-9  { width: 44px;  top:  4%; left: 42%;  --dur: 24s; --delay:  7s;   --dy: -24px; --r0: -3deg;  --r1:  8deg;  --op0: 0.9;  --op1: 0.5; }
+.shape-10 { width: 26px;  top: 88%; left: 18%;  --dur: 16s; --delay:  9s;   --dy: -18px; --r0:  8deg;  --r1: -5deg;  --op0: 1;    --op1: 0.6; }
+.shape-11 { width: 40px;  top: 28%; left: 95%;  --dur: 20s; --delay: 11s;   --dy: -22px; --r0:-15deg;  --r1:  3deg;  --op0: 0.85; --op1: 0.45; }
+.shape-12 { width: 30px;  top: 92%; left: 75%;  --dur: 14s; --delay:  3.5s; --dy: -10px; --r0:  0deg;  --r1: 18deg;  --op0: 1;    --op1: 0.55; }
+
+/* Dark mode — shapes become slightly more visible */
+[data-theme="dark"] .hero-deco-shape {
+    color: rgba(129, 140, 248, 0.2);
+}
+
 .hero-inner {
     position: relative;
     max-width: 780px;
@@ -296,12 +344,30 @@
 }
 
 /* ====================================================================
+   Star canvas — shared by dark sections
+   ==================================================================== */
+
+.star-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ====================================================================
    HOW IT WORKS  (dark section)
    ==================================================================== */
 
 .how-it-works {
     background: linear-gradient(160deg, #0d0b1e 0%, #0f172a 60%, #0c1428 100%);
     padding: 6.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.how-it-works .section-inner {
+    position: relative;
+    z-index: 1;
 }
 
 .steps-grid {
@@ -358,7 +424,7 @@
 
 .features {
     padding: 6.5rem 2rem;
-    background: #fff;
+    background: var(--bg-page);
 }
 
 .features-grid {
@@ -444,7 +510,7 @@
 
 .audience-card {
     position: relative;
-    background: #fff;
+    background: var(--bg-surface);
     border: 1.5px solid var(--border);
     border-radius: var(--radius-xl);
     padding: 2rem;
@@ -552,9 +618,13 @@
     background: linear-gradient(160deg, #0d0b1e 0%, #1e293b 100%);
     padding: 3.5rem 2rem;
     text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .tech-section-inner {
+    position: relative;
+    z-index: 1;
     max-width: 900px;
     margin: 0 auto;
 }
@@ -607,7 +677,7 @@
     max-width: 600px;
     margin: 0 auto;
     padding: 3.5rem 2.5rem;
-    background: #fff;
+    background: var(--bg-surface);
     border-radius: var(--radius-2xl);
     box-shadow: 0 20px 60px rgba(79, 70, 229, 0.14);
     border: 1.5px solid rgba(124, 58, 237, 0.15);
@@ -626,6 +696,61 @@
     color: var(--text-secondary);
     margin-bottom: 2rem;
     line-height: 1.75;
+}
+
+/* ====================================================================
+   DARK MODE — Landing page overrides
+   ==================================================================== */
+
+[data-theme="dark"] .hero {
+    background: linear-gradient(160deg, #0a0914 0%, #0f0d20 35%, #130f28 65%, #0d0a1c 100%);
+}
+
+[data-theme="dark"] .hero::before {
+    background-image: radial-gradient(circle, rgba(129, 140, 248, 0.07) 1.5px, transparent 1.5px);
+}
+
+[data-theme="dark"] .hero-title {
+    color: #e6edf3;
+}
+
+[data-theme="dark"] .hero-description {
+    color: #8b949e;
+}
+
+[data-theme="dark"] .hero-value-row {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(129, 140, 248, 0.15);
+}
+
+[data-theme="dark"] .hero-value-item {
+    color: #c6cdd5;
+}
+
+[data-theme="dark"] .hero-stat-label {
+    color: #6e7681;
+}
+
+[data-theme="dark"] .hero-stats {
+    border-top-color: rgba(129, 140, 248, 0.14);
+}
+
+[data-theme="dark"] .features {
+    background: #0d1117;
+}
+
+[data-theme="dark"] .audience-section {
+    background: linear-gradient(160deg, #0f0d20 0%, #0d1117 55%, #110e1e 100%);
+}
+
+[data-theme="dark"] .cta-section {
+    background: linear-gradient(160deg, #0f0d20 0%, #130f28 50%, #0d0a1c 100%);
+}
+
+[data-theme="dark"] .cta-card {
+    background: var(--bg-surface);
+    border-color: rgba(129, 140, 248, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 /* ====================================================================

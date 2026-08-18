@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\SkillController;
 use App\Http\Controllers\Api\V1\TopicController;
 use App\Http\Controllers\Api\V1\LevelController;
+use App\Http\Controllers\Api\V1\TheoryLevelController;
 
 Route::prefix('v1/auth')->group(function () {
 
@@ -72,6 +73,12 @@ Route::middleware('auth:sanctum')
         Route::get('topics/{topic}/theory-questions', [TheoryQuestionController::class, 'index']);
         Route::post('theory-questions/{question}/submit', [TheoryQuestionController::class, 'submit']);
         Route::get('theory-answers/{answer}', [TheoryQuestionController::class, 'show']);
+
+        // Theory level system — areas must come before {area} dynamic segment
+        Route::get('theory/areas', [TheoryLevelController::class, 'areas']);
+        Route::get('theory/{area}/levels', [TheoryLevelController::class, 'levels']);
+        Route::get('theory/{area}/levels/{level}/exam', [TheoryLevelController::class, 'examQuestions']);
+        Route::post('theory/{area}/levels/{level}/exam', [TheoryLevelController::class, 'submitExam']);
 
         Route::get('skills', [SkillController::class, 'index']);
 

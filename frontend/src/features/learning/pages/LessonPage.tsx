@@ -39,6 +39,12 @@ export default function LessonPage() {
             onSuccess: () => {
                 setCompleted(true);
                 toast.success('Lesson marked as complete!');
+                try {
+                    const saved: number[] = JSON.parse(localStorage.getItem('careeros_completed_lessons') ?? '[]');
+                    if (!saved.includes(id)) {
+                        localStorage.setItem('careeros_completed_lessons', JSON.stringify([...saved, id]));
+                    }
+                } catch { /* ignore */ }
             },
         });
     }

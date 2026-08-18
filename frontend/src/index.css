@@ -36,6 +36,7 @@
   --text-muted:     #9ca3af;
   --bg-page:        #ffffff;
   --bg-subtle:      #f9fafb;
+  --bg-surface:     #ffffff;
   --border:         #e5e7eb;
   --border-strong:  #d1d5db;
 
@@ -144,4 +145,189 @@ h1, h2, h3, h4, h5, h6 {
 
 .page-enter {
   animation: page-enter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ====================================================================
+   Dark Theme
+   ==================================================================== */
+
+[data-theme="dark"] {
+  /* Brand — lighter for readability on dark surfaces */
+  --primary:        #818cf8;
+  --primary-hover:  #a5b4fc;
+  --primary-light:  #c7d2fe;
+  --secondary:      #c4b5fd;
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, #818cf8 0%, #c4b5fd 100%);
+  --gradient-bg:    linear-gradient(135deg, #1a1f3a 0%, #1f1a38 60%, #2a1a3a 100%);
+  --gradient-text:  linear-gradient(135deg, #a5b4fc, #c4b5fd);
+
+  /* Neutral scale — mapped for dark surfaces */
+  --gray-50:  rgba(255, 255, 255, 0.04);
+  --gray-100: rgba(255, 255, 255, 0.08);
+  --gray-200: #30363d;
+  --gray-300: #4a5260;
+  --gray-400: #6e7681;
+  --gray-500: #8b949e;
+  --gray-600: #aab4bf;
+  --gray-700: #c6cdd5;
+  --gray-800: #d8dee8;
+  --gray-900: #e6edf3;
+
+  /* Semantic tokens */
+  --text-primary:   #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted:     #6e7681;
+  --bg-page:        #0d1117;
+  --bg-subtle:      #161b22;
+  --bg-surface:     #1a2035;
+  --border:         #30363d;
+  --border-strong:  #444c56;
+
+  /* Shadows — heavier on dark */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.8), 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-brand: 0 4px 14px rgba(129, 140, 248, 0.40);
+}
+
+/* --- Dark: Public header glassmorphism -------------------------------- */
+[data-theme="dark"] .header {
+  background: rgba(13, 17, 23, 0.88);
+}
+
+/* --- Dark: Auth page gradient background ------------------------------ */
+[data-theme="dark"] .auth-root {
+  background: linear-gradient(135deg, #1a1f38 0%, #1a1730 50%, #221a38 100%);
+}
+
+/* --- Dark: Auth hardcoded color overrides ----------------------------- */
+[data-theme="dark"] .auth-card {
+  box-shadow:
+    0 0 0 1px rgba(129, 140, 248, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    0 24px 56px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .auth-title      { color: var(--text-primary); }
+[data-theme="dark"] .auth-subtitle   { color: var(--text-secondary); }
+[data-theme="dark"] .auth-footer     { color: var(--text-secondary); }
+[data-theme="dark"] .auth-label      { color: var(--text-secondary); }
+
+[data-theme="dark"] .auth-input {
+  background: var(--bg-subtle);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .auth-input:focus {
+  background: var(--bg-surface);
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .auth-input::placeholder { color: var(--text-muted); }
+[data-theme="dark"] .auth-icon              { color: var(--text-muted); }
+
+/* --- Dark: Sidebar logout hover -------------------------------------- */
+[data-theme="dark"] .sidebar-logout-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+[data-theme="dark"] .sidebar-logout-btn:hover:not(:disabled) .sidebar-nav-icon {
+  color: #f87171;
+}
+
+/* --- Dark: Learning page gradient title — light pastel gradient ------- */
+[data-theme="dark"] .learn-page .page-header-title {
+  background: linear-gradient(135deg, #a5b4fc 15%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* --- Dark: Dashboard CTA card ---------------------------------------- */
+[data-theme="dark"] .dash-card-cta {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.1) 0%, rgba(196, 181, 253, 0.08) 100%);
+  border-color: rgba(129, 140, 248, 0.18);
+}
+
+/* --- Dark: Ghost button in header ------------------------------------ */
+[data-theme="dark"] .header-btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* --- Dark: Exam radio dot inner highlight ---------------------------- */
+[data-theme="dark"] .exam-option--selected .exam-option-dot {
+  box-shadow: inset 0 0 0 3px var(--bg-surface);
+}
+
+/* --- Dark: Skeleton shimmer ------------------------------------------ */
+[data-theme="dark"] .skeleton,
+[data-theme="dark"] .prog-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease infinite;
+}
+
+/* --- Dark: Warning/amber tinted boxes -------------------------------- */
+[data-theme="dark"] .pending-message,
+[data-theme="dark"] .mf-alert.mf-alert-warn {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+/* --- Dark: Error/red tinted boxes ------------------------------------ */
+[data-theme="dark"] .mf-input.mf-input-err {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* --- Dark: Practice active-category card ----------------------------- */
+[data-theme="dark"] .prac-cat-card--active {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.13) 0%, rgba(196, 181, 253, 0.1) 100%);
+  border-color: rgba(129, 140, 248, 0.2);
+}
+
+/* --- Dark: Auth modal input ------------------------------------------ */
+[data-theme="dark"] .mf-input {
+  background: var(--bg-subtle);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+[data-theme="dark"] .mf-input::placeholder { color: var(--text-muted); }
+
+/* --- Dark: Scrollbar ------------------------------------------------- */
+[data-theme="dark"] html,
+[data-theme="dark"] {
+  scrollbar-color: var(--gray-300) transparent;
+}
+
+/* --- Dark: text selection -------------------------------------------- */
+[data-theme="dark"] ::selection {
+  background: rgba(129, 140, 248, 0.3);
+  color: var(--text-primary);
+}
+
+/* --- Dark: Page header titles — bright near-white (gradient pages override) */
+[data-theme="dark"] .page-header-title {
+  color: #f0f6fc;
+}
+
+/* --- Dark: Heading hierarchy — slightly brighter than body text ------- */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4 {
+  color: #f0f6fc;
 }

@@ -17,6 +17,9 @@ const LANG_BADGE: Record<string, { text: string; bg: string; color: string }> = 
     angular:    { text: 'Ng',  bg: '#DD0031', color: '#ffffff' },
     vue:        { text: 'Vu',  bg: '#42B883', color: '#ffffff' },
     nextjs:     { text: 'Nx',  bg: '#111111', color: '#ffffff' },
+    laravel:    { text: 'Lv',  bg: '#FF2D20', color: '#ffffff' },
+    nodejs:     { text: 'No',  bg: '#339933', color: '#ffffff' },
+    express:    { text: 'Ex',  bg: '#444444', color: '#ffffff' },
 };
 
 const CATEGORY_CONFIG = {
@@ -25,9 +28,9 @@ const CATEGORY_CONFIG = {
         desc: 'Master programming language fundamentals, syntax, and best practices level by level.',
         subjects: [
             { slug: 'javascript', label: 'JavaScript', active: true },
-            { slug: 'typescript', label: 'TypeScript', active: false },
-            { slug: 'python',     label: 'Python',     active: false },
-            { slug: 'php',        label: 'PHP',        active: false },
+            { slug: 'typescript', label: 'TypeScript', active: true },
+            { slug: 'python',     label: 'Python',     active: true },
+            { slug: 'php',        label: 'PHP',        active: true },
             { slug: 'java',       label: 'Java',       active: false },
             { slug: 'c',          label: 'C',          active: false },
             { slug: 'cpp',        label: 'C++',        active: false },
@@ -39,9 +42,18 @@ const CATEGORY_CONFIG = {
         desc: 'Build production-grade interfaces with modern frameworks level by level.',
         subjects: [
             { slug: 'react',   label: 'React',   active: true },
-            { slug: 'angular', label: 'Angular', active: false },
+            { slug: 'angular', label: 'Angular', active: true },
             { slug: 'vue',     label: 'Vue.js',  active: false },
             { slug: 'nextjs',  label: 'Next.js', active: false },
+        ],
+    },
+    backend: {
+        title: 'Backend Development',
+        desc: 'Build server-side applications, REST APIs, and scalable systems level by level.',
+        subjects: [
+            { slug: 'laravel', label: 'Laravel', active: true },
+            { slug: 'nodejs',  label: 'Node.js', active: true },
+            { slug: 'express', label: 'Express', active: false },
         ],
     },
 } as const;
@@ -90,7 +102,10 @@ export default function LearningCategoryPage() {
     const allSubjects = [...feSubjects, ...beSubjects, ...fsdSubjects];
     const subjectMap = new Map<string, Subject>(allSubjects.map(s => [s.slug, s]));
 
-    const categoryLabel = category === 'languages' ? 'Languages' : 'Frontend';
+    const categoryLabel =
+        category === 'languages' ? 'Languages' :
+        category === 'frontend'  ? 'Frontend' :
+        category === 'backend'   ? 'Backend' : category ?? '';
 
     return (
         <div className="learn-page">

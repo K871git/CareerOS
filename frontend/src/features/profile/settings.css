@@ -1,0 +1,366 @@
+/* ====================================================================
+   Settings Page
+   ==================================================================== */
+
+.settings-page {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Identity block -------------------------------------------------- */
+
+.settings-identity {
+    display: flex;
+    align-items: center;
+    gap: 1.375rem;
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2rem;
+    transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.settings-identity:hover {
+    border-color: rgba(79, 70, 229, 0.14);
+    box-shadow: var(--shadow-sm);
+}
+
+.settings-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--gradient-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.375rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+    outline: 3px solid rgba(79, 70, 229, 0.1);
+    outline-offset: 3px;
+}
+
+.settings-identity-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-identity-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.875rem;
+}
+
+.settings-identity-text {
+    min-width: 0;
+}
+
+.settings-user-name {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-user-email {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+    word-break: break-all;
+}
+
+/* --- Level badge ----------------------------------------------------- */
+
+.settings-level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.settings-level-badge--junior {
+    background: rgba(79, 70, 229, 0.08);
+    color: var(--primary);
+}
+
+.settings-level-badge--mid {
+    background: rgba(124, 58, 237, 0.08);
+    color: var(--secondary);
+}
+
+.settings-level-badge--senior {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.settings-level-badge--none {
+    background: var(--gray-100);
+    color: var(--text-muted);
+}
+
+/* --- Completeness bar ----------------------------------------------- */
+
+.settings-completeness {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.settings-completeness-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settings-completeness-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.settings-completeness-pct {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.settings-completeness-track {
+    height: 5px;
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.settings-completeness-fill {
+    height: 100%;
+    background: var(--gradient-brand);
+    border-radius: var(--radius-full);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 4px;
+}
+
+/* --- Section heading ------------------------------------------------- */
+
+.settings-section-head {
+    margin-bottom: 0.875rem;
+}
+
+.settings-section-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+}
+
+.settings-section-desc {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Spacing: profile form card already has its own style, just push next section down */
+.settings-content > .profile-form-card {
+    margin-bottom: 2rem;
+}
+
+.settings-content > .settings-section-head:first-of-type + .settings-section-head {
+    margin-top: 2rem;
+}
+
+/* Gap between Career Profile section head and account section head */
+.settings-section-head + .settings-account-card + .settings-section-head {
+    margin-top: 2rem;
+}
+
+/* --- Account card ---------------------------------------------------- */
+
+.settings-account-card {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: border-color var(--ease), box-shadow var(--ease);
+    margin-bottom: 2rem;
+}
+
+.settings-account-card:hover {
+    border-color: rgba(79, 70, 229, 0.12);
+    box-shadow: var(--shadow-sm);
+}
+
+.settings-account-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.125rem 1.5rem;
+}
+
+.settings-account-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-md);
+    background: rgba(79, 70, 229, 0.07);
+    border: 1.5px solid rgba(79, 70, 229, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.settings-account-field {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.settings-account-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.settings-account-value {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.settings-readonly-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.625rem;
+    border-radius: var(--radius-full);
+    font-size: 0.69rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.09);
+    color: #059669;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.settings-account-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 1.5rem;
+}
+
+/* --- Sign out row ---------------------------------------------------- */
+
+.settings-signout-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+}
+
+.settings-signout-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.settings-signout-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.settings-signout-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.settings-signout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.125rem;
+    border: 1.5px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-md);
+    background: rgba(239, 68, 68, 0.05);
+    color: #dc2626;
+    font-family: var(--font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background var(--ease), border-color var(--ease), transform var(--ease-fast);
+}
+
+.settings-signout-btn:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.45);
+    transform: translateY(-1px);
+}
+
+.settings-signout-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- Responsive ------------------------------------------------------ */
+
+@media (max-width: 620px) {
+    .settings-identity {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .settings-avatar {
+        width: 54px;
+        height: 54px;
+        font-size: 1.125rem;
+    }
+
+    .settings-identity-top {
+        flex-wrap: wrap;
+    }
+
+    .settings-signout-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .settings-signout-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

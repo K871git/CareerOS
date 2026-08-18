@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Save, AlertCircle } from 'lucide-react';
+import { Save, AlertCircle, Settings2 } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '../schemas';
 import { useUpdateProfile } from '../hooks/useProfile';
 import { EXPERIENCE_LEVELS } from '../types';
@@ -43,10 +43,17 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
     return (
         <div className="profile-form-card">
             <div className="profile-form-header">
-                <h2 className="profile-form-title">Edit Profile</h2>
-                <p className="profile-form-sub">
-                    Keep your career profile up to date to get personalised learning recommendations.
-                </p>
+                <div className="profile-form-title-row">
+                    <div className="profile-form-title-icon">
+                        <Settings2 size={18} />
+                    </div>
+                    <div>
+                        <h2 className="profile-form-title">Edit Profile</h2>
+                        <p className="profile-form-sub">
+                            Keep your career profile up to date to get personalised learning recommendations.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit((data) => updateProfile(data))} noValidate>

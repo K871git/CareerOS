@@ -1,11 +1,51 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Mail, Lock, User, AlertCircle, GraduationCap } from 'lucide-react';
+import { X, Mail, Lock, User, AlertCircle, ArrowRight, LogIn } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from '../../features/auth/schemas';
 import { useLogin } from '../../features/auth/hooks/useLogin';
 import { useRegister } from '../../features/auth/hooks/useRegister';
 import './auth-modal.css';
+
+const GoogleIcon = () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+);
+
+const GitHubIcon = () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.745 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+    </svg>
+);
+
+function SocialButtons() {
+    const handleSocial = (provider: string) => {
+        toast('Coming soon — ' + provider + ' login is on the way!', { icon: '🚀' });
+    };
+    return (
+        <div className="mf-social">
+            <button type="button" className="mf-social-btn" onClick={() => handleSocial('Google')}>
+                <GoogleIcon /> Google
+            </button>
+            <button type="button" className="mf-social-btn mf-social-btn--github" onClick={() => handleSocial('GitHub')}>
+                <GitHubIcon /> GitHub
+            </button>
+        </div>
+    );
+}
+
+function OrDivider() {
+    return (
+        <div className="mf-divider">
+            <span>or continue with email</span>
+        </div>
+    );
+}
 
 type ModalMode = 'login' | 'register';
 
@@ -28,11 +68,15 @@ function isEmailTaken(error: unknown): boolean {
     return combined.includes('taken') || combined.includes('already');
 }
 
-function LoginForm({ onSwitch }: { onSwitch: () => void }) {
+function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEmail?: string }) {
     const { mutate: login, isPending, isError, error, reset } = useLogin();
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     });
+
+    useEffect(() => {
+        if (prefillEmail) setValue('email', prefillEmail);
+    }, [prefillEmail]);
 
     const apiError = isError ? getApiError(error) : null;
 
@@ -60,7 +104,12 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
             </div>
 
             <div className="mf">
-                <label className="mf-label">Password</label>
+                <div className="mf-label-row">
+                    <label className="mf-label">Password</label>
+                    <button type="button" className="mf-forgot" tabIndex={-1}>
+                        Forgot password?
+                    </button>
+                </div>
                 <div className="mf-input-wrap">
                     <span className="mf-icon"><Lock size={15} /></span>
                     <input
@@ -74,46 +123,61 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
             </div>
 
             <button type="submit" disabled={isPending} className="mf-btn">
-                {isPending ? 'Signing in…' : 'Sign in'}
+                {isPending ? 'Signing in…' : <><LogIn size={15} /> Sign in</>}
             </button>
 
             <p className="mf-footer">
-                Don't have an account?{' '}
-                <button type="button" className="mf-switch" onClick={onSwitch}>Create one</button>
+                No account?{' '}
+                <button type="button" className="mf-switch" onClick={onSwitch}>Create one free</button>
             </p>
         </form>
     );
 }
 
-function RegisterForm({ onSwitch, onEmailExists }: { onSwitch: () => void; onEmailExists: () => void }) {
+function RegisterForm({
+    onSwitch,
+    onEmailExists,
+}: {
+    onSwitch: (email?: string) => void;
+    onEmailExists: (email: string) => void;
+}) {
     const { mutate: register_, isPending, isError, error, reset } = useRegister();
-    const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
+    const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
     });
 
     const apiError = isError ? getApiError(error) : null;
     const emailTaken = isError && isEmailTaken(error);
+    const watchedEmail = watch('email', '');
 
     useEffect(() => {
-        if (emailTaken) onEmailExists();
+        if (emailTaken) onEmailExists(watchedEmail);
     }, [emailTaken]);
 
     return (
         <form onSubmit={handleSubmit((data) => { reset(); register_(data); })} noValidate>
-            {apiError && (
-                <div className={`mf-alert${emailTaken ? ' mf-alert-warn' : ''}`} role="alert">
+            {apiError && !emailTaken && (
+                <div className="mf-alert" role="alert">
                     <AlertCircle size={15} />
-                    <span>
-                        {emailTaken ? 'This email is already registered.' : apiError}
-                        {emailTaken && (
-                            <>
-                                {' '}
-                                <button type="button" className="mf-alert-switch" onClick={onSwitch}>
-                                    Sign in instead →
-                                </button>
-                            </>
-                        )}
-                    </span>
+                    <span>{apiError}</span>
+                </div>
+            )}
+
+            {emailTaken && (
+                <div className="mf-email-taken" role="alert">
+                    <div className="mf-email-taken-text">
+                        <AlertCircle size={14} />
+                        This email is already registered.
+                    </div>
+                    <button
+                        type="button"
+                        className="mf-email-taken-action"
+                        onClick={() => onSwitch(watchedEmail)}
+                    >
+                        <LogIn size={14} />
+                        Log in with this email
+                        <ArrowRight size={13} />
+                    </button>
                 </div>
             )}
 
@@ -159,12 +223,12 @@ function RegisterForm({ onSwitch, onEmailExists }: { onSwitch: () => void; onEma
             </div>
 
             <button type="submit" disabled={isPending} className="mf-btn">
-                {isPending ? 'Creating account…' : 'Create account'}
+                {isPending ? 'Creating account…' : <>Create account <ArrowRight size={15} /></>}
             </button>
 
             <p className="mf-footer">
                 Already have an account?{' '}
-                <button type="button" className="mf-switch" onClick={onSwitch}>Sign in</button>
+                <button type="button" className="mf-switch" onClick={() => onSwitch()}>Sign in</button>
             </p>
         </form>
     );
@@ -172,6 +236,7 @@ function RegisterForm({ onSwitch, onEmailExists }: { onSwitch: () => void; onEma
 
 export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
     const [signInHighlight, setSignInHighlight] = useState(false);
+    const [prefillEmail, setPrefillEmail] = useState<string | undefined>();
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -184,7 +249,20 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
         return () => { document.body.style.overflow = ''; };
     }, []);
 
-    useEffect(() => { setSignInHighlight(false); }, [mode]);
+    useEffect(() => {
+        setSignInHighlight(false);
+        if (mode === 'register') setPrefillEmail(undefined);
+    }, [mode]);
+
+    const handleEmailExists = (email: string) => {
+        setPrefillEmail(email);
+        setSignInHighlight(true);
+    };
+
+    const handleSwitchFromRegister = (email?: string) => {
+        if (email) setPrefillEmail(email);
+        onSwitch('login');
+    };
 
     return (
         <div className="modal-backdrop" onClick={onClose}>
@@ -199,13 +277,7 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
                 </button>
 
                 <div className="modal-brand">
-                    <div className="modal-brand-wordmark">
-                        <span className="modal-brand-cap-letter">
-                            <GraduationCap size={22} className="modal-brand-cap" />
-                            <span className="modal-brand-letter">C</span>
-                        </span>
-                        <span className="modal-brand-rest">areerOS</span>
-                    </div>
+                    <span className="modal-brand-wordmark">CareerOS</span>
                 </div>
 
                 <div className="modal-tabs" role="tablist">
@@ -227,11 +299,28 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
                     </button>
                 </div>
 
+                <div className="modal-headline">
+                    <h2 className="modal-title">
+                        {mode === 'login' ? 'Welcome back' : 'Start for free'}
+                    </h2>
+                    <p className="modal-subtitle">
+                        {mode === 'login'
+                            ? 'Sign in to continue your journey'
+                            : 'Join engineers preparing for their next role'}
+                    </p>
+                </div>
+
+                <SocialButtons />
+                <OrDivider />
+
                 {mode === 'login'
-                    ? <LoginForm onSwitch={() => onSwitch('register')} />
+                    ? <LoginForm
+                        onSwitch={() => onSwitch('register')}
+                        prefillEmail={prefillEmail}
+                      />
                     : <RegisterForm
-                        onSwitch={() => onSwitch('login')}
-                        onEmailExists={() => setSignInHighlight(true)}
+                        onSwitch={handleSwitchFromRegister}
+                        onEmailExists={handleEmailExists}
                       />
                 }
             </div>

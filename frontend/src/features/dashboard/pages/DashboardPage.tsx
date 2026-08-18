@@ -13,12 +13,17 @@ import {
     Clock,
     Zap,
     BarChart2,
+    Shield,
+    BookMarked,
+    Layers,
 } from 'lucide-react';
 import { useAuth } from '../../../store/authStore';
 import { useDashboardOverview } from '../hooks/useDashboard';
 import { timeAgo } from '../../../utils/time';
 import type {
     DashboardSummary,
+    DashboardProfile,
+    DashboardUserSkill,
     QuizBySubject,
     WeakArea,
     Recommendation,
@@ -27,7 +32,7 @@ import type {
 } from '../../../types/api';
 import '../dashboard.css';
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 function scoreColor(pct: number): string {
     if (pct >= 70) return 'score-good';
@@ -41,13 +46,23 @@ function scoreBarColor(pct: number): string {
     return 'bar-bad';
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+// ── Skeletons ─────────────────────────────────────────────────────────────────
 
 function SkeletonStats() {
     return (
         <div className="dash-stats">
             {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="skeleton skeleton-stat" />
+            ))}
+        </div>
+    );
+}
+
+function SkeletonSections() {
+    return (
+        <div className="dash-section-cards">
+            {[0, 1, 2].map((i) => (
+                <div key={i} className="skeleton" style={{ height: 82, borderRadius: 16 }} />
             ))}
         </div>
     );
@@ -63,6 +78,43 @@ function SkeletonCard({ rows = 3 }: { rows?: number }) {
                     style={{ height: 48, marginBottom: 10, width: i === rows - 1 ? '70%' : '100%' }}
                 />
             ))}
+        </div>
+    );
+}
+
+// ── Welcome Banner ────────────────────────────────────────────────────────────
+
+function WelcomeBanner({
+    firstName,
+    profile,
+    weakCount,
+}: {
+    firstName: string;
+    profile: DashboardProfile | null;
+    weakCount: number;
+}) {
+    const hasGoal = profile?.target_role;
+
+    return (
+        <div className="dash-welcome">
+            <div>
+                <div className="dash-welcome-top">
+                    <h1 className="dash-welcome-title">Welcome back, {firstName}!</h1>
+                    {profile?.experience_level && (
+                        <span className="dash-exp-badge">{profile.experience_level}</span>
+                    )}
+                </div>
+                <p className="dash-welcome-sub">
+                    {hasGoal
+                        ? `Preparing for ${profile!.target_role} · ${weakCount > 0 ? `${weakCount} area${weakCount > 1 ? 's' : ''} to improve` : 'Keep it up!'}`
+                        : weakCount > 0
+                            ? `You have ${weakCount} weak area${weakCount > 1 ? 's' : ''} to focus on — keep going.`
+                            : 'Consistency is what separates great engineers. Keep the momentum.'}
+                </p>
+            </div>
+            <Link to="/practice" className="dash-continue-btn">
+                <Play size={13} /> Start Quiz <ArrowRight size={13} />
+            </Link>
         </div>
     );
 }
@@ -92,20 +144,28 @@ function StatCard({ value, label, icon: Icon, variant = 'default' }: StatCardPro
 
 function StatsRow({ summary }: { summary: DashboardSummary }) {
     const accuracyVariant =
-        summary.accuracy >= 70 ? 'success' : summary.accuracy >= 50 ? 'warning' : 'danger';
+        summary.quizzes_taken === 0
+            ? 'default'
+            : summary.accuracy >= 70
+                ? 'success'
+                : summary.accuracy >= 50
+                    ? 'warning'
+                    : 'danger';
+
+    const totalLevels = summary.learning_levels_passed + summary.theory_levels_passed;
 
     return (
         <div className="dash-stats">
             <StatCard
-                value={summary.quizzes_taken}
-                label="Quizzes Taken"
-                icon={Target}
-            />
-            <StatCard
                 value={summary.quizzes_taken === 0 ? '—' : `${summary.accuracy}%`}
                 label="Quiz Accuracy"
                 icon={Award}
-                variant={summary.quizzes_taken > 0 ? accuracyVariant : 'default'}
+                variant={accuracyVariant}
+            />
+            <StatCard
+                value={summary.total_questions_answered}
+                label="Questions Answered"
+                icon={Brain}
             />
             <StatCard
                 value={summary.lessons_completed}
@@ -114,10 +174,84 @@ function StatsRow({ summary }: { summary: DashboardSummary }) {
                 variant={summary.lessons_completed > 0 ? 'success' : 'default'}
             />
             <StatCard
-                value={summary.total_questions_answered}
-                label="Questions Answered"
-                icon={Brain}
+                value={totalLevels}
+                label="Levels Passed"
+                icon={TrendingUp}
+                variant={totalLevels > 0 ? 'success' : 'default'}
             />
+        </div>
+    );
+}
+
+// ── Section Overview Cards ────────────────────────────────────────────────────
+
+function SectionCards({ summary }: { summary: DashboardSummary }) {
+    const theoryTotal = 3; // only Languages is active (3 levels)
+
+    return (
+        <div className="dash-section-cards">
+            <Link to="/practice" className="dash-section-card">
+                <div className="dash-section-icon dash-section-icon--practice">
+                    <Target size={18} />
+                </div>
+                <div className="dash-section-body">
+                    <div className="dash-section-label">Practice</div>
+                    <div className="dash-section-stat">
+                        {summary.quizzes_taken > 0
+                            ? `${summary.avg_quiz_score}% avg · ${summary.quizzes_taken} quiz${summary.quizzes_taken === 1 ? '' : 'zes'}`
+                            : 'Not started yet'}
+                    </div>
+                    <div className="dash-section-bar">
+                        <div
+                            className="dash-section-fill dash-section-fill--practice"
+                            style={{ width: `${Math.min(summary.accuracy, 100)}%` }}
+                        />
+                    </div>
+                </div>
+                <ArrowRight size={14} className="dash-section-arrow" />
+            </Link>
+
+            <Link to="/learning" className="dash-section-card">
+                <div className="dash-section-icon dash-section-icon--learning">
+                    <BookOpen size={18} />
+                </div>
+                <div className="dash-section-body">
+                    <div className="dash-section-label">Learning</div>
+                    <div className="dash-section-stat">
+                        {summary.lessons_completed > 0
+                            ? `${summary.lessons_completed} lessons · ${summary.learning_levels_passed} levels passed`
+                            : 'Not started yet'}
+                    </div>
+                    <div className="dash-section-bar">
+                        <div
+                            className="dash-section-fill dash-section-fill--learning"
+                            style={{ width: `${summary.lessons_percentage}%` }}
+                        />
+                    </div>
+                </div>
+                <ArrowRight size={14} className="dash-section-arrow" />
+            </Link>
+
+            <Link to="/theory" className="dash-section-card">
+                <div className="dash-section-icon dash-section-icon--theory">
+                    <Layers size={18} />
+                </div>
+                <div className="dash-section-body">
+                    <div className="dash-section-label">Theory</div>
+                    <div className="dash-section-stat">
+                        {summary.theory_levels_passed > 0
+                            ? `${summary.theory_levels_passed}/${theoryTotal} levels passed`
+                            : 'Not started yet'}
+                    </div>
+                    <div className="dash-section-bar">
+                        <div
+                            className="dash-section-fill dash-section-fill--theory"
+                            style={{ width: `${(summary.theory_levels_passed / theoryTotal) * 100}%` }}
+                        />
+                    </div>
+                </div>
+                <ArrowRight size={14} className="dash-section-arrow" />
+            </Link>
         </div>
     );
 }
@@ -191,6 +325,63 @@ function RecentAttemptsList({ attempts }: { attempts: RecentAttempt[] }) {
     );
 }
 
+// ── Skill Level Card ──────────────────────────────────────────────────────────
+
+const SKILL_LEVEL_NAMES = ['Beginner', 'Developing', 'Proficient', 'Advanced'];
+
+function SkillLevelCard({
+    summary,
+    userSkills,
+}: {
+    summary: DashboardSummary;
+    userSkills: DashboardUserSkill[];
+}) {
+    const level = summary.skill_level; // 0 = not started, 1–4
+    const label = summary.skill_label;
+
+    return (
+        <div className="dash-card">
+            <div className="dash-card-header">
+                <h2 className="dash-card-title">Your Level</h2>
+                <Shield size={15} className="dash-skill-icon" />
+            </div>
+
+            <div className="skill-level-display">
+                <div className="skill-level-label">{label}</div>
+                <div className="skill-level-bar">
+                    {SKILL_LEVEL_NAMES.map((_, i) => (
+                        <div
+                            key={i}
+                            className={`skill-level-seg${i < level ? ' skill-level-seg--active' : ''}`}
+                        />
+                    ))}
+                </div>
+                <div className="skill-level-names">
+                    {SKILL_LEVEL_NAMES.map((n) => (
+                        <span key={n} className="skill-level-lbl">{n}</span>
+                    ))}
+                </div>
+                <p className="skill-level-basis">
+                    {level === 0
+                        ? 'Complete quizzes to determine your level.'
+                        : `Based on ${summary.quizzes_taken} quiz${summary.quizzes_taken === 1 ? '' : 'zes'} · ${summary.accuracy}% accuracy`}
+                </p>
+            </div>
+
+            {userSkills.length > 0 && (
+                <div className="skill-chips-wrap">
+                    <div className="skill-chips-label">Assessed Skills</div>
+                    <div className="skill-chips">
+                        {userSkills.slice(0, 6).map((s) => (
+                            <span key={s.name} className="skill-chip">{s.name}</span>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 // ── Weak Areas ────────────────────────────────────────────────────────────────
 
 function WeakAreasList({ areas }: { areas: WeakArea[] }) {
@@ -217,7 +408,10 @@ function WeakAreasList({ areas }: { areas: WeakArea[] }) {
                         <span className={`weak-score ${scoreColor(area.avg_score)}`}>
                             {area.avg_score}%
                         </span>
-                        <Link to="/practice" className="weak-retry-link">
+                        <Link
+                            to={`/practice/topics/${area.topic_id}`}
+                            className="weak-retry-link"
+                        >
                             Retry <ArrowRight size={11} />
                         </Link>
                     </div>
@@ -229,21 +423,27 @@ function WeakAreasList({ areas }: { areas: WeakArea[] }) {
 
 // ── Recommendations ───────────────────────────────────────────────────────────
 
+function recIcon(type: string) {
+    switch (type) {
+        case 'weak_topic':    return <AlertTriangle size={14} />;
+        case 'get_started':   return <Zap size={14} />;
+        case 'start_theory':  return <Brain size={14} />;
+        case 'start_learning':return <BookMarked size={14} />;
+        default:              return <TrendingUp size={14} />;
+    }
+}
+
 function RecommendationsList({ items }: { items: Recommendation[] }) {
     return (
         <ul className="rec-list">
             {items.map((rec, i) => (
                 <li key={i} className={`rec-item rec-item--${rec.type}`}>
-                    <div className="rec-icon">
-                        {rec.type === 'weak_topic' && <AlertTriangle size={14} />}
-                        {rec.type === 'get_started' && <Zap size={14} />}
-                        {rec.type === 'explore' && <TrendingUp size={14} />}
-                    </div>
+                    <div className="rec-icon">{recIcon(rec.type)}</div>
                     <div className="rec-body">
                         <span className="rec-title">{rec.title}</span>
                         <span className="rec-desc">{rec.description}</span>
                     </div>
-                    <Link to="/practice" className="rec-action">
+                    <Link to={rec.route} className="rec-action">
                         <ArrowRight size={13} />
                     </Link>
                 </li>
@@ -283,39 +483,6 @@ function ActivityFeed({ items }: { items: DashboardActivity[] }) {
     );
 }
 
-// ── Quick Actions ─────────────────────────────────────────────────────────────
-
-function QuickActions() {
-    return (
-        <div className="quick-actions">
-            <Link to="/practice" className="quick-action-item">
-                <div className="quick-action-icon"><Target size={16} /></div>
-                <div className="quick-action-body">
-                    <div className="quick-action-label">Practice Quiz</div>
-                    <div className="quick-action-desc">Answer interview questions</div>
-                </div>
-                <ArrowRight size={13} className="quick-action-arrow" />
-            </Link>
-            <Link to="/tracks" className="quick-action-item">
-                <div className="quick-action-icon"><BookOpen size={16} /></div>
-                <div className="quick-action-body">
-                    <div className="quick-action-label">Browse Tracks</div>
-                    <div className="quick-action-desc">Find your learning path</div>
-                </div>
-                <ArrowRight size={13} className="quick-action-arrow" />
-            </Link>
-            <Link to="/progress" className="quick-action-item">
-                <div className="quick-action-icon"><TrendingUp size={16} /></div>
-                <div className="quick-action-body">
-                    <div className="quick-action-label">Full Progress</div>
-                    <div className="quick-action-desc">Detailed breakdown</div>
-                </div>
-                <ArrowRight size={13} className="quick-action-arrow" />
-            </Link>
-        </div>
-    );
-}
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -323,26 +490,22 @@ export default function DashboardPage() {
     const firstName = state.user?.name?.split(' ')[0] ?? 'there';
     const { data: overview, isLoading } = useDashboardOverview();
 
-    const weakCount = overview?.weak_areas.length ?? 0;
+    const weakCount  = overview?.weak_areas.length ?? 0;
     const hasQuizData = (overview?.summary.quizzes_taken ?? 0) > 0;
 
     return (
         <div className="dashboard">
 
-            {/* Welcome */}
-            <div className="dash-welcome">
-                <div>
-                    <h1 className="dash-welcome-title">Welcome back, {firstName}!</h1>
-                    <p className="dash-welcome-sub">
-                        {weakCount > 0
-                            ? `You have ${weakCount} weak area${weakCount > 1 ? 's' : ''} to focus on — keep going.`
-                            : 'Consistency is what separates great engineers. Keep the momentum.'}
-                    </p>
-                </div>
-                <Link to="/practice" className="dash-continue-btn">
-                    <Play size={13} /> Start Quiz <ArrowRight size={13} />
-                </Link>
-            </div>
+            {/* Welcome / career goal banner */}
+            {isLoading ? (
+                <div className="skeleton" style={{ height: 72, borderRadius: 16, marginBottom: '1.75rem' }} />
+            ) : (
+                <WelcomeBanner
+                    firstName={firstName}
+                    profile={overview?.profile ?? null}
+                    weakCount={weakCount}
+                />
+            )}
 
             {/* Stats row */}
             {isLoading || !overview ? (
@@ -351,7 +514,14 @@ export default function DashboardPage() {
                 <StatsRow summary={overview.summary} />
             )}
 
-            {/* Main grid */}
+            {/* Section overview cards */}
+            {isLoading || !overview ? (
+                <SkeletonSections />
+            ) : (
+                <SectionCards summary={overview.summary} />
+            )}
+
+            {/* Main content grid */}
             <div className="dash-grid">
 
                 {/* ── Left column ── */}
@@ -360,10 +530,10 @@ export default function DashboardPage() {
                     {/* Quiz Performance by Subject */}
                     <div className="dash-card">
                         <div className="dash-card-header">
-                            <h2 className="dash-card-title">Quiz Performance by Subject</h2>
+                            <h2 className="dash-card-title">Performance by Subject</h2>
                             {hasQuizData && (
                                 <span className="dash-card-meta">
-                                    avg {overview!.summary.avg_quiz_score}% overall
+                                    {overview!.summary.avg_quiz_score}% overall avg
                                 </span>
                             )}
                         </div>
@@ -387,11 +557,11 @@ export default function DashboardPage() {
                         )}
                     </div>
 
-                    {/* Recent Lesson Activity */}
+                    {/* Lesson Activity */}
                     <div className="dash-card">
                         <div className="dash-card-header">
                             <h2 className="dash-card-title">Lesson Activity</h2>
-                            <Link to="/tracks" className="dash-card-link">Browse tracks</Link>
+                            <Link to="/learning" className="dash-card-link">Go to Learning</Link>
                         </div>
                         {isLoading ? (
                             <SkeletonCard rows={3} />
@@ -403,6 +573,18 @@ export default function DashboardPage() {
 
                 {/* ── Right column ── */}
                 <div className="dash-col-side">
+
+                    {/* Skill Level */}
+                    {isLoading ? (
+                        <div className="dash-card">
+                            <SkeletonCard rows={4} />
+                        </div>
+                    ) : (
+                        <SkillLevelCard
+                            summary={overview!.summary}
+                            userSkills={overview?.user_skills ?? []}
+                        />
+                    )}
 
                     {/* Weak Areas */}
                     <div className="dash-card">
@@ -434,38 +616,6 @@ export default function DashboardPage() {
                             <RecommendationsList items={overview?.recommendations ?? []} />
                         )}
                     </div>
-
-                    {/* Quick Actions */}
-                    <div className="dash-card">
-                        <div className="dash-card-header">
-                            <h2 className="dash-card-title">Quick Actions</h2>
-                        </div>
-                        <QuickActions />
-                    </div>
-
-                    {/* Lesson progress mini */}
-                    {overview && (
-                        <div className="dash-card dash-card--muted">
-                            <div className="dash-card-header" style={{ marginBottom: '0.875rem' }}>
-                                <h2 className="dash-card-title">Lesson Progress</h2>
-                                <span className="dash-card-meta">
-                                    {overview.summary.lessons_percentage}%
-                                </span>
-                            </div>
-                            <div className="track-progress-bar">
-                                <div
-                                    className="track-progress-fill"
-                                    style={{ width: `${overview.summary.lessons_percentage}%` }}
-                                />
-                            </div>
-                            <p className="dash-progress-label">
-                                {overview.summary.lessons_completed} / {overview.summary.lessons_total} lessons completed
-                            </p>
-                            <Link to="/tracks" className="track-cta" style={{ marginTop: '1rem' }}>
-                                <BookOpen size={13} /> Continue Learning
-                            </Link>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

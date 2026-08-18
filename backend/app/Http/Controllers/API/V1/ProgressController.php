@@ -4,18 +4,24 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProgressResource;
+use App\Models\AssessmentAttempt;
 use App\Models\LearningTrack;
 use App\Models\Lesson;
+use App\Models\LevelCompletion;
+use App\Models\TheoryCompletion;
 use App\Models\UserProgress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProgressController extends Controller
 {
+    private const THEORY_AREAS = ['languages', 'frameworks', 'networking'];
+
     public function index(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
 
+        // --- Learning: tracks + lessons ---
         $tracks = LearningTrack::with(['subjects.topics.lessons'])->get();
 
         $completedIds = UserProgress::where('user_id', $userId)
@@ -28,7 +34,7 @@ class ProgressController extends Controller
 
         foreach ($tracks as $track) {
             $lessonIds = $track->subjects
-                ->flatMap(fn($s) => $s->topics->flatMap(fn($t) => $t->lessons->pluck('id')));
+                ->flatMap(fn ($s) => $s->topics->flatMap(fn ($t) => $t->lessons->pluck('id')));
 
             $trackTotal     = $lessonIds->count();
             $trackCompleted = $lessonIds->intersect($completedIds)->count();
@@ -46,16 +52,88 @@ class ProgressController extends Controller
             ];
         }
 
+        $learningLevelsPassed = LevelCompletion::where('user_id', $userId)->where('passed', true)->count();
+
+        // --- Practice: quiz attempts ---
+        $practiceAttempts = AssessmentAttempt::where('user_id', $userId)
+            ->with(['topic.subject'])
+            ->orderByDesc('submitted_at')
+            ->get();
+
+        $quizzesTaken  = $practiceAttempts->count();
+        $totalAnswered = $practiceAttempts->sum('total_questions');
+        $totalCorrect  = $practiceAttempts->sum('score');
+        $accuracy      = $totalAnswered > 0
+            ? round($totalCorrect / $totalAnswered * 100, 1)
+            : 0.0;
+
+        $subjectMap = [];
+        foreach ($practiceAttempts as $attempt) {
+            $subject = $attempt->topic?->subject;
+            if (! $subject) {
+                continue;
+            }
+            $sid = $subject->id;
+            if (! isset($subjectMap[$sid])) {
+                $subjectMap[$sid] = [
+                    'subject_id'      => $sid,
+                    'subject_title'   => $subject->title,
+                    'attempts'        => 0,
+                    'total_questions' => 0,
+                    'total_correct'   => 0,
+                ];
+            }
+            $subjectMap[$sid]['attempts']++;
+            $subjectMap[$sid]['total_questions'] += $attempt->total_questions;
+            $subjectMap[$sid]['total_correct']   += $attempt->score;
+        }
+
+        $quizBySubject = collect($subjectMap)->map(fn ($d) => array_merge($d, [
+            'accuracy' => $d['total_questions'] > 0
+                ? round($d['total_correct'] / $d['total_questions'] * 100, 1)
+                : 0.0,
+        ]))->sortByDesc('accuracy')->values();
+
+        // --- Theory: level completions ---
+        $theoryCompletions   = TheoryCompletion::where('user_id', $userId)->where('passed', true)->get();
+        $theoryLevelsPassed  = $theoryCompletions->count();
+        $theoryLevelsTotal   = count(self::THEORY_AREAS) * 3;
+
+        $theoryByArea = collect(self::THEORY_AREAS)->map(fn ($area) => [
+            'area'   => $area,
+            'passed' => $theoryCompletions->where('area', $area)->count(),
+            'total'  => 3,
+        ])->values();
+
         return response()->json([
             'success' => true,
             'message' => 'Progress dashboard retrieved successfully.',
             'data'    => [
                 'summary' => [
-                    'total_lessons'     => $totalLessons,
-                    'completed_lessons' => $totalCompleted,
-                    'percentage'        => $totalLessons > 0 ? round($totalCompleted / $totalLessons * 100, 1) : 0.0,
+                    'total_lessons'          => $totalLessons,
+                    'completed_lessons'      => $totalCompleted,
+                    'percentage'             => $totalLessons > 0
+                        ? round($totalCompleted / $totalLessons * 100, 1)
+                        : 0.0,
+                    'quizzes_taken'          => $quizzesTaken,
+                    'accuracy'               => $accuracy,
+                    'theory_levels_passed'   => $theoryLevelsPassed,
+                    'theory_levels_total'    => $theoryLevelsTotal,
+                    'learning_levels_passed' => $learningLevelsPassed,
                 ],
-                'tracks' => $trackData,
+                'tracks'   => $trackData,
+                'practice' => [
+                    'quizzes_taken'            => $quizzesTaken,
+                    'total_questions_answered' => $totalAnswered,
+                    'total_correct'            => $totalCorrect,
+                    'accuracy'                 => $accuracy,
+                    'by_subject'               => $quizBySubject,
+                ],
+                'theory' => [
+                    'levels_passed' => $theoryLevelsPassed,
+                    'levels_total'  => $theoryLevelsTotal,
+                    'by_area'       => $theoryByArea,
+                ],
             ],
         ]);
     }
@@ -64,20 +142,54 @@ class ProgressController extends Controller
     {
         $userId = $request->user()->id;
 
-        $recent = UserProgress::where('user_id', $userId)
+        $lessonActivities = UserProgress::where('user_id', $userId)
             ->where('status', 'COMPLETED')
             ->with(['lesson.topic.subject'])
             ->orderByDesc('completed_at')
-            ->limit(10)
-            ->get();
+            ->limit(20)
+            ->get()
+            ->map(fn ($p) => [
+                'type'         => 'lesson_completed',
+                'description'  => 'Completed: ' . ($p->lesson?->title ?? 'Lesson'),
+                'subject_name' => $p->lesson?->topic?->subject?->title,
+                'created_at'   => $p->completed_at?->toISOString() ?? $p->updated_at->toISOString(),
+            ]);
 
-        $activities = $recent->map(fn ($progress) => [
-            'id'           => $progress->id,
-            'type'         => 'lesson_completed',
-            'description'  => 'Completed: ' . $progress->lesson->title,
-            'subject_name' => $progress->lesson->topic->subject->title ?? null,
-            'created_at'   => $progress->completed_at?->toISOString() ?? $progress->updated_at->toISOString(),
-        ]);
+        $quizActivities = AssessmentAttempt::where('user_id', $userId)
+            ->with(['topic.subject'])
+            ->orderByDesc('submitted_at')
+            ->limit(20)
+            ->get()
+            ->map(fn ($a) => [
+                'type'         => 'quiz_completed',
+                'description'  => 'Quiz: ' . ($a->topic?->title ?? 'Practice') . ' — '
+                    . ($a->total_questions > 0 ? round($a->score / $a->total_questions * 100) : 0) . '%',
+                'subject_name' => $a->topic?->subject?->title,
+                'score'        => $a->total_questions > 0
+                    ? round($a->score / $a->total_questions * 100, 1)
+                    : 0.0,
+                'created_at'   => $a->submitted_at?->toISOString() ?? $a->updated_at->toISOString(),
+            ]);
+
+        $theoryActivities = TheoryCompletion::where('user_id', $userId)
+            ->where('passed', true)
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get()
+            ->map(fn ($t) => [
+                'type'         => 'theory_passed',
+                'description'  => ucfirst($t->area) . ' — Level ' . $t->level . ' passed',
+                'subject_name' => ucfirst($t->area),
+                'created_at'   => $t->created_at?->toISOString(),
+            ]);
+
+        $activities = $lessonActivities
+            ->concat($quizActivities)
+            ->concat($theoryActivities)
+            ->filter(fn ($a) => $a['created_at'] !== null)
+            ->sortByDesc('created_at')
+            ->take(15)
+            ->values();
 
         return response()->json([
             'success' => true,

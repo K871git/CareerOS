@@ -4,11 +4,11 @@ import { useSubjectBySlug, useLevelStatus } from '../hooks/useLevel';
 import '../learning.css';
 
 const LEVEL_META = [
-    { level: 1, title: 'Foundations',      desc: 'Core concepts, syntax, and fundamental patterns.' },
-    { level: 2, title: 'Building Blocks',  desc: 'Intermediate patterns, standard library, real-world usage.' },
-    { level: 3, title: 'Applied Skills',   desc: 'Solving practical problems and applying best practices.' },
+    { level: 1, title: 'Foundations',       desc: 'Core concepts, syntax, and fundamental patterns.' },
+    { level: 2, title: 'Building Blocks',   desc: 'Intermediate patterns, standard library, real-world usage.' },
+    { level: 3, title: 'Applied Skills',    desc: 'Solving practical problems and applying best practices.' },
     { level: 4, title: 'Advanced Concepts', desc: 'Deep internals, performance, and architectural decisions.' },
-    { level: 5, title: 'Expert Level',     desc: 'Edge cases, optimisations, and production-grade mastery.' },
+    { level: 5, title: 'Expert Level',      desc: 'Edge cases, optimisations, and production-grade mastery.' },
 ];
 
 export default function SubjectLevelsPage() {
@@ -64,13 +64,13 @@ export default function SubjectLevelsPage() {
             </div>
 
             {isLoading ? (
-                <div className="level-list">
+                <div className="level-grid">
                     {[0, 1, 2, 3, 4].map(i => (
-                        <div key={i} className="skeleton" style={{ height: 88, borderRadius: 14 }} />
+                        <div key={i} className="skeleton" style={{ height: 140, borderRadius: 14 }} />
                     ))}
                 </div>
             ) : (
-                <div className="level-list">
+                <div className="level-grid">
                     {LEVEL_META.map((meta, idx) => {
                         const levelData = levels[idx];
                         const locked    = levelData?.locked    ?? idx > 0;
@@ -80,8 +80,13 @@ export default function SubjectLevelsPage() {
                         if (locked) {
                             return (
                                 <div key={meta.level} className="level-card level-card--locked">
-                                    <div className="level-card-num">
-                                        <Lock size={16} className="level-lock-icon" />
+                                    <div className="level-card-top">
+                                        <span className="level-num-badge level-num-badge--locked">
+                                            <Lock size={14} className="level-lock-icon" />
+                                        </span>
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                            Level {meta.level}
+                                        </span>
                                     </div>
                                     <div className="level-card-body">
                                         <span className="level-card-title">{meta.title}</span>
@@ -100,23 +105,28 @@ export default function SubjectLevelsPage() {
                                 state={{ subjectId }}
                                 className={`level-card level-card--active${completed ? ' level-card--done' : ''}`}
                             >
-                                <div className="level-card-num">
+                                <div className="level-card-top">
                                     {completed
-                                        ? <CheckCircle2 size={20} className="level-check-icon" />
+                                        ? <CheckCircle2 size={22} className="level-check-icon" />
                                         : <span className="level-num-badge level-num-badge--active">{meta.level}</span>
                                     }
+                                    <div className="level-card-top-right">
+                                        {completed && score !== null && score !== undefined && (
+                                            <span className="level-score-badge">
+                                                <ClipboardList size={11} />
+                                                {score}/10
+                                            </span>
+                                        )}
+                                        <ChevronRight size={15} className="level-card-arrow" />
+                                    </div>
                                 </div>
                                 <div className="level-card-body">
                                     <span className="level-card-title">{meta.title}</span>
                                     <span className="level-card-desc">{meta.desc}</span>
                                 </div>
-                                {completed && score !== null && score !== undefined && (
-                                    <span className="level-score-badge">
-                                        <ClipboardList size={11} />
-                                        {score}/10
-                                    </span>
-                                )}
-                                <ChevronRight size={16} className="level-card-arrow" />
+                                <div className={`level-card-cta${completed ? ' level-card--done' : ''}`}>
+                                    {completed ? 'Revisit Level →' : 'Start Learning →'}
+                                </div>
                             </Link>
                         );
                     })}

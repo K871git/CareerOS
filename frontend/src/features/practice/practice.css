@@ -51,7 +51,7 @@
   align-items: center;
   gap: 1.25rem;
   padding: 1.5rem 1.625rem;
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: 14px;
   text-decoration: none;
@@ -71,7 +71,7 @@
 }
 
 .prac-cat-card--soon {
-  background: #fff;
+  background: var(--bg-surface);
 }
 
 .prac-cat-icon {
@@ -113,9 +113,10 @@
 .prac-cat-desc {
   font-size: 0.8125rem;
   color: var(--text-secondary);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
   margin: 0;
   line-height: 1.5;
 }
@@ -294,11 +295,11 @@
   z-index: 1;
 }
 
-/* White body section */
+/* Surface body section */
 .prac-arena-body {
   flex: 1;
   padding: 1.25rem 1.5rem;
-  background: #fff;
+  background: var(--bg-surface);
   display: flex;
   flex-direction: column;
 }
@@ -328,8 +329,8 @@
 
 .prac-arena-footer {
   padding: 0.875rem 1.5rem;
-  background: #fff;
-  border-top: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -365,7 +366,7 @@
   align-items: center;
   gap: 0.875rem;
   padding: 1rem 1.125rem;
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: 12px;
   text-decoration: none;
@@ -508,6 +509,16 @@
   color: var(--text-muted);
 }
 
+.prac-breadcrumb span:not([class]),
+.prac-breadcrumb-current {
+  color: var(--primary);
+  font-weight: 600;
+  background: rgba(79, 70, 229, 0.09);
+  padding: 0.175rem 0.625rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(79, 70, 229, 0.15);
+}
+
 /* ====================================================================
    Level Page — Header
    ==================================================================== */
@@ -547,7 +558,7 @@
 .prac-level-card {
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -754,12 +765,14 @@
    Responsive
    ==================================================================== */
 
+/* --- 960px: Arena 3 → 2 --------------------------------------------- */
 @media (max-width: 960px) {
   .prac-arena-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+/* --- 860px: Tech / Level 3 → 2 -------------------------------------- */
 @media (max-width: 860px) {
   .prac-tech-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -768,33 +781,115 @@
   .prac-level-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
 
-  .prac-hero-card {
-    flex-wrap: wrap;
-  }
-
-  .prac-hero-cta {
-    width: 100%;
-    justify-content: center;
+/* --- 720px: Category grid 2 → 1 ------------------------------------ */
+@media (max-width: 720px) {
+  .prac-cat-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }
 
+/* --- 640px: Arena 2 → 1, reduce arena card padding ----------------- */
 @media (max-width: 640px) {
   .prac-arena-grid {
     grid-template-columns: 1fr;
+    gap: 0.875rem;
   }
 
-  .prac-cs-grid {
-    grid-template-columns: 1fr;
+  .prac-arena-head {
+    padding: 1.25rem 1.25rem 1rem;
+    gap: 0.625rem;
+  }
+
+  .prac-arena-body {
+    padding: 1rem 1.25rem;
+  }
+
+  .prac-arena-footer {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .prac-home-title,
+  .prac-fsd-title {
+    font-size: 1.35rem;
+  }
+
+  .prac-level-subject-title {
+    font-size: 1.25rem;
   }
 }
 
-@media (max-width: 560px) {
+/* --- 540px: Tech / Level 2 → 1, cat card & level card compact ------- */
+@media (max-width: 540px) {
   .prac-tech-grid {
     grid-template-columns: 1fr;
+    gap: 0.625rem;
   }
 
   .prac-level-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .prac-cat-card {
+    padding: 1rem 1.125rem;
+    gap: 0.875rem;
+    min-height: auto;
+  }
+
+  .prac-cat-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .prac-cat-title {
+    font-size: 0.875rem;
+  }
+
+  .prac-cat-cta {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .prac-level-body {
+    padding: 1.125rem 1.125rem 0.875rem;
+  }
+
+  .prac-level-footer {
+    padding: 0.75rem 1.125rem;
+  }
+}
+
+/* --- 400px: Breadcrumb wraps, smallest padding ----------------------- */
+@media (max-width: 400px) {
+  .prac-breadcrumb {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .prac-cat-card {
+    padding: 0.875rem 1rem;
+  }
+
+  .prac-cat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .prac-arena-head {
+    padding: 1rem 1rem 0.875rem;
+  }
+
+  .prac-arena-body {
+    padding: 0.875rem 1rem;
+  }
+
+  .prac-arena-footer {
+    padding: 0.625rem 1rem;
   }
 }

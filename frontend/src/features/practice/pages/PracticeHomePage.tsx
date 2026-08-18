@@ -47,7 +47,8 @@ const CATEGORIES = [
         title: 'Databases',
         desc: 'SQL, normalization, indexing, transactions, and NoSQL.',
         icon: Database,
-        available: false,
+        to: '/practice/databases',
+        available: true,
     },
     {
         id: 'git',

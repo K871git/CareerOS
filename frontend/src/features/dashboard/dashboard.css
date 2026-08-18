@@ -24,6 +24,7 @@
   letter-spacing: -0.03em;
   line-height: 1.2;
   margin-bottom: 0.3rem;
+  color: var(--text-primary);
 }
 
 .dash-welcome-sub {
@@ -63,19 +64,20 @@
 }
 
 .stat-card {
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.25rem 1.375rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: border-color var(--ease), box-shadow var(--ease);
+  transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease-fast);
 }
 
 .stat-card:hover {
   border-color: rgba(79, 70, 229, 0.22);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .stat-icon {
@@ -130,10 +132,16 @@
 /* --- Cards ----------------------------------------------------------- */
 
 .dash-card {
-  background: #fff;
+  background: var(--bg-surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 1.5rem;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.dash-card:hover {
+  border-color: rgba(79, 70, 229, 0.14);
+  box-shadow: var(--shadow-sm);
 }
 
 .dash-card-header {
@@ -838,6 +846,227 @@
   margin-top: 0.5rem;
 }
 
+/* --- Experience Badge ------------------------------------------------ */
+
+.dash-welcome-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+
+.dash-exp-badge {
+  display: inline-block;
+  padding: 0.2rem 0.625rem;
+  background: rgba(79, 70, 229, 0.08);
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: capitalize;
+}
+
+/* --- Section Overview Cards (Practice / Learning / Theory) ----------- */
+
+.dash-section-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dash-section-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.125rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease-fast);
+}
+
+.dash-section-card:hover {
+  border-color: rgba(79, 70, 229, 0.22);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.dash-section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dash-section-icon--practice { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
+.dash-section-icon--learning { background: rgba(34, 197, 94, 0.1);  color: #16a34a; }
+.dash-section-icon--theory   { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+
+.dash-section-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.dash-section-stat {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-section-bar {
+  height: 4px;
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.dash-section-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dash-section-fill--practice { background: var(--gradient-brand); }
+.dash-section-fill--learning { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.dash-section-fill--theory   { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+
+.dash-section-arrow {
+  color: var(--gray-300);
+  flex-shrink: 0;
+  transition: color var(--ease), transform var(--ease-fast);
+}
+
+.dash-section-card:hover .dash-section-arrow {
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+/* --- Skill Level Card ------------------------------------------------ */
+
+.dash-skill-icon {
+  color: var(--primary);
+}
+
+.skill-level-display {
+  margin-bottom: 1rem;
+}
+
+.skill-level-label {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.skill-level-bar {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.375rem;
+}
+
+.skill-level-seg {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  transition: background 0.4s ease;
+}
+
+.skill-level-seg--active {
+  background: var(--gradient-brand);
+}
+
+.skill-level-names {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.skill-level-lbl {
+  font-size: 0.67rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.skill-level-basis {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.skill-chips-wrap {
+  border-top: 1px solid var(--border);
+  padding-top: 0.875rem;
+}
+
+.skill-chips-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.skill-chip {
+  display: inline-block;
+  padding: 0.2rem 0.625rem;
+  background: rgba(79, 70, 229, 0.07);
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* --- New recommendation types --------------------------------------- */
+
+.rec-item--start_theory {
+  background: rgba(139, 92, 246, 0.04);
+  border-color: rgba(139, 92, 246, 0.15);
+}
+
+.rec-item--start_theory .rec-icon {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+
+.rec-item--start_learning {
+  background: rgba(34, 197, 94, 0.04);
+  border-color: rgba(34, 197, 94, 0.15);
+}
+
+.rec-item--start_learning .rec-icon {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
 /* --- Responsive ------------------------------------------------------ */
 
 @media (max-width: 1080px) {
@@ -847,6 +1076,13 @@
   .dash-col-side {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-section-cards {
+    grid-template-columns: 1fr;
+    gap: 0.625rem;
   }
 }
 

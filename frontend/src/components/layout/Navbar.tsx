@@ -1,6 +1,7 @@
-import { Bell, Search, GraduationCap, ChevronRight, Menu } from 'lucide-react';
+import { Bell, Search, GraduationCap, ChevronRight, Menu, Moon, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
+import { useTheme } from '../../hooks/useTheme';
 import './navbar.css';
 
 interface NavbarProps {
@@ -11,12 +12,12 @@ interface NavbarProps {
 
 export default function Navbar({ title, onToggleCollapse, onMenuToggle }: NavbarProps) {
     const { state } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     return (
         <header className="dash-navbar">
             {/* Sidebar zone */}
             <div className="dash-navbar-sidebar-zone">
-                {/* Mobile only: hamburger to open drawer */}
                 <button
                     className="dash-navbar-menu-btn"
                     onClick={onMenuToggle}
@@ -25,7 +26,6 @@ export default function Navbar({ title, onToggleCollapse, onMenuToggle }: Navbar
                     <Menu size={20} />
                 </button>
 
-                {/* Desktop collapsed: graduation cap → hover reveals expand arrow */}
                 <button
                     className="dash-navbar-brand-collapsed"
                     onClick={onToggleCollapse}
@@ -35,7 +35,6 @@ export default function Navbar({ title, onToggleCollapse, onMenuToggle }: Navbar
                     <ChevronRight size={17} className="dash-navbar-brand-expand" />
                 </button>
 
-                {/* Desktop expanded + mobile: CareerOS logo link */}
                 <Link to="/dashboard" className="dash-navbar-brand-expanded">
                     <span className="dash-navbar-brand-text">CareerOS</span>
                 </Link>
@@ -51,8 +50,14 @@ export default function Navbar({ title, onToggleCollapse, onMenuToggle }: Navbar
                     <button className="dash-navbar-icon-btn" aria-label="Notifications">
                         <Bell size={17} />
                     </button>
-                    <div className="dash-navbar-divider" />
-                    <span className="dash-navbar-user">{state.user?.name}</span>
+                    <button
+                        className="dash-navbar-icon-btn dash-navbar-theme-btn"
+                        onClick={toggleTheme}
+                        aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                        title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                    >
+                        {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                    </button>
                 </div>
             </div>
         </header>

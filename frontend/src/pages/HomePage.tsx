@@ -1,6 +1,7 @@
 import { useOutletContext } from 'react-router-dom';
 import { BookOpen, Target, TrendingUp, ArrowRight, Zap, CheckCircle, Users, Code2, BarChart2 } from 'lucide-react';
 import type { GuestOutletContext } from '../layouts/GuestLayout';
+import StarCanvas from '../components/ui/StarCanvas';
 import './home.css';
 
 const features = [
@@ -99,6 +100,62 @@ export default function HomePage() {
                 <div className="hero-blob hero-blob-1" />
                 <div className="hero-blob hero-blob-2" />
                 <div className="hero-blob hero-blob-3" />
+
+                {/* Floating geometric sketch decorations */}
+                <div className="hero-deco" aria-hidden="true">
+                    {/* Dashed orbit circle */}
+                    <svg className="hero-deco-shape shape-1" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="6 4"/>
+                    </svg>
+                    {/* Diamond */}
+                    <svg className="hero-deco-shape shape-2" viewBox="0 0 52 52">
+                        <polygon points="26,3 49,26 26,49 3,26" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
+                    {/* Triangle */}
+                    <svg className="hero-deco-shape shape-3" viewBox="0 0 60 56">
+                        <polygon points="30,4 58,52 2,52" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
+                    {/* Small dashed circle */}
+                    <svg className="hero-deco-shape shape-4" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3"/>
+                    </svg>
+                    {/* Plus cross */}
+                    <svg className="hero-deco-shape shape-5" viewBox="0 0 30 30">
+                        <line x1="15" y1="3" x2="15" y2="27" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <line x1="3" y1="15" x2="27" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    {/* Hexagon */}
+                    <svg className="hero-deco-shape shape-6" viewBox="0 0 56 56">
+                        <polygon points="28,4 52,18 52,38 28,52 4,38 4,18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
+                    {/* Dotted diamond */}
+                    <svg className="hero-deco-shape shape-7" viewBox="0 0 38 38">
+                        <polygon points="19,2 36,19 19,36 2,19" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeDasharray="3 2"/>
+                    </svg>
+                    {/* Spiral arc */}
+                    <svg className="hero-deco-shape shape-8" viewBox="0 0 50 50">
+                        <path d="M25,25 m-16,0 a16,16 0 1,1 32,0 a12,12 0 1,0 -24,0 a8,8 0 1,1 16,0" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                    </svg>
+                    {/* Target/bullseye */}
+                    <svg className="hero-deco-shape shape-9" viewBox="0 0 48 48">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5 3"/>
+                        <circle cx="24" cy="24" r="10" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+                        <circle cx="24" cy="24" r="3" fill="currentColor" opacity="0.45"/>
+                    </svg>
+                    {/* X mark */}
+                    <svg className="hero-deco-shape shape-10" viewBox="0 0 28 28">
+                        <line x1="4" y1="4" x2="24" y2="24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <line x1="24" y1="4" x2="4" y2="24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    {/* Rounded square */}
+                    <svg className="hero-deco-shape shape-11" viewBox="0 0 44 44">
+                        <rect x="6" y="6" width="32" height="32" rx="8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 3"/>
+                    </svg>
+                    {/* Small triangle */}
+                    <svg className="hero-deco-shape shape-12" viewBox="0 0 32 30">
+                        <polygon points="16,3 30,27 2,27" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
+                </div>
                 <div className="hero-inner">
                     <div className="hero-badge">
                         <span className="hero-badge-dot" />
@@ -136,6 +193,7 @@ export default function HomePage() {
 
             {/* How it Works */}
             <section className="how-it-works">
+                <StarCanvas count={120} />
                 <div className="section-inner">
                     <div className="section-header">
                         <span className="section-label section-label--light">How it works</span>
@@ -213,6 +271,7 @@ export default function HomePage() {
 
             {/* Technologies */}
             <section className="tech-section">
+                <StarCanvas count={70} />
                 <div className="tech-section-inner">
                     <p className="tech-label">Technologies &amp; topics covered</p>
                     <div className="tech-tags">

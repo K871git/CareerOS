@@ -50,7 +50,7 @@
 /* ── Topic Selector ───────────────────────────────────────────────── */
 
 .theory-selector-card {
-    background: #fff;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     padding: 1.75rem;
@@ -194,7 +194,7 @@
 /* ── Question Card ────────────────────────────────────────────────── */
 
 .theory-q-card {
-    background: #fff;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-left: 3px solid transparent;
     border-radius: var(--radius-xl);
@@ -275,7 +275,7 @@
 /* ── Question Display (answering + result views) ─────────────────── */
 
 .theory-question-display {
-    background: #fff;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     padding: 1.375rem 1.75rem;
@@ -301,7 +301,7 @@
 /* ── Answer Editor ────────────────────────────────────────────────── */
 
 .answer-editor-wrap {
-    background: #fff;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     padding: 1.5rem 1.75rem;
@@ -336,7 +336,7 @@
 .answer-textarea:focus {
     outline: none;
     border-color: var(--primary);
-    background: #fff;
+    background: var(--bg-surface);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
@@ -414,7 +414,7 @@
 /* ── Submission Status ────────────────────────────────────────────── */
 
 .submission-status-card {
-    background: #fff;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     padding: 1.5rem 1.75rem;
@@ -543,7 +543,7 @@
 /* ── Answer Display (TheoryAnswerPage) ────────────────────────────── */
 
 .theory-answer-display {
-    background: #fff;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     padding: 1.5rem 1.75rem;
@@ -579,7 +579,7 @@
     text-align: center;
     padding: 3rem 1rem;
     color: var(--gray-500);
-    background: #fff;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     display: flex;
@@ -592,7 +592,7 @@
     font-size: 0.925rem;
 }
 
-/* ── Responsive ───────────────────────────────────────────────────── */
+/* ── Responsive (old pages) ───────────────────────────────────────── */
 
 @media (max-width: 640px) {
     .theory-page { padding: 1.25rem 1rem; }
@@ -605,4 +605,369 @@
 
     .answer-editor-footer { flex-direction: column; align-items: stretch; }
     .answer-editor-actions { justify-content: flex-end; }
+}
+
+/* ====================================================================
+   Theory v2 — new level-based navigation pages
+   ==================================================================== */
+
+.theory-v2-page {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.theory-v2-inner {
+    /* inherits dash-content padding */
+}
+
+/* ── Home header ──────────────────────────────────────────────────── */
+
+.th-home-header {
+    margin-bottom: 1.5rem;
+}
+
+.th-home-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+}
+
+.th-home-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    max-width: 560px;
+    line-height: 1.55;
+}
+
+/* "Done" badge — green variant of prac-cat-cta */
+.th-done-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #059669;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    padding: 0.35rem 0.8rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ── Area page header ─────────────────────────────────────────────── */
+
+.th-area-header {
+    margin-bottom: 1.75rem;
+}
+
+.th-area-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+}
+
+.th-area-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* ── Level card grid ──────────────────────────────────────────────── */
+
+.th-level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.th-level-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: border-color var(--ease), box-shadow var(--ease);
+    position: relative;
+}
+
+.th-level-card:hover:not(.th-level-card--locked) {
+    border-color: var(--primary);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12);
+}
+
+.th-level-card--locked {
+    opacity: 0.62;
+    cursor: not-allowed;
+}
+
+.th-level-card--completed {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.th-level-card--completed:hover {
+    border-color: #10b981;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+}
+
+.th-level-strip {
+    height: 5px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.th-level-body {
+    padding: 1.375rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.th-level-icon-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.875rem;
+}
+
+.th-level-num {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.th-level-lock {
+    color: var(--text-muted);
+}
+
+.th-completed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border-radius: var(--radius-full);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.th-level-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+}
+
+.th-level-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex: 1;
+    margin-bottom: 0.875rem;
+}
+
+.th-score-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.th-score-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.th-score-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.th-score-fill {
+    height: 100%;
+    background: var(--gradient-brand);
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+.th-score-fill--pass {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.th-score-num {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.th-pass-info {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: auto;
+    padding-top: 0.625rem;
+}
+
+.th-level-footer {
+    padding: 0.875rem 1.375rem;
+    border-top: 1px solid var(--gray-100);
+}
+
+.th-start-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.625rem 1rem;
+    background: var(--gradient-brand);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-brand);
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity var(--ease), transform var(--ease-fast);
+}
+
+.th-start-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.th-retake-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.625rem 1rem;
+    background: transparent;
+    color: #059669;
+    border: 1.5px solid rgba(16, 185, 129, 0.4);
+    border-radius: var(--radius-md);
+    font-family: var(--font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--ease), border-color var(--ease);
+}
+
+.th-retake-btn:hover {
+    background: rgba(16, 185, 129, 0.06);
+    border-color: #10b981;
+}
+
+.th-locked-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+/* ── All-complete banner ──────────────────────────────────────────── */
+
+.th-assessment-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(139, 92, 246, 0.06) 100%);
+    border: 1.5px solid rgba(99, 102, 241, 0.18);
+    border-radius: var(--radius-lg);
+    flex-wrap: wrap;
+}
+
+.th-assessment-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.18));
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.th-assessment-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+}
+
+.th-assessment-desc {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.th-assessment-banner > div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Responsive — Theory v2 ───────────────────────────────────────── */
+
+@media (max-width: 860px) {
+    .th-level-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .th-home-title,
+    .th-area-title { font-size: 1.35rem; }
+
+    .th-level-grid {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+    }
+
+    .th-assessment-banner {
+        padding: 1rem 1.125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .th-assessment-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .th-level-body { padding: 1.125rem 1.125rem 0.875rem; }
+    .th-level-footer { padding: 0.75rem 1.125rem; }
 }

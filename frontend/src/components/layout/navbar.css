@@ -4,7 +4,7 @@
 
 .dash-navbar {
   height: 60px;
-  background: #fff;
+  background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -278,8 +278,12 @@
 
 .breadcrumb-current {
   font-size: 0.8125rem;
-  color: var(--text-primary);
-  font-weight: 500;
+  color: var(--primary);
+  font-weight: 600;
+  background: rgba(79, 70, 229, 0.09);
+  padding: 0.175rem 0.625rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(79, 70, 229, 0.15);
 }
 
 /* ====================================================================
