@@ -39,7 +39,7 @@ export default function SettingsPage() {
         : '?';
 
     const levelLabel = profile ? LEVEL_LABELS[profile.experience_level] : null;
-    const pct = profileCompleteness(profile);
+    const pct = profileCompleteness(profile ?? null);
 
     return (
         <div className="settings-page">

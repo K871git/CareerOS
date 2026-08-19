@@ -28,6 +28,13 @@ const CATEGORIES = [
         active: true,
     },
     {
+        key: 'databases',
+        title: 'Databases',
+        desc: 'SQL, NoSQL, query optimization, indexing, and schema design patterns.',
+        icon: Database,
+        active: true,
+    },
+    {
         key: 'networking',
         title: 'Networking',
         desc: 'Understand protocols, TCP/IP, DNS, HTTP/S and network architecture.',
@@ -39,13 +46,6 @@ const CATEGORIES = [
         title: 'Operating Systems',
         desc: 'Process management, memory, file systems, concurrency and more.',
         icon: Cpu,
-        active: false,
-    },
-    {
-        key: 'databases',
-        title: 'Databases',
-        desc: 'SQL, NoSQL, query optimization, indexing, and schema design patterns.',
-        icon: Database,
         active: false,
     },
     {

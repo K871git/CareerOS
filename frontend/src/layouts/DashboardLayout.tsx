@@ -43,7 +43,10 @@ export default function DashboardLayout() {
                 )}
 
                 <main className="dash-main">
-                    <div key={location.key} className="dash-content page-enter">
+                    <div
+                        key={location.key}
+                        className={`dash-content page-enter${location.pathname.startsWith('/playground') ? ' dash-content--full' : ''}`}
+                    >
                         <Outlet />
                     </div>
                 </main>

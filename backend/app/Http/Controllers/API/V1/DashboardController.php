@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\AssessmentAttempt;
 use App\Models\Lesson;
 use App\Models\LevelCompletion;
-use App\Models\TheoryCompletion;
 use App\Models\UserProgress;
 use App\Models\UserProfile;
 use App\Models\UserSkill;
@@ -56,11 +55,6 @@ class DashboardController extends Controller
                 1
             )
             : 0.0;
-
-        // --- Theory completions (passed only) ---
-        $theoryLevelsPassed = TheoryCompletion::where('user_id', $userId)
-            ->where('passed', true)
-            ->count();
 
         // --- Learning level completions (passed only) ---
         $learningLevelsPassed = LevelCompletion::where('user_id', $userId)
@@ -187,18 +181,6 @@ class DashboardController extends Controller
             }
         }
 
-        if ($theoryLevelsPassed === 0) {
-            $recommendations[] = [
-                'type'          => 'start_theory',
-                'title'         => 'Start Theory: Languages',
-                'description'   => 'Test your conceptual knowledge with 10-question level exams.',
-                'topic_id'      => null,
-                'topic_slug'    => null,
-                'subject_title' => null,
-                'route'         => '/theory/languages',
-            ];
-        }
-
         if ($completedLessons === 0) {
             $recommendations[] = [
                 'type'          => 'start_learning',
@@ -266,7 +248,6 @@ class DashboardController extends Controller
                     'total_correct'            => $totalCorrect,
                     'accuracy'                 => $accuracy,
                     'avg_quiz_score'           => $avgQuizScore,
-                    'theory_levels_passed'     => $theoryLevelsPassed,
                     'learning_levels_passed'   => $learningLevelsPassed,
                     'skill_level'              => $skillLevel,
                     'skill_label'              => $skillLabel,

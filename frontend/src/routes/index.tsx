@@ -4,7 +4,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
 import HomePage from '../pages/HomePage';
 import NotFoundPage from '../pages/NotFoundPage';
-import DashboardPage from '../features/dashboard/pages/DashboardPage';
+import OverviewPage from '../features/overview/pages/OverviewPage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
 import SettingsPage from '../features/profile/pages/SettingsPage';
 import CareerAssessmentPage from '../features/assessment/pages/CareerAssessmentPage';
@@ -23,11 +23,7 @@ import PracticeDatabasesPage from '../features/practice/pages/PracticeDatabasesP
 import PracticeLevelPage from '../features/practice/pages/PracticeLevelPage';
 import PracticeSessionPage from '../features/practice/pages/PracticeSessionPage';
 import AssessmentResultPage from '../features/assessment/pages/AssessmentResultPage';
-import TheoryHomePage from '../features/theory/pages/TheoryHomePage';
-import TheoryAreaPage from '../features/theory/pages/TheoryAreaPage';
-import TheoryExamPage from '../features/theory/pages/TheoryExamPage';
-import TheoryAnswerPage from '../features/theory/pages/TheoryAnswerPage';
-import ProgressPage from '../features/progress/pages/ProgressPage';
+import PlaygroundPage from '../features/playground/pages/PlaygroundPage';
 
 const router = createBrowserRouter([
     // Old auth paths — redirect to landing page modal
@@ -52,7 +48,7 @@ const router = createBrowserRouter([
             {
                 element: <DashboardLayout />,
                 children: [
-                    { path: '/dashboard',  element: <DashboardPage /> },
+                    { path: '/dashboard',  element: <OverviewPage /> },
                     { path: '/profile',    element: <ProfilePage /> },
                     { path: '/settings',   element: <SettingsPage /> },
                     { path: '/assessment', element: <CareerAssessmentPage /> },
@@ -74,11 +70,8 @@ const router = createBrowserRouter([
                     { path: '/practice/subjects/:subjectId',                  element: <PracticeLevelPage /> },
                     { path: '/practice/topics/:topicId',                      element: <PracticeSessionPage /> },
                     { path: '/practice/results/:attemptId',                   element: <AssessmentResultPage /> },
-                    { path: '/theory',                 element: <TheoryHomePage /> },
-                    { path: '/theory/answers/:answerId', element: <TheoryAnswerPage /> },
-                    { path: '/theory/:area',             element: <TheoryAreaPage /> },
-                    { path: '/theory/:area/:level',      element: <TheoryExamPage /> },
-                    { path: '/progress',                                      element: <ProgressPage /> },
+                    { path: '/progress',                                      element: <OverviewPage /> },
+                    { path: '/playground',                                    element: <PlaygroundPage /> },
                 ],
             },
         ],

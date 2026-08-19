@@ -14,8 +14,6 @@ class Question extends Model
         'difficulty',
         'question',
         'explanation',
-        'theory_area',
-        'theory_level',
     ];
 
     public function topic(): BelongsTo

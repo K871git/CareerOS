@@ -31,6 +31,15 @@
   padding: 2rem;
 }
 
+/* Full-height pages (e.g. playground) — removes padding, fills viewport below navbar */
+.dash-content--full {
+  padding: 0;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 /* --- Overlay (mobile drawer backdrop) ------------------------------------------ */
 
 .sidebar-overlay {

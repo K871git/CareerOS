@@ -4,8 +4,7 @@ import {
     LayoutDashboard,
     BookOpen,
     Target,
-    BookMarked,
-    TrendingUp,
+    Terminal,
     Settings,
     ChevronLeft,
     ChevronUp,
@@ -26,11 +25,10 @@ interface SidebarProps {
 }
 
 const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard',      to: '/dashboard' },
-    { icon: Target,          label: 'Practice',        to: '/practice' },
-    { icon: BookOpen,        label: 'Learning',        to: '/learning' },
-    { icon: BookMarked,      label: 'Theory',          to: '/theory' },
-    { icon: TrendingUp,      label: 'Progress',        to: '/progress' },
+    { icon: LayoutDashboard, label: 'Overview',    to: '/dashboard' },
+    { icon: Target,          label: 'Practice',    to: '/practice' },
+    { icon: BookOpen,        label: 'Learning',    to: '/learning' },
+    { icon: Terminal,        label: 'Playground',  to: '/playground' },
 ];
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: SidebarProps) {

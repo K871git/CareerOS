@@ -8,15 +8,12 @@ use App\Models\AssessmentAttempt;
 use App\Models\LearningTrack;
 use App\Models\Lesson;
 use App\Models\LevelCompletion;
-use App\Models\TheoryCompletion;
 use App\Models\UserProgress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProgressController extends Controller
 {
-    private const THEORY_AREAS = ['languages', 'frameworks', 'networking'];
-
     public function index(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
@@ -55,6 +52,7 @@ class ProgressController extends Controller
         $learningLevelsPassed = LevelCompletion::where('user_id', $userId)->where('passed', true)->count();
 
         // --- Practice: quiz attempts ---
+
         $practiceAttempts = AssessmentAttempt::where('user_id', $userId)
             ->with(['topic.subject'])
             ->orderByDesc('submitted_at')
@@ -94,17 +92,6 @@ class ProgressController extends Controller
                 : 0.0,
         ]))->sortByDesc('accuracy')->values();
 
-        // --- Theory: level completions ---
-        $theoryCompletions   = TheoryCompletion::where('user_id', $userId)->where('passed', true)->get();
-        $theoryLevelsPassed  = $theoryCompletions->count();
-        $theoryLevelsTotal   = count(self::THEORY_AREAS) * 3;
-
-        $theoryByArea = collect(self::THEORY_AREAS)->map(fn ($area) => [
-            'area'   => $area,
-            'passed' => $theoryCompletions->where('area', $area)->count(),
-            'total'  => 3,
-        ])->values();
-
         return response()->json([
             'success' => true,
             'message' => 'Progress dashboard retrieved successfully.',
@@ -117,8 +104,6 @@ class ProgressController extends Controller
                         : 0.0,
                     'quizzes_taken'          => $quizzesTaken,
                     'accuracy'               => $accuracy,
-                    'theory_levels_passed'   => $theoryLevelsPassed,
-                    'theory_levels_total'    => $theoryLevelsTotal,
                     'learning_levels_passed' => $learningLevelsPassed,
                 ],
                 'tracks'   => $trackData,
@@ -128,11 +113,6 @@ class ProgressController extends Controller
                     'total_correct'            => $totalCorrect,
                     'accuracy'                 => $accuracy,
                     'by_subject'               => $quizBySubject,
-                ],
-                'theory' => [
-                    'levels_passed' => $theoryLevelsPassed,
-                    'levels_total'  => $theoryLevelsTotal,
-                    'by_area'       => $theoryByArea,
                 ],
             ],
         ]);
@@ -171,21 +151,8 @@ class ProgressController extends Controller
                 'created_at'   => $a->submitted_at?->toISOString() ?? $a->updated_at->toISOString(),
             ]);
 
-        $theoryActivities = TheoryCompletion::where('user_id', $userId)
-            ->where('passed', true)
-            ->orderByDesc('created_at')
-            ->limit(20)
-            ->get()
-            ->map(fn ($t) => [
-                'type'         => 'theory_passed',
-                'description'  => ucfirst($t->area) . ' — Level ' . $t->level . ' passed',
-                'subject_name' => ucfirst($t->area),
-                'created_at'   => $t->created_at?->toISOString(),
-            ]);
-
         $activities = $lessonActivities
             ->concat($quizActivities)
-            ->concat($theoryActivities)
             ->filter(fn ($a) => $a['created_at'] !== null)
             ->sortByDesc('created_at')
             ->take(15)

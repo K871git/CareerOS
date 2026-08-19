@@ -11,7 +11,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ title, onToggleCollapse, onMenuToggle }: NavbarProps) {
-    const { state } = useAuth();
+    useAuth();
     const { theme, toggleTheme } = useTheme();
 
     return (

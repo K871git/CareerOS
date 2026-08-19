@@ -8,6 +8,7 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    mobile: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -94,12 +95,6 @@ export interface PracticeSubjectProgress {
     accuracy: number;
 }
 
-export interface TheoryAreaProgress {
-    area: string;
-    passed: number;
-    total: number;
-}
-
 export interface UserProgress {
     summary: {
         total_lessons: number;
@@ -107,8 +102,6 @@ export interface UserProgress {
         percentage: number;
         quizzes_taken: number;
         accuracy: number;
-        theory_levels_passed: number;
-        theory_levels_total: number;
         learning_levels_passed: number;
     };
     tracks: ProgressTrackItem[];
@@ -119,14 +112,9 @@ export interface UserProgress {
         accuracy: number;
         by_subject: PracticeSubjectProgress[];
     };
-    theory: {
-        levels_passed: number;
-        levels_total: number;
-        by_area: TheoryAreaProgress[];
-    };
 }
 
-export type ActivityType = 'lesson_completed' | 'quiz_completed' | 'theory_passed' | 'question_answered' | 'track_started';
+export type ActivityType = 'lesson_completed' | 'quiz_completed' | 'question_answered' | 'track_started';
 
 export interface RecentActivity {
     id?: number;
@@ -163,7 +151,7 @@ export interface QuestionOption {
 }
 
 export type QuestionDifficulty = 'Easy' | 'Medium' | 'Hard';
-export type QuestionType = 'MCQ' | 'THEORY';
+export type QuestionType = 'MCQ';
 
 export interface MCQQuestion {
     id: number;
@@ -215,15 +203,6 @@ export interface LessonCompletionRecord {
     completed_at: string | null;
 }
 
-export interface TheoryQuestion {
-    id: number;
-    type: QuestionType;
-    difficulty: QuestionDifficulty;
-    question: string;
-}
-
-export type TheoryAnswerStatus = 'pending_review' | 'reviewed';
-
 // --- Dashboard Overview ---
 
 export interface DashboardSummary {
@@ -235,7 +214,6 @@ export interface DashboardSummary {
     total_correct: number;
     accuracy: number;
     avg_quiz_score: number;
-    theory_levels_passed: number;
     learning_levels_passed: number;
     skill_level: number;
     skill_label: string;
@@ -276,7 +254,6 @@ export type RecommendationType =
     | 'weak_topic'
     | 'get_started'
     | 'explore'
-    | 'start_theory'
     | 'start_learning';
 
 export interface Recommendation {
@@ -318,41 +295,3 @@ export interface DashboardOverview {
     recent_activity: DashboardActivity[];
 }
 
-// --- Theory Level System ---
-
-export interface TheoryArea {
-    slug: string;
-    title: string;
-    available: boolean;
-    levels_completed: number;
-    total_levels: number;
-}
-
-export interface TheoryLevelStatus {
-    level: number;
-    locked: boolean;
-    completed: boolean;
-    score: number | null;
-    pass_threshold: number;
-    pass_percentage: number;
-}
-
-export interface TheoryExamResult {
-    score: number;
-    total: number;
-    passed: boolean;
-    threshold: number;
-    percentage: number;
-}
-
-export interface TheoryAnswer {
-    id: number;
-    question_id: number;
-    question: string;
-    answer: string;
-    status: TheoryAnswerStatus;
-    score: number | null;
-    feedback: string | null;
-    explanation: string | null;
-    submitted_at: string;
-}

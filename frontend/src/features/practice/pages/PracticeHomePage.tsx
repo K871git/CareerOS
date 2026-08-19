@@ -15,6 +15,14 @@ const CATEGORIES = [
         available: true,
     },
     {
+        id: 'databases',
+        title: 'Databases',
+        desc: 'SQL, normalization, indexing, transactions, and NoSQL.',
+        icon: Database,
+        to: '/practice/databases',
+        available: true,
+    },
+    {
         id: 'networking',
         title: 'Networking',
         desc: 'TCP/IP, HTTP, DNS, OSI model, and network protocols.',
@@ -41,14 +49,6 @@ const CATEGORIES = [
         desc: 'Processes, threads, memory management, and system calls.',
         icon: Cpu,
         available: false,
-    },
-    {
-        id: 'databases',
-        title: 'Databases',
-        desc: 'SQL, normalization, indexing, transactions, and NoSQL.',
-        icon: Database,
-        to: '/practice/databases',
-        available: true,
     },
     {
         id: 'git',

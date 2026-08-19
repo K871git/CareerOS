@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Mail, Lock, User, AlertCircle, ArrowRight, LogIn } from 'lucide-react';
+import { X, Mail, Lock, User, Phone, KeyRound, AlertCircle, ArrowRight, LogIn } from 'lucide-react';
+import { isAxiosError } from 'axios';
 import toast from 'react-hot-toast';
-import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from '../../features/auth/schemas';
-import { useLogin } from '../../features/auth/hooks/useLogin';
-import { useRegister } from '../../features/auth/hooks/useRegister';
+import {
+    loginSchema, registerSchema, sendOtpSchema, verifyOtpSchema,
+    type LoginFormData, type RegisterFormData, type SendOtpFormData, type VerifyOtpFormData,
+} from '../../features/auth/schemas';
+import { useLogin }      from '../../features/auth/hooks/useLogin';
+import { useRegister }   from '../../features/auth/hooks/useRegister';
+import { useSendOtp }    from '../../features/auth/hooks/useSendOtp';
+import { useVerifyOtp }  from '../../features/auth/hooks/useVerifyOtp';
 import './auth-modal.css';
 
 const GoogleIcon = () => (
@@ -42,12 +48,14 @@ function SocialButtons() {
 function OrDivider() {
     return (
         <div className="mf-divider">
-            <span>or continue with email</span>
+            <span>or continue with</span>
         </div>
     );
 }
 
-type ModalMode = 'login' | 'register';
+type ModalMode   = 'login' | 'register';
+type LoginMethod = 'email' | 'emailOtp';
+type OtpStep     = 'enter_email' | 'enter_otp';
 
 interface AuthModalProps {
     mode: ModalMode;
@@ -56,8 +64,8 @@ interface AuthModalProps {
 }
 
 function getApiError(error: unknown): string {
-    const e = error as any;
-    return e?.response?.data?.message ?? 'Something went wrong. Please try again.';
+    if (isAxiosError(error)) return error.response?.data?.message ?? 'Something went wrong. Please try again.';
+    return 'Something went wrong. Please try again.';
 }
 
 function isEmailTaken(error: unknown): boolean {
@@ -68,69 +76,251 @@ function isEmailTaken(error: unknown): boolean {
     return combined.includes('taken') || combined.includes('already');
 }
 
+function formatTimer(seconds: number): string {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
 function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEmail?: string }) {
+    const [method, setMethod]     = useState<LoginMethod>('email');
+    const [otpStep, setOtpStep]   = useState<OtpStep>('enter_email');
+    const [otpEmail, setOtpEmail] = useState('');
+    const [timer, setTimer]       = useState(0);
+
     const { mutate: login, isPending, isError, error, reset } = useLogin();
+    const sendOtpMutation   = useSendOtp();
+    const verifyOtpMutation = useVerifyOtp();
+
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     });
+    const sendForm = useForm<SendOtpFormData>({ resolver: zodResolver(sendOtpSchema) });
+    const otpForm  = useForm<VerifyOtpFormData>({ resolver: zodResolver(verifyOtpSchema) });
 
     useEffect(() => {
         if (prefillEmail) setValue('email', prefillEmail);
     }, [prefillEmail]);
 
+    useEffect(() => {
+        if (timer <= 0) return;
+        const id = setInterval(() => setTimer((t) => t - 1), 1000);
+        return () => clearInterval(id);
+    }, [timer]);
+
     const apiError = isError ? getApiError(error) : null;
 
+    const handleMethodChange = (next: LoginMethod) => {
+        setMethod(next);
+        setOtpStep('enter_email');
+        sendForm.reset();
+        otpForm.reset();
+        sendOtpMutation.reset();
+        verifyOtpMutation.reset();
+    };
+
+    const handleSendOtp = sendForm.handleSubmit((data) => {
+        sendOtpMutation.mutate(data.email, {
+            onSuccess: () => {
+                setOtpEmail(data.email);
+                setOtpStep('enter_otp');
+                setTimer(300);
+            },
+        });
+    });
+
+    const handleVerifyOtp = otpForm.handleSubmit((data) => {
+        verifyOtpMutation.mutate({ email: otpEmail, code: data.code });
+    });
+
+    const handleResend = () => {
+        sendOtpMutation.mutate(otpEmail, {
+            onSuccess: () => {
+                setTimer(300);
+                otpForm.reset();
+                verifyOtpMutation.reset();
+            },
+        });
+    };
+
     return (
-        <form onSubmit={handleSubmit((data) => { reset(); login(data); })} noValidate>
-            {apiError && (
-                <div className="mf-alert" role="alert">
-                    <AlertCircle size={15} />
-                    <span>{apiError}</span>
-                </div>
+        <>
+            {/* Method tabs: Email / Email OTP */}
+            <div className="mf-method-tabs">
+                <button
+                    type="button"
+                    className={`mf-method-tab${method === 'email' ? ' mf-method-tab--active' : ''}`}
+                    onClick={() => handleMethodChange('email')}
+                >
+                    <Mail size={13} /> Email
+                </button>
+                <button
+                    type="button"
+                    className={`mf-method-tab${method === 'emailOtp' ? ' mf-method-tab--active' : ''}`}
+                    onClick={() => handleMethodChange('emailOtp')}
+                >
+                    <KeyRound size={13} /> Email OTP
+                </button>
+            </div>
+
+            {/* ── Email + password ───────────────────────────────── */}
+            {method === 'email' && (
+                <form onSubmit={handleSubmit((data) => { reset(); login(data); })} noValidate>
+                    {apiError && (
+                        <div className="mf-alert" role="alert">
+                            <AlertCircle size={15} />
+                            <span>{apiError}</span>
+                        </div>
+                    )}
+
+                    <div className="mf">
+                        <label className="mf-label">Email address</label>
+                        <div className="mf-input-wrap">
+                            <span className="mf-icon"><Mail size={15} /></span>
+                            <input
+                                type="email"
+                                placeholder="you@example.com"
+                                className={`mf-input${apiError ? ' mf-input-err' : ''}`}
+                                {...register('email')}
+                            />
+                        </div>
+                        {errors.email && <p className="mf-error">{errors.email.message}</p>}
+                    </div>
+
+                    <div className="mf">
+                        <div className="mf-label-row">
+                            <label className="mf-label">Password</label>
+                            <button type="button" className="mf-forgot" tabIndex={-1}>
+                                Forgot password?
+                            </button>
+                        </div>
+                        <div className="mf-input-wrap">
+                            <span className="mf-icon"><Lock size={15} /></span>
+                            <input
+                                type="password"
+                                placeholder="••••••••"
+                                className={`mf-input${apiError ? ' mf-input-err' : ''}`}
+                                {...register('password')}
+                            />
+                        </div>
+                        {errors.password && <p className="mf-error">{errors.password.message}</p>}
+                    </div>
+
+                    <button type="submit" disabled={isPending} className="mf-btn">
+                        {isPending ? 'Signing in…' : <><LogIn size={15} /> Sign in</>}
+                    </button>
+
+                    <p className="mf-footer">
+                        No account?{' '}
+                        <button type="button" className="mf-switch" onClick={onSwitch}>Create one free</button>
+                    </p>
+                </form>
             )}
 
-            <div className="mf">
-                <label className="mf-label">Email address</label>
-                <div className="mf-input-wrap">
-                    <span className="mf-icon"><Mail size={15} /></span>
-                    <input
-                        type="email"
-                        placeholder="you@example.com"
-                        className={`mf-input${apiError ? ' mf-input-err' : ''}`}
-                        {...register('email')}
-                    />
-                </div>
-                {errors.email && <p className="mf-error">{errors.email.message}</p>}
-            </div>
+            {/* ── Email OTP: enter email ─────────────────────────── */}
+            {method === 'emailOtp' && otpStep === 'enter_email' && (
+                <form onSubmit={handleSendOtp} noValidate>
+                    {sendOtpMutation.error && (
+                        <div className="mf-alert" role="alert">
+                            <AlertCircle size={15} />
+                            <span>{getApiError(sendOtpMutation.error)}</span>
+                        </div>
+                    )}
 
-            <div className="mf">
-                <div className="mf-label-row">
-                    <label className="mf-label">Password</label>
-                    <button type="button" className="mf-forgot" tabIndex={-1}>
-                        Forgot password?
+                    <div className="mf">
+                        <label className="mf-label">Email address</label>
+                        <div className="mf-input-wrap">
+                            <span className="mf-icon"><Mail size={15} /></span>
+                            <input
+                                type="email"
+                                placeholder="you@example.com"
+                                className="mf-input"
+                                {...sendForm.register('email')}
+                            />
+                        </div>
+                        {sendForm.formState.errors.email && (
+                            <p className="mf-error">{sendForm.formState.errors.email.message}</p>
+                        )}
+                    </div>
+
+                    <button type="submit" disabled={sendOtpMutation.isPending} className="mf-btn">
+                        {sendOtpMutation.isPending ? 'Sending OTP…' : <><Mail size={15} /> Get OTP</>}
                     </button>
-                </div>
-                <div className="mf-input-wrap">
-                    <span className="mf-icon"><Lock size={15} /></span>
-                    <input
-                        type="password"
-                        placeholder="••••••••"
-                        className={`mf-input${apiError ? ' mf-input-err' : ''}`}
-                        {...register('password')}
-                    />
-                </div>
-                {errors.password && <p className="mf-error">{errors.password.message}</p>}
-            </div>
 
-            <button type="submit" disabled={isPending} className="mf-btn">
-                {isPending ? 'Signing in…' : <><LogIn size={15} /> Sign in</>}
-            </button>
+                    <p className="mf-footer">
+                        No account?{' '}
+                        <button type="button" className="mf-switch" onClick={onSwitch}>Create one free</button>
+                    </p>
+                </form>
+            )}
 
-            <p className="mf-footer">
-                No account?{' '}
-                <button type="button" className="mf-switch" onClick={onSwitch}>Create one free</button>
-            </p>
-        </form>
+            {/* ── Email OTP: enter code ──────────────────────────── */}
+            {method === 'emailOtp' && otpStep === 'enter_otp' && (
+                <form onSubmit={handleVerifyOtp} noValidate>
+                    <p className="mf-otp-hint">
+                        OTP sent to <strong>{otpEmail}</strong>
+                    </p>
+
+                    {verifyOtpMutation.error && (
+                        <div className="mf-alert" role="alert">
+                            <AlertCircle size={15} />
+                            <span>{getApiError(verifyOtpMutation.error)}</span>
+                        </div>
+                    )}
+
+                    <div className="mf">
+                        <label className="mf-label">6-digit OTP</label>
+                        <div className="mf-input-wrap">
+                            <span className="mf-icon"><KeyRound size={15} /></span>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={6}
+                                placeholder="000000"
+                                className="mf-input mf-otp-input"
+                                autoComplete="one-time-code"
+                                {...otpForm.register('code')}
+                            />
+                        </div>
+                        {otpForm.formState.errors.code && (
+                            <p className="mf-error">{otpForm.formState.errors.code.message}</p>
+                        )}
+                    </div>
+
+                    <p className={`mf-otp-timer${timer === 0 ? ' mf-otp-timer--expired' : ''}`}>
+                        {timer > 0 ? `Expires in ${formatTimer(timer)}` : 'OTP expired'}
+                    </p>
+
+                    <button
+                        type="submit"
+                        disabled={verifyOtpMutation.isPending || timer === 0}
+                        className="mf-btn"
+                    >
+                        {verifyOtpMutation.isPending ? 'Verifying…' : <><LogIn size={15} /> Verify & Sign in</>}
+                    </button>
+
+                    <div className="mf-otp-resend-row">
+                        <span>Didn't receive it?</span>
+                        <button
+                            type="button"
+                            className="mf-otp-resend"
+                            disabled={timer > 0 || sendOtpMutation.isPending}
+                            onClick={handleResend}
+                        >
+                            {sendOtpMutation.isPending ? 'Sending…' : 'Resend'}
+                        </button>
+                        <span>·</span>
+                        <button
+                            type="button"
+                            className="mf-phone-change"
+                            onClick={() => { setOtpStep('enter_email'); }}
+                        >
+                            Change email
+                        </button>
+                    </div>
+                </form>
+            )}
+        </>
     );
 }
 
@@ -146,7 +336,7 @@ function RegisterForm({
         resolver: zodResolver(registerSchema),
     });
 
-    const apiError = isError ? getApiError(error) : null;
+    const apiError   = isError ? getApiError(error) : null;
     const emailTaken = isError && isEmailTaken(error);
     const watchedEmail = watch('email', '');
 
@@ -205,6 +395,15 @@ function RegisterForm({
             </div>
 
             <div className="mf">
+                <label className="mf-label">Mobile number</label>
+                <div className="mf-input-wrap">
+                    <span className="mf-icon"><Phone size={15} /></span>
+                    <input type="tel" placeholder="9876543210" className="mf-input" {...register('mobile')} />
+                </div>
+                {errors.mobile && <p className="mf-error">{errors.mobile.message}</p>}
+            </div>
+
+            <div className="mf">
                 <label className="mf-label">Password</label>
                 <div className="mf-input-wrap">
                     <span className="mf-icon"><Lock size={15} /></span>
@@ -236,7 +435,7 @@ function RegisterForm({
 
 export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
     const [signInHighlight, setSignInHighlight] = useState(false);
-    const [prefillEmail, setPrefillEmail] = useState<string | undefined>();
+    const [prefillEmail, setPrefillEmail]       = useState<string | undefined>();
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };

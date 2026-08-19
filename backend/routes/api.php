@@ -15,24 +15,23 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\QuestionController;
 use App\Http\Controllers\Api\V1\SubjectController;
 use App\Http\Controllers\Api\V1\ProgressController;
-use App\Http\Controllers\Api\V1\TheoryQuestionController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\SkillController;
 use App\Http\Controllers\Api\V1\TopicController;
 use App\Http\Controllers\Api\V1\LevelController;
-use App\Http\Controllers\Api\V1\TheoryLevelController;
+use App\Http\Controllers\Api\V1\PlaygroundController;
 
 Route::prefix('v1/auth')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login',    [AuthController::class, 'login']);
 
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/otp/send',   [AuthController::class, 'sendOtp']);
+    Route::post('/otp/verify', [AuthController::class, 'verifyOtp']);
 
     Route::middleware('auth:sanctum')->group(function () {
-
         Route::post('/logout', [AuthController::class, 'logout']);
-
-        Route::get('/me', [AuthController::class, 'me']);
+        Route::get('/me',      [AuthController::class, 'me']);
     });
 });
 
@@ -70,16 +69,6 @@ Route::middleware('auth:sanctum')
         Route::post('assessments/submit', [QuestionController::class, 'submit']);
         Route::get('assessments/{attempt}', [QuestionController::class, 'result']);
 
-        Route::get('topics/{topic}/theory-questions', [TheoryQuestionController::class, 'index']);
-        Route::post('theory-questions/{question}/submit', [TheoryQuestionController::class, 'submit']);
-        Route::get('theory-answers/{answer}', [TheoryQuestionController::class, 'show']);
-
-        // Theory level system — areas must come before {area} dynamic segment
-        Route::get('theory/areas', [TheoryLevelController::class, 'areas']);
-        Route::get('theory/{area}/levels', [TheoryLevelController::class, 'levels']);
-        Route::get('theory/{area}/levels/{level}/exam', [TheoryLevelController::class, 'examQuestions']);
-        Route::post('theory/{area}/levels/{level}/exam', [TheoryLevelController::class, 'submitExam']);
-
         Route::get('skills', [SkillController::class, 'index']);
 
         Route::get('dashboard', [DashboardController::class, 'overview']);
@@ -91,6 +80,6 @@ Route::middleware('auth:sanctum')
     });
 
 
-    /**
-     *   
-     */
+Route::middleware('auth:sanctum')->prefix('v1/playground')->group(function () {
+    Route::post('/run', [PlaygroundController::class, 'run']);
+});

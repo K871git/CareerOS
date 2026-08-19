@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
-import { User, Mail, Lock } from 'lucide-react';
+import { User, Mail, Phone, Lock } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import { registerSchema, type RegisterFormData } from '../schemas';
 import { useRegister } from '../hooks/useRegister';
@@ -16,11 +16,17 @@ export default function RegisterPage() {
     return (
         <AuthLayout title="Create your account" subtitle="Start your engineering career journey today">
             <form onSubmit={handleSubmit((data) => register_(data))} noValidate>
+
                 <div className="auth-field">
                     <label className="auth-label">Full name</label>
                     <div className="auth-input-wrap">
                         <span className="auth-icon"><User size={16} /></span>
-                        <input type="text" placeholder="John Smith" className="auth-input" {...register('name')} />
+                        <input
+                            type="text"
+                            placeholder="John Smith"
+                            className="auth-input"
+                            {...register('name')}
+                        />
                     </div>
                     {errors.name && <p className="auth-error">{errors.name.message}</p>}
                 </div>
@@ -29,16 +35,40 @@ export default function RegisterPage() {
                     <label className="auth-label">Email address</label>
                     <div className="auth-input-wrap">
                         <span className="auth-icon"><Mail size={16} /></span>
-                        <input type="email" placeholder="you@example.com" className="auth-input" {...register('email')} />
+                        <input
+                            type="email"
+                            placeholder="you@example.com"
+                            className="auth-input"
+                            {...register('email')}
+                        />
                     </div>
                     {errors.email && <p className="auth-error">{errors.email.message}</p>}
+                </div>
+
+                <div className="auth-field">
+                    <label className="auth-label">Mobile number</label>
+                    <div className="auth-input-wrap">
+                        <span className="auth-icon"><Phone size={16} /></span>
+                        <input
+                            type="tel"
+                            placeholder="9876543210"
+                            className="auth-input"
+                            {...register('mobile')}
+                        />
+                    </div>
+                    {errors.mobile && <p className="auth-error">{errors.mobile.message}</p>}
                 </div>
 
                 <div className="auth-field">
                     <label className="auth-label">Password</label>
                     <div className="auth-input-wrap">
                         <span className="auth-icon"><Lock size={16} /></span>
-                        <input type="password" placeholder="Min. 8 characters" className="auth-input" {...register('password')} />
+                        <input
+                            type="password"
+                            placeholder="Min. 8 characters"
+                            className="auth-input"
+                            {...register('password')}
+                        />
                     </div>
                     {errors.password && <p className="auth-error">{errors.password.message}</p>}
                 </div>
@@ -47,7 +77,12 @@ export default function RegisterPage() {
                     <label className="auth-label">Confirm password</label>
                     <div className="auth-input-wrap">
                         <span className="auth-icon"><Lock size={16} /></span>
-                        <input type="password" placeholder="Repeat your password" className="auth-input" {...register('password_confirmation')} />
+                        <input
+                            type="password"
+                            placeholder="Repeat your password"
+                            className="auth-input"
+                            {...register('password_confirmation')}
+                        />
                     </div>
                     {errors.password_confirmation && <p className="auth-error">{errors.password_confirmation.message}</p>}
                 </div>

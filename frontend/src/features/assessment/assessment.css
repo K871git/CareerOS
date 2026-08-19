@@ -1335,7 +1335,144 @@
 }
 
 
-/* 
+/* ====================================================================
+   Assessment / Quiz — v2 Polish Pass
+   Adds: gradient question card, stronger option selection, shimmer
+         progress, dot pulse animation, result summary refinements.
+   ==================================================================== */
+
+/* ── Question card — left accent + gradient tint ─────────────────── */
+
+.q-card {
+  border-left: 3px solid var(--primary);
+  background: linear-gradient(
+    to right,
+    rgba(79, 70, 229, 0.025) 0%,
+    var(--bg-surface) 60%
+  );
+}
+
+/* ── Option hover — gradient background ──────────────────────────── */
+
+.q-option:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(79, 70, 229, 0.04),
+    rgba(124, 58, 237, 0.02)
+  );
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+/* ── Selected option — stronger, more distinct ───────────────────── */
+
+.q-option--selected {
+  border-color: var(--primary);
+  background: linear-gradient(
+    135deg,
+    rgba(79, 70, 229, 0.07),
+    rgba(124, 58, 237, 0.04)
+  );
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1),
+              0 2px 8px rgba(79, 70, 229, 0.12);
+}
+
+/* Option label color change on hover */
+.q-option-label {
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.q-option:hover:not(:disabled) .q-option-label {
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--primary);
+}
+
+/* ── Progress fill — shimmer animation ───────────────────────────── */
+
+@keyframes prac-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.q-progress-fill {
+  background: linear-gradient(
+    90deg,
+    #6366f1 0%,
+    #8b5cf6 40%,
+    #6366f1 100%
+  );
+  background-size: 200% 100%;
+  animation: prac-shimmer 2.5s ease infinite;
+}
+
+/* ── Current dot — pulse ring ────────────────────────────────────── */
+
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(79, 70, 229, 0.45); }
+  50%       { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0);    }
+}
+
+.quiz-dot--current {
+  animation: dot-pulse 1.8s ease infinite;
+}
+
+/* ── Result summary — gradient bg tint ───────────────────────────── */
+
+.result-summary {
+  background: linear-gradient(
+    135deg,
+    var(--bg-surface) 0%,
+    rgba(79, 70, 229, 0.025) 50%,
+    var(--bg-surface) 100%
+  );
+}
+
+/* Pass badge — gradient border + subtle glow */
+.result-badge--pass {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.16));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15);
+}
+
+/* Correct count value — gradient text */
+.result-stat--correct .result-stat-val {
+  background: linear-gradient(135deg, #10b981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Dark mode overrides ──────────────────────────────────────────── */
+
+[data-theme='dark'] .q-card {
+  background: linear-gradient(
+    to right,
+    rgba(79, 70, 229, 0.05) 0%,
+    var(--bg-surface) 60%
+  );
+}
+
+[data-theme='dark'] .q-option--selected {
+  background: linear-gradient(
+    135deg,
+    rgba(79, 70, 229, 0.12),
+    rgba(124, 58, 237, 0.07)
+  );
+}
+
+[data-theme='dark'] .result-summary {
+  background: linear-gradient(
+    135deg,
+    var(--bg-surface) 0%,
+    rgba(79, 70, 229, 0.05) 50%,
+    var(--bg-surface) 100%
+  );
+}
+
+/* ======================================================================
+   (Legacy note — kept below)
+   ====================================================================== */
+
+/*
 lets focus on the theory section
 where we are choosing the track and then proceed, and this is completly bad UI and also process
 instead just like previous sections here is different UI so 

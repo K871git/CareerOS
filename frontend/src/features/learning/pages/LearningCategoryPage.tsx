@@ -20,6 +20,12 @@ const LANG_BADGE: Record<string, { text: string; bg: string; color: string }> = 
     laravel:    { text: 'Lv',  bg: '#FF2D20', color: '#ffffff' },
     nodejs:     { text: 'No',  bg: '#339933', color: '#ffffff' },
     express:    { text: 'Ex',  bg: '#444444', color: '#ffffff' },
+    mysql:      { text: 'My',  bg: '#4479A1', color: '#ffffff' },
+    sql:        { text: 'SQL', bg: '#336791', color: '#ffffff' },
+    postgresql: { text: 'PG',  bg: '#336791', color: '#ffffff' },
+    mongodb:    { text: 'Mo',  bg: '#47A248', color: '#ffffff' },
+    redis:      { text: 'Re',  bg: '#DC382D', color: '#ffffff' },
+    clickhouse: { text: 'CH',  bg: '#FFCC01', color: '#1a1a1a' },
 };
 
 const CATEGORY_CONFIG = {
@@ -53,7 +59,19 @@ const CATEGORY_CONFIG = {
         subjects: [
             { slug: 'laravel', label: 'Laravel', active: true },
             { slug: 'nodejs',  label: 'Node.js', active: true },
-            { slug: 'express', label: 'Express', active: false },
+            { slug: 'express', label: 'Express', active: true },
+        ],
+    },
+    databases: {
+        title: 'Databases',
+        desc: 'Master relational and NoSQL databases — queries, schemas, indexing, and scalability.',
+        subjects: [
+            { slug: 'mysql',      label: 'MySQL',      active: true },
+            { slug: 'sql',        label: 'SQL Theory',  active: true },
+            { slug: 'postgresql', label: 'PostgreSQL',  active: true },
+            { slug: 'mongodb',    label: 'MongoDB',     active: false },
+            { slug: 'redis',      label: 'Redis',       active: false },
+            { slug: 'clickhouse', label: 'ClickHouse',  active: false },
         ],
     },
 } as const;
@@ -90,22 +108,25 @@ export default function LearningCategoryPage() {
     const feId  = tracks.find(t => t.slug === 'frontend-engineering')?.id ?? 0;
     const beId  = tracks.find(t => t.slug === 'backend-engineering')?.id ?? 0;
     const fsdId = tracks.find(t => t.slug === 'full-stack-web-development')?.id ?? 0;
+    const dbId  = tracks.find(t => t.slug === 'databases')?.id ?? 0;
 
     const { data: feSubjects  = [], isLoading: s1 } = useSubjects(feId);
     const { data: beSubjects  = [], isLoading: s2 } = useSubjects(beId);
     const { data: fsdSubjects = [], isLoading: s3 } = useSubjects(fsdId);
+    const { data: dbSubjects  = [], isLoading: s4 } = useSubjects(dbId);
 
-    const isLoading = tracksLoading || s1 || s2 || s3;
+    const isLoading = tracksLoading || s1 || s2 || s3 || s4;
 
     if (!config) return <Navigate to="/learning" replace />;
 
-    const allSubjects = [...feSubjects, ...beSubjects, ...fsdSubjects];
+    const allSubjects = [...feSubjects, ...beSubjects, ...fsdSubjects, ...dbSubjects];
     const subjectMap = new Map<string, Subject>(allSubjects.map(s => [s.slug, s]));
 
     const categoryLabel =
         category === 'languages' ? 'Languages' :
         category === 'frontend'  ? 'Frontend' :
-        category === 'backend'   ? 'Backend' : category ?? '';
+        category === 'backend'   ? 'Backend' :
+        category === 'databases' ? 'Databases' : category ?? '';
 
     return (
         <div className="learn-page">
