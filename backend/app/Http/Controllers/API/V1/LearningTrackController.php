@@ -13,6 +13,7 @@ class LearningTrackController extends Controller
     {
         $tracks = LearningTrack::orderBy('display_order')->get();
 
+
         return response()->json([
             'success' => true,
             'message' => 'Learning tracks retrieved successfully.',
