@@ -20,8 +20,9 @@ use App\Http\Controllers\Api\V1\SkillController;
 use App\Http\Controllers\Api\V1\TopicController;
 use App\Http\Controllers\Api\V1\LevelController;
 use App\Http\Controllers\Api\V1\PlaygroundController;
+use App\Http\Controllers\Api\V1\CodingProblemController;
 
-Route::prefix('v1/auth')->group(function () {
+Route::middleware('throttle:5,1')->prefix('v1/auth')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login',    [AuthController::class, 'login']);
@@ -80,6 +81,15 @@ Route::middleware('auth:sanctum')
     });
 
 
-Route::middleware('auth:sanctum')->prefix('v1/playground')->group(function () {
-    Route::post('/run', [PlaygroundController::class, 'run']);
+Route::middleware(['auth:sanctum', 'throttle:20,1'])->prefix('v1/playground')->group(function () {
+    Route::post('/run',        [PlaygroundController::class, 'run']);
+    Route::get('/schema',      [PlaygroundController::class, 'schema']);
+    Route::post('/reset-data', [PlaygroundController::class, 'resetData']);
+});
+
+Route::middleware(['auth:sanctum', 'throttle:15,1'])->prefix('v1/battleground')->group(function () {
+    Route::get('/problems',                              [CodingProblemController::class, 'index']);
+    Route::get('/problems/{codingProblem:slug}',         [CodingProblemController::class, 'show']);
+    Route::post('/problems/{codingProblem:slug}/submit', [CodingProblemController::class, 'submit']);
+    Route::get('/problems/{codingProblem:slug}/submissions', [CodingProblemController::class, 'submissions']);
 });

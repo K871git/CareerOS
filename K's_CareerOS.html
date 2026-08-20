@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerOS — Documentation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #05050f;
+      --surface:  #0d0e1f;
+      --card:     #111228;
+      --border:   rgba(99,102,241,.14);
+      --primary:  #6366f1;
+      --violet:   #8b5cf6;
+      --accent:   #a78bfa;
+      --teal:     #2dd4bf;
+      --green:    #10b981;
+      --amber:    #f59e0b;
+      --text:     #f1f5f9;
+      --muted:    rgba(241,245,249,.5);
+      --dim:      rgba(241,245,249,.25);
+      --radius:   12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(5,5,15,.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; gap: 2rem;
+      height: 54px;
+    }
+    .nav-brand { font-weight: 800; color: var(--accent); font-size: 1rem; white-space: nowrap; }
+    .nav-links { display: flex; gap: 1.4rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: .85rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── LAYOUT ── */
+    main { max-width: 1060px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+    section { margin-bottom: 5rem; }
+
+    /* ── TYPOGRAPHY ── */
+    .section-label {
+      font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+      color: var(--accent); text-transform: uppercase; margin-bottom: .5rem;
+    }
+    h2 { font-size: 1.75rem; font-weight: 800; line-height: 1.2; margin-bottom: .5rem; }
+    .lead { color: var(--muted); max-width: 600px; margin-bottom: 2rem; }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 4rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.25);
+      border-radius: 20px; padding: .25rem .85rem;
+      font-size: .75rem; font-weight: 600; color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900; line-height: 1.1;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: .6rem;
+    }
+    .hero-sub { color: var(--muted); font-size: 1.05rem; max-width: 540px; margin-bottom: 1.8rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .meta-chip {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: .3rem .75rem;
+      font-size: .78rem; color: var(--muted);
+    }
+    .meta-chip span { color: var(--text); font-weight: 600; }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+      margin-bottom: 5rem;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.4rem 1.2rem; text-align: center;
+    }
+    .stat-num {
+      font-size: 2.2rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-lbl { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── CARDS GRID ── */
+    .cards { display: grid; gap: 1rem; }
+    .cards-2 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .cards-3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.4rem 1.3rem;
+      transition: border-color .25s, transform .25s;
+    }
+    .card:hover { border-color: rgba(99,102,241,.4); transform: translateY(-3px); }
+
+    .card-icon { font-size: 1.5rem; margin-bottom: .6rem; }
+    .card h3 { font-size: .95rem; font-weight: 700; margin-bottom: .35rem; }
+    .card p  { font-size: .84rem; color: var(--muted); }
+
+    .card-stripe { border-top: 2px solid var(--primary); }
+    .card-stripe.violet { border-top-color: var(--violet); }
+    .card-stripe.teal   { border-top-color: var(--teal); }
+    .card-stripe.amber  { border-top-color: var(--amber); }
+
+    /* ── STEPS ── */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step  {
+      display: flex; gap: 1.2rem; padding: 1.3rem 0;
+      border-left: 2px solid var(--border);
+      padding-left: 1.5rem; position: relative;
+    }
+    .step::before {
+      content: attr(data-n);
+      position: absolute; left: -14px; top: 1.4rem;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      font-size: .72rem; font-weight: 800;
+      display: grid; place-items: center;
+    }
+    .step h3  { font-size: .92rem; font-weight: 700; margin-bottom: .2rem; }
+    .step p   { font-size: .82rem; color: var(--muted); }
+
+    /* ── TECH PILLS ── */
+    .pills { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .pill {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: .35rem .85rem;
+      font-size: .8rem; font-weight: 600; color: var(--muted);
+    }
+    .pill.primary { border-color: rgba(99,102,241,.4); color: var(--primary); }
+    .pill.violet  { border-color: rgba(139,92,246,.4); color: var(--violet); }
+    .pill.teal    { border-color: rgba(45,212,191,.4); color: var(--teal); }
+
+    /* ── TESTER BLOCK ── */
+    .tester-header {
+      display: flex; align-items: center; gap: .8rem; margin-bottom: 1.5rem;
+    }
+    .internal-badge {
+      background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.3);
+      color: #f43f5e; font-size: .7rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: .2rem .65rem; border-radius: 6px;
+    }
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: .45rem; margin-top: .8rem; }
+    .checklist li { font-size: .83rem; color: var(--muted); display: flex; gap: .45rem; align-items: flex-start; }
+    .checklist li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .checklist li.warn::before { content: '⚠'; color: var(--amber); }
+
+    /* ── ROADMAP ── */
+    .phase-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .phase {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.4rem 1.3rem;
+    }
+    .phase-label { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .5rem; }
+    .phase.done  .phase-label { color: var(--green); }
+    .phase.next  .phase-label { color: var(--amber); }
+    .phase.future .phase-label { color: var(--dim); }
+    .phase h3 { font-size: .92rem; font-weight: 700; margin-bottom: .7rem; }
+    .phase ul { list-style: none; display: flex; flex-direction: column; gap: .3rem; }
+    .phase ul li { font-size: .82rem; color: var(--muted); }
+    .phase ul li::before { content: '·  '; color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 2.5rem 1.5rem;
+      text-align: center; color: var(--dim); font-size: .8rem;
+    }
+    footer strong { color: var(--accent); }
+
+    /* ── FADE-IN ANIMATION ── */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 640px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      nav { gap: 1rem; }
+      .nav-links { gap: .8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">CareerOS</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#tech">Tech</a></li>
+      <li><a href="#testers">Testers</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-badge">⚡ MVP v1.0 — Internal Docs</div>
+      <h1>CareerOS</h1>
+      <p class="hero-sub">
+        A structured career growth platform for placement students and software engineers
+        preparing for technical interviews — not a question bank, a learning system.
+      </p>
+      <div class="meta-row">
+        <div class="meta-chip">Author <span>ghost-K871 (Kishor_K871)</span></div>
+        <div class="meta-chip">Stack <span>Laravel 13 · React · TypeScript</span></div>
+        <div class="meta-chip">Contact <span>gangardekishor87@gmail.com</span></div>
+        <div class="meta-chip">Location <span>Wakad, Pune</span></div>
+      </div>
+    </header>
+
+    <!-- STATS -->
+    <div class="stats-row reveal">
+      <div class="stat-card"><div class="stat-num" data-count="185">0</div><div class="stat-lbl">Lessons</div></div>
+      <div class="stat-card"><div class="stat-num" data-count="44">0</div><div class="stat-lbl">Practice Tests</div></div>
+      <div class="stat-card"><div class="stat-num" data-count="22">0</div><div class="stat-lbl">Subjects</div></div>
+      <div class="stat-card"><div class="stat-num" data-count="5">0</div><div class="stat-lbl">Skill Levels</div></div>
+    </div>
+
+    <!-- ABOUT -->
+    <section id="about" class="reveal">
+      <div class="section-label">What is CareerOS</div>
+      <h2>Built for engineers learning the craft</h2>
+      <p class="lead">
+        CareerOS is not a quiz app. It is a structured learning and practice system that guides users from
+        fundamentals to advanced concepts — tracking progress, surfacing weak areas, and forcing mastery
+        before progression.
+      </p>
+
+      <div class="cards cards-3">
+        <div class="card card-stripe">
+          <div class="card-icon">🎓</div>
+          <h3>Placement Students</h3>
+          <p>Go from zero to interview-ready with structured tracks, concept lessons, and real MCQ practice.</p>
+        </div>
+        <div class="card card-stripe violet">
+          <div class="card-icon">💻</div>
+          <h3>Junior Devs (0–2 yr)</h3>
+          <p>Fill concept gaps, practice under exam conditions, and track what needs work — systematically.</p>
+        </div>
+        <div class="card card-stripe teal">
+          <div class="card-icon">⚡</div>
+          <h3>Mid-level Engineers (2–5 yr)</h3>
+          <p>Revisit fundamentals, tackle advanced topics, and prepare for senior-role interviews.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="reveal">
+      <div class="section-label">Features</div>
+      <h2>Everything users need to prepare</h2>
+      <p class="lead">Six core systems, each solving a specific part of the interview-preparation journey.</p>
+
+      <div class="cards cards-2">
+        <div class="card">
+          <div class="card-icon">🔐</div>
+          <h3>Auth & Profile</h3>
+          <p>Secure registration and login with Sanctum tokens. Profile completeness tracking — users fill their stack, experience, and career goal before anything else.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <h3>Career Assessment</h3>
+          <p>On first login users pick their target role, experience level, and strengths. This shapes their personalized learning track from day one.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📖</div>
+          <h3>Learning System (5-Level Gate)</h3>
+          <p>Each subject has 5 levels. Users must score <strong>10/10</strong> on a level exam to unlock the next. No skipping, no shortcuts — mastery first.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚔️</div>
+          <h3>Practice Arena</h3>
+          <p>Four practice modes: MCQ, Theory, Scenario, and Mixed. Timed or untimed. Results go to the dashboard — wrong answers surface as weak areas.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧑‍💻</div>
+          <h3>Coding Playground</h3>
+          <p>Real coding problems with a browser-based code editor. Submit your solution — evaluated against test cases. Covers DSA and real-world scenarios.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <h3>Overview Dashboard</h3>
+          <p>Single screen showing profile completeness, subjects attempted, level progress per track, XP, weak topics, and last active sessions — your KPI board.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="reveal">
+      <div class="section-label">User Journey</div>
+      <h2>How it works</h2>
+      <p class="lead">The full flow from signup to skill mastery.</p>
+
+      <div class="steps">
+        <div class="step" data-n="1">
+          <div>
+            <h3>Register & Set Up Profile</h3>
+            <p>Create account → fill career goal, experience, and tech stack. Profile completeness % shown on dashboard.</p>
+          </div>
+        </div>
+        <div class="step" data-n="2">
+          <div>
+            <h3>Take Career Assessment</h3>
+            <p>Answer 5–10 questions about your background. CareerOS recommends a starting track and level.</p>
+          </div>
+        </div>
+        <div class="step" data-n="3">
+          <div>
+            <h3>Study Lessons at Each Level</h3>
+            <p>Read structured lesson content per topic. Each level has multiple lessons covering theory, patterns, and real-world usage.</p>
+          </div>
+        </div>
+        <div class="step" data-n="4">
+          <div>
+            <h3>Pass the Level Exam (10/10)</h3>
+            <p>Take the 10-question MCQ exam. Score 10/10 to unlock the next level — anything less, study more and retry.</p>
+          </div>
+        </div>
+        <div class="step" data-n="5">
+          <div>
+            <h3>Practice & Track Progress</h3>
+            <p>Jump to Practice Arena for MCQ, Theory, or Coding problems. Dashboard updates weak areas and overall progress automatically.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section id="tech" class="reveal">
+      <div class="section-label">Tech Stack</div>
+      <h2>What it's built with</h2>
+      <p class="lead">Production-grade stack — no shortcuts.</p>
+
+      <div style="display:flex; flex-direction:column; gap:1.2rem;">
+        <div>
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;">BACKEND</p>
+          <div class="pills">
+            <span class="pill primary">Laravel 13</span>
+            <span class="pill primary">PHP 8.3+</span>
+            <span class="pill primary">MySQL</span>
+            <span class="pill primary">Laravel Sanctum</span>
+            <span class="pill primary">PSR-12</span>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;">FRONTEND</p>
+          <div class="pills">
+            <span class="pill violet">React 19</span>
+            <span class="pill violet">TypeScript</span>
+            <span class="pill violet">Vite</span>
+            <span class="pill violet">TanStack Query v5</span>
+            <span class="pill violet">React Router v6</span>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;">PLANNED (Phase 2+)</p>
+          <div class="pills">
+            <span class="pill teal">Redis</span>
+            <span class="pill teal">Laravel Horizon</span>
+            <span class="pill teal">AI Evaluation</span>
+            <span class="pill teal">Docker</span>
+            <span class="pill teal">CI/CD</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOR TESTERS -->
+    <section id="testers" class="reveal">
+      <div class="tester-header">
+        <div class="section-label" style="margin:0">For Testers</div>
+        <span class="internal-badge">Internal Use Only</span>
+      </div>
+      <h2>Test Coverage Checklist</h2>
+      <p class="lead">What to verify before any release. Cover all areas — edge cases matter.</p>
+
+      <div class="cards cards-2">
+        <div class="card">
+          <h3>🔐 Auth</h3>
+          <ul class="checklist">
+            <li>Register with valid email + password</li>
+            <li>Login returns token, persists session</li>
+            <li>Logout clears token, redirects to login</li>
+            <li class="warn">Duplicate email shows validation error</li>
+            <li class="warn">Invalid token returns 401 on protected routes</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>📖 Learning</h3>
+          <ul class="checklist">
+            <li>Lessons load for all 5 levels</li>
+            <li>Level exam shows 10 questions</li>
+            <li>Score 10/10 → next level unlocks</li>
+            <li class="warn">Score less than 10 → level stays locked</li>
+            <li class="warn">Locked level shows overlay, not content</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>⚔️ Practice</h3>
+          <ul class="checklist">
+            <li>All 4 modes load (MCQ, Theory, Scenario, Mixed)</li>
+            <li>Submit answer records result</li>
+            <li>Wrong answers appear in dashboard weak areas</li>
+            <li class="warn">Timer works and auto-submits on expiry</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🧑‍💻 Playground</h3>
+          <ul class="checklist">
+            <li>Problems load with description and test cases</li>
+            <li>Code editor accepts input</li>
+            <li>Submit evaluates against test cases</li>
+            <li class="warn">Empty submission shows validation error</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>📊 Dashboard</h3>
+          <ul class="checklist">
+            <li>Profile completeness % updates on save</li>
+            <li>Level progress bars reflect actual data</li>
+            <li>Weak areas list populated after practice</li>
+            <li class="warn">Empty state shows when no data yet</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🌐 Edge Cases</h3>
+          <ul class="checklist">
+            <li>API errors show user-friendly message (toast)</li>
+            <li>Session expiry redirects to login</li>
+            <li class="warn">Network disconnect handled gracefully</li>
+            <li class="warn">Dark/light theme persists on refresh</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section id="roadmap" class="reveal">
+      <div class="section-label">Roadmap</div>
+      <h2>Where we're headed</h2>
+
+      <div class="phase-cards">
+        <div class="phase done">
+          <div class="phase-label">Phase 1 — Done</div>
+          <h3>MVP Core</h3>
+          <ul>
+            <li>Auth & profile</li>
+            <li>Career assessment</li>
+            <li>5-level learning gate</li>
+            <li>Practice arena (4 modes)</li>
+            <li>Coding playground</li>
+            <li>Overview dashboard</li>
+          </ul>
+        </div>
+        <div class="phase next">
+          <div class="phase-label">Phase 2 — Next</div>
+          <h3>Intelligence Layer</h3>
+          <ul>
+            <li>AI evaluation for answers</li>
+            <li>Spaced repetition review</li>
+            <li>Streaks & XP system</li>
+            <li>Detailed analytics</li>
+            <li>Mock interview mode</li>
+          </ul>
+        </div>
+        <div class="phase future">
+          <div class="phase-label">Phase 3 — Future</div>
+          <h3>Scale</h3>
+          <ul>
+            <li>Live coding sessions</li>
+            <li>Peer review system</li>
+            <li>Mentor matching</li>
+            <li>Company-specific tracks</li>
+            <li>Team / cohort dashboards</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>CareerOS — Internal Documentation &nbsp;·&nbsp; <strong>ghost-K871 (Kishor_K871)</strong> &nbsp;·&nbsp; Wakad, Pune &nbsp;·&nbsp; gangardekishor87@gmail.com</p>
+    <p style="margin-top:.4rem">Built for placement students and software engineers. Not for public distribution.</p>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Counter animation
+    function animateCounter(el) {
+      const target = +el.dataset.count;
+      const dur = 1200;
+      const step = dur / 60;
+      let cur = 0;
+      const inc = target / (dur / step);
+      const t = setInterval(() => {
+        cur = Math.min(cur + inc, target);
+        el.textContent = Math.floor(cur);
+        if (cur >= target) clearInterval(t);
+      }, step);
+    }
+    const counterObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('[data-count]').forEach(animateCounter);
+          counterObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    document.querySelectorAll('.stats-row').forEach(el => counterObs.observe(el));
+  </script>
+
+</body>
+</html>

@@ -70,9 +70,9 @@ class AuthController extends Controller
         $user = User::where('email', $email)->first();
         if (!$user) {
             return response()->json([
-                'success' => false,
-                'message' => 'No account found with this email address.',
-            ], 404);
+                'success' => true,
+                'message' => 'If this email is registered, an OTP has been sent.',
+            ]);
         }
 
         OtpToken::where('email', $email)

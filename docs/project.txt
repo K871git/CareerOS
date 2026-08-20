@@ -1,0 +1,404 @@
+composer require laravel/sanctum : using the sanctum for authentication
+
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+
+npm install
+
+npm install react-router-dom
+
+npm install axios
+
+-----------------------project is set up now --------------------------
+creating the migrations 
+
+php artisan make:migration create_user_profiles_table
+php artisan make:migration create_skills_table
+php artisan make:migration create_user_skills_table
+php artisan make:migration create_learning_tracks_table
+php artisan make:migration create_subjects_table
+php artisan make:migration create_topics_table
+php artisan make:migration create_lessons_table
+php artisan make:migration create_questions_table
+php artisan make:migration create_question_options_table
+php artisan make:migration create_user_progress_table
+php artisan make:migration create_assessment_attempts_table
+php artisan make:migration create_assessment_answers_table
+
+----------------------- migrations done :-> eloquent models --------------------------
+
+php artisan make:model UserProfile
+php artisan make:model Skill
+php artisan make:model UserSkill
+php artisan make:model LearningTrack
+php artisan make:model Subject
+php artisan make:model Topic
+php artisan make:model Lesson
+php artisan make:model Question
+php artisan make:model QuestionOption
+php artisan make:model UserProgress
+php artisan make:model AssessmentAttempt
+php artisan make:model AssessmentAnswer
+
+example user.php :
+public function profile()
+{
+    return $this->hasOne(UserProfile::class);
+}
+
+public function skills()
+{
+    return $this->hasMany(UserSkill::class);
+}
+
+public function progress()
+{
+    return $this->hasMany(UserProgress::class);
+}
+
+public function assessmentAttempts()
+{
+    return $this->hasMany(AssessmentAttempt::class);
+}
+
+UserProfile.php 
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
+Skill.php
+public function users()
+{
+    return $this->hasMany(UserSkill::class);
+}
+
+UserSkill.php
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
+public function skill()
+{
+    return $this->belongsTo(Skill::class);
+}
+
+LearningTrack.php
+public function subjects()
+{
+    return $this->hasMany(Subject::class);
+}
+
+Subject.php
+public function track()
+{
+    return $this->belongsTo(LearningTrack::class);
+}
+
+public function topics()
+{
+    return $this->hasMany(Topic::class);
+}
+
+Topic.php
+public function subject()
+{
+    return $this->belongsTo(Subject::class);
+}
+
+public function lessons()
+{
+    return $this->hasMany(Lesson::class);
+}
+
+public function questions()
+{
+    return $this->hasMany(Question::class);
+}
+Lesson.php
+public function topic()
+{
+    return $this->belongsTo(Topic::class);
+}
+Question.php
+public function topic()
+{
+    return $this->belongsTo(Topic::class);
+}
+public function options()
+{
+    return $this->hasMany(QuestionOption::class);
+}
+
+QuestionOption.php
+public function question()
+{
+    return $this->belongsTo(Question::class);
+}
+
+UserProgress.php
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+public function lesson()
+{
+    return $this->belongsTo(Lesson::class);
+}
+
+AssessmentAttempt.php
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+public function answers()
+{
+    return $this->hasMany(AssessmentAnswer::class);
+}
+
+AssessmentAnswer.php
+public function attempt()
+{
+    return $this->belongsTo(AssessmentAttempt::class);
+}
+public function question()
+{
+    return $this->belongsTo(Question::class);
+}
+
+
+----------------------- step is API structure design --------------------------
+
+things to remember
+# API versoning : 
+
+ routes/api.php 
+
+ Route::prefix('v1')->group(function(){
+    //apis routes
+ });
+
+API format : /api/v1/endpoint
+
+# Dir structure Design : 
+
+Folder structure 
+app/
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/
+│   │       └── V1/
+│   ├── Requests/
+│   └── Resources/
+│
+├── Services/
+└── Actions/
+
+
+Controllers → Handle HTTP requests only
+Requests → Validation
+Resources → API response formatting
+Services → Business logic
+
+ 
+# Authentication Middleware : 
+Route::middleware('auth:sanctum')
+
+Public:
+register 
+login 
+
+Protected:
+profile
+progress
+assessment
+
+----------------------- API structure Implementation --------------------------
+
+API controller :
+php artisan make:controller Api/V1/AuthController
+
+Form Requests : 
+php artisan make:request RegisterRequest
+php artisan make:request LoginRequest
+
+**new concept : making the resource
+
+php artisan make:resource UserResource
+
+modify the api.php adding routes :
+
+use App\Http\Controllers\Api\V1\AuthController;
+
+Route::prefix('v1/auth')->group(function () {
+
+    Route::post('/register', [AuthController::class, 'register']);
+
+    Route::post('/login', [AuthController::class, 'login']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+
+        Route::post('/logout', [AuthController::class, 'logout']);
+
+        Route::get('/me', [AuthController::class, 'me']);
+
+    });
+
+});
+
+
+Authentication flow : 
+Register:
+User
+ ↓
+Validate Request
+ ↓
+Create User
+ ↓
+Generate Sanctum Token
+ ↓
+Return User + Token
+
+Login:
+
+Credentials
+ ↓
+Check Password
+ ↓
+Generate Token
+ ↓
+Return Token
+
+Logout:
+Delete Current Token
+
+
+update user modal:
+
+--------------------- API done : 
+
+UserProfile Module : php artisan make:controller Api/V1/ProfileController
+
+writing the profile handling logic :
+
+--------------------- profile done :
+
+php artisan make:controller Api/V1/CareerAssessmentController
+
+php artisan make:request StoreCareerAssessmentRequest
+
+php artisan make:resource CareerAssessmentResource
+
+routes added : 
+Route::middleware('auth:sanctum')
+    ->prefix('v1/career-assessment')
+    ->group(function () {
+        Route::get('/', [CareerAssessmentController::class, 'show']);
+        Route::post('/', [CareerAssessmentController::class, 'store']);
+        Route::put('/', [CareerAssessmentController::class, 'update']);
+    });
+
+Business Logic
+Create/update the user's assessment.
+Upsert records into user_skills.
+Return the updated assessment with user skill levels.
+
+--------------------- assesment done :
+
+php artisan make:controller Api/V1/LearningTrackController
+php artisan make:controller Api/V1/SubjectController
+php artisan make:controller Api/V1/TopicController
+php artisan make:controller Api/V1/LessonController
+
+
+php artisan make:resource LearningTrackResource
+php artisan make:resource SubjectResource
+php artisan make:resource TopicResource
+php artisan make:resource LessonResource
+
+Route::middleware('auth:sanctum')
+    ->prefix('v1')
+    ->group(function () {
+
+        Route::apiResource('tracks', LearningTrackController::class)->only(['index', 'show']);
+
+        Route::get('tracks/{track}/subjects', [SubjectController::class, 'index']);
+
+        Route::get('subjects/{subject}/topics', [TopicController::class, 'index']);
+
+        Route::get('topics/{topic}/lessons', [LessonController::class, 'index']);
+
+        Route::get('lessons/{lesson}', [LessonController::class, 'show']);
+
+    });
+
+seeding :
+
+php artisan make:seeder SkillSeeder
+php artisan make:seeder LearningTrackSeeder
+php artisan make:seeder SubjectSeeder
+php artisan make:seeder TopicSeeder
+php artisan make:seeder LessonSeeder
+
+
+
+--------------------- tracking system done :
+
+php artisan make:controller Api/V1/QuestionController
+
+php artisan make:request SubmitAssessmentRequest
+
+php artisan make:resource QuestionResource
+php artisan make:resource AssessmentAttemptResource
+
+Route::middleware('auth:sanctum')
+    ->prefix('v1')
+    ->group(function () {
+        Route::get('topics/{topic}/questions', [QuestionController::class, 'index']);
+        Route::post('assessments/submit', [QuestionController::class, 'submit']);
+        Route::get('assessments/{attempt}', [QuestionController::class, 'result']);
+    });
+
+seeding: 
+php artisan make:seeder QuestionSeeder
+php artisan make:seeder QuestionOptionSeeder
+
+
+Business Logic
+Fetch questions.
+Validate submitted answers.
+Compare with correct options.
+Calculate score.
+Store assessment_attempts.
+Store assessment_answers.
+Return score, percentage, and answer review.
+
+--------------------- mcq system done :
+
+php artisan make:controller Api/V1/TheoryQuestionController
+
+php artisan make:request SubmitTheoryAnswerRequest
+
+php artisan make:resource TheoryQuestionResource
+php artisan make:resource TheoryAnswerResource
+
+Route::middleware('auth:sanctum')
+    ->prefix('v1')
+    ->group(function () {
+        Route::get('topics/{topic}/theory-questions', [TheoryQuestionController::class, 'index']);
+        Route::post('theory-questions/{question}/submit', [TheoryQuestionController::class, 'submit']);
+        Route::get('theory-answers/{answer}', [TheoryQuestionController::class, 'show']);
+    });
+
+create table : theory answers table
+php artisan make:migration create_theory_answers_table
+
+TheoryAnswer modal
+php artisan make:model TheoryAnswer
+
+Business Logic
+Fetch theory questions.
+Accept and validate user answers.
+Store answers.
+Mark submission status as Pending Review (AI/manual evaluation can be added later).
+Return submission confirmation.

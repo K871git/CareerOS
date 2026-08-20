@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Navbar from '../components/layout/Navbar';
+import LoadingBar from '../components/ui/LoadingBar';
 import './dashboard.css';
 
 export default function DashboardLayout() {
@@ -21,6 +22,7 @@ export default function DashboardLayout() {
 
     return (
         <div className={`dash-root${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+            <LoadingBar />
             <Navbar
                 onToggleCollapse={toggleCollapse}
                 onMenuToggle={() => setSidebarOpen((prev) => !prev)}

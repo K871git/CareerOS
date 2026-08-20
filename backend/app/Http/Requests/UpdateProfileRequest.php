@@ -24,9 +24,9 @@ class UpdateProfileRequest extends FormRequest
     {
         return [
             'current_role'     => ['nullable', 'string', 'max:100'],
-            'experience_level' => ['required', 'string'],
+            'experience_level' => ['required', 'string', 'in:junior,mid,senior,lead'],
             'target_role'      => ['required', 'string', 'max:100'],
-            'career_goal'      => ['nullable', 'string'],
+            'career_goal'      => ['nullable', 'string', 'max:500'],
         ];
     }
 }

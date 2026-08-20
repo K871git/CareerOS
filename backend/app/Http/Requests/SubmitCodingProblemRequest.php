@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RunCodeRequest extends FormRequest
+class SubmitCodingProblemRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,9 +14,8 @@ class RunCodeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'language' => ['required', 'string', 'in:php,javascript,python,mysql'],
+            'language' => ['required', 'string', 'in:php,javascript,python'],
             'code'     => ['required', 'string', 'max:10000'],
-            'stdin'    => ['nullable', 'string', 'max:5000'],
         ];
     }
 }

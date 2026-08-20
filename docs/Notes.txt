@@ -1,0 +1,20 @@
+# Explain laravel sanctum : 
+laravel sanctum is the package used for providing the authentication for SPA (vue, React, Angular)
+It allows users to secuerly access protected routes 
+Sanctum make the authentication simple and well defined
+User
+   │
+Login
+   │
+Creates Token
+   │
+Client stores Token
+   │
+Every request sends Token
+   │
+Laravel verifies Token
+   │
+Returns authenticated user
+
+# what is the migration in laravel? explain with example
+->
