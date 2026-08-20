@@ -46,3 +46,4 @@ EXPOSE 10000
 # Run migrations is NOT done here on purpose — do that manually via Render Shell
 # (php artisan migrate --force) so a bad deploy never wipes/breaks the DB automatically.
 CMD php artisan serve --host 0.0.0.0 --port $PORT
+
