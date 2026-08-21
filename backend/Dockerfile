@@ -40,10 +40,10 @@ RUN composer dump-autoload --optimize \
 # Storage & cache dirs need to be writable
 RUN chmod -R 775 storage bootstrap/cache
 
-# Render sets $PORT at runtime — Laravel's built-in server binds to it
+# Make the entrypoint script executable
+RUN chmod +x docker-entrypoint.sh
+
 EXPOSE 10000
 
-# Run migrations is NOT done here on purpose — do that manually via Render Shell
-# (php artisan migrate --force) so a bad deploy never wipes/breaks the DB automatically.
-CMD php artisan serve --host 0.0.0.0 --port $PORT
-
+# Entrypoint: migrate → seed-if-empty → serve
+CMD ["./docker-entrypoint.sh"]
