@@ -63,14 +63,9 @@ class JsJuniorQuestionsSeeder extends Seeder
 
         $topic = Topic::where('slug', 'js-basics-junior')->firstOrFail();
 
-        foreach ($this->questions() as $qData) {
-            $exists = Question::where('topic_id', $topic->id)
-                ->where('question', $qData['question'])
-                ->exists();
-            if ($exists) {
-                continue;
-            }
+        Question::where('topic_id', $topic->id)->delete();
 
+        foreach ($this->questions() as $qData) {
             $q = Question::create([
                 'topic_id'    => $topic->id,
                 'type'        => 'MCQ',
@@ -79,13 +74,13 @@ class JsJuniorQuestionsSeeder extends Seeder
                 'explanation' => $qData['explanation'],
             ]);
 
-            foreach ($qData['options'] as $opt) {
-                QuestionOption::create([
-                    'question_id' => $q->id,
-                    'option_text' => $opt['text'],
-                    'is_correct'  => $opt['correct'],
-                ]);
-            }
+            QuestionOption::insert(array_map(fn ($opt) => [
+                'question_id' => $q->id,
+                'option_text' => $opt['text'],
+                'is_correct'  => $opt['correct'],
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ], $qData['options']));
         }
 
         $count = Question::where('topic_id', $topic->id)->count();

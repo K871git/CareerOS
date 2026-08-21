@@ -2061,13 +2061,16 @@ MD; }
 
         foreach ($allQuestions as $level => $data) {
             $topic = $topics[$level];
+            Question::where('topic_id', $topic->id)->delete();
             foreach ($data['questions'] as $qData) {
-                $exists = Question::where('topic_id', $topic->id)->where('question', $qData['question'])->exists();
-                if ($exists) continue;
                 $q = Question::create(['topic_id' => $topic->id, 'type' => 'MCQ', 'difficulty' => $data['difficulty'], 'question' => $qData['question'], 'explanation' => $qData['explanation']]);
-                foreach ($qData['options'] as $opt) {
-                    QuestionOption::create(['question_id' => $q->id, 'option_text' => $opt['text'], 'is_correct' => $opt['correct']]);
-                }
+                QuestionOption::insert(array_map(fn ($opt) => [
+                    'question_id' => $q->id,
+                    'option_text' => $opt['text'],
+                    'is_correct'  => $opt['correct'],
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
+                ], $qData['options']));
             }
         }
     }

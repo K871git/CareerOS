@@ -2727,12 +2727,9 @@ MD;
             ],
         ];
 
-        foreach ($questions as $qData) {
-            $exists = Question::where('topic_id', $topic->id)
-                ->where('question', $qData['question'])
-                ->exists();
-            if ($exists) continue;
+        Question::where('topic_id', $topic->id)->delete();
 
+        foreach ($questions as $qData) {
             $question = Question::create([
                 'topic_id'    => $topic->id,
                 'type'        => 'MCQ',
@@ -2741,13 +2738,13 @@ MD;
                 'explanation' => $qData['explanation'],
             ]);
 
-            foreach ($qData['options'] as $opt) {
-                QuestionOption::create([
-                    'question_id' => $question->id,
-                    'option_text' => $opt['text'],
-                    'is_correct'  => $opt['correct'],
-                ]);
-            }
+            QuestionOption::insert(array_map(fn ($opt) => [
+                'question_id' => $question->id,
+                'option_text' => $opt['text'],
+                'is_correct'  => $opt['correct'],
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ], $qData['options']));
         }
     }
 
@@ -2868,12 +2865,9 @@ MD;
             ],
         ];
 
-        foreach ($questions as $qData) {
-            $exists = Question::where('topic_id', $topic->id)
-                ->where('question', $qData['question'])
-                ->exists();
-            if ($exists) continue;
+        Question::where('topic_id', $topic->id)->delete();
 
+        foreach ($questions as $qData) {
             $question = Question::create([
                 'topic_id'    => $topic->id,
                 'type'        => 'MCQ',
@@ -2882,13 +2876,13 @@ MD;
                 'explanation' => $qData['explanation'],
             ]);
 
-            foreach ($qData['options'] as $opt) {
-                QuestionOption::create([
-                    'question_id' => $question->id,
-                    'option_text' => $opt['text'],
-                    'is_correct'  => $opt['correct'],
-                ]);
-            }
+            QuestionOption::insert(array_map(fn ($opt) => [
+                'question_id' => $question->id,
+                'option_text' => $opt['text'],
+                'is_correct'  => $opt['correct'],
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ], $qData['options']));
         }
     }
 }
