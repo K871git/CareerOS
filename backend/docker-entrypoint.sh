@@ -10,11 +10,11 @@ php artisan migrate --force
 
 if [ "$FORCE_SEED" = "true" ]; then
     echo "==> FORCE_SEED enabled — running all seeders..."
-    php artisan db:seed --force
+    php -d memory_limit=512M artisan db:seed --force
     echo "==> Seeding complete. Remove FORCE_SEED from env vars now."
 else
     echo "==> Seeding (skipped if data exists)..."
-    php artisan db:seed-if-empty
+    php -d memory_limit=512M artisan db:seed-if-empty
 fi
 
 echo "==> App ready."
