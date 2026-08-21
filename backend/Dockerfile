@@ -36,6 +36,11 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 # Copy the rest of the app
 COPY . .
 
+# Fix case mismatch: GitHub stores directory as API but namespace expects Api (Linux is case-sensitive)
+RUN if [ -d app/Http/Controllers/API ] && [ ! -d app/Http/Controllers/Api ]; then \
+        mv app/Http/Controllers/API app/Http/Controllers/Api; \
+    fi
+
 # Finish composer setup now that artisan + full app are present
 RUN composer dump-autoload --optimize \
     && php artisan config:clear
