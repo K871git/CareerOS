@@ -24,11 +24,6 @@ class CodingProblemController extends Controller
             ->get(['id', 'title', 'slug', 'difficulty', 'language', 'order']);
 
         // Attach best submission status per problem for this user
-        // $bestStatuses = ProblemSubmission::where('user_id', $userId)
-        //     ->whereIn('problem_id', $problems->pluck('id'))
-        //     ->selectRaw('problem_id, MAX(CASE WHEN status = "accepted" THEN 2 ELSE 1 END) as rank, MAX(status) as status')
-        //     ->groupBy('problem_id')
-        //     ->pluck('status', 'problem_id');
         $bestStatuses = ProblemSubmission::where('user_id', $userId)
             ->whereIn('problem_id', $problems->pluck('id'))
             ->selectRaw('problem_id, MAX(CASE WHEN status = "accepted" THEN 1 ELSE 0 END) as is_accepted')

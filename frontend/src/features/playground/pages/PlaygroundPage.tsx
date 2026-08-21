@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import type { ReactElement } from 'react';
 import Editor from '@monaco-editor/react';
 import type { BeforeMount, OnMount } from '@monaco-editor/react';
 import {
@@ -101,7 +102,7 @@ function SqlIcon({ size = 22 }: { size?: number }) {
     );
 }
 
-const LANG_ICONS: Record<Language, (size?: number) => JSX.Element> = {
+const LANG_ICONS: Record<Language, (size?: number) => ReactElement> = {
     php:        (s) => <PhpIcon size={s} />,
     javascript: (s) => <JsIcon size={s} />,
     python:     (s) => <PyIcon size={s} />,
