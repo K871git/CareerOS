@@ -9,7 +9,23 @@ echo "==> Running migrations..."
 php artisan migrate --force
 
 if [ "$FORCE_SEED" = "true" ]; then
-    echo "==> FORCE_SEED enabled — seeding each class in its own process..."
+    echo "==> FORCE_SEED enabled — seeding each class with retry..."
+
+    seed_with_retry() {
+        local SEEDER=$1
+        local ATTEMPT=1
+        while [ $ATTEMPT -le 3 ]; do
+            echo "==> Seeding ${SEEDER} (attempt ${ATTEMPT})..."
+            if php -d memory_limit=256M artisan db:seed --class="$SEEDER" --force; then
+                return 0
+            fi
+            echo "==> ${SEEDER} failed. Waiting 15s before retry..."
+            sleep 15
+            ATTEMPT=$((ATTEMPT + 1))
+        done
+        echo "FATAL: ${SEEDER} failed after 3 attempts."
+        exit 1
+    }
 
     SEEDERS=(
         "SkillSeeder"
@@ -58,8 +74,8 @@ if [ "$FORCE_SEED" = "true" ]; then
     )
 
     for SEEDER in "${SEEDERS[@]}"; do
-        echo "==> Seeding ${SEEDER}..."
-        php -d memory_limit=256M artisan db:seed --class="$SEEDER" --force
+        seed_with_retry "$SEEDER"
+        sleep 5
     done
 
     echo "==> Seeding complete. Remove FORCE_SEED from env vars now."
