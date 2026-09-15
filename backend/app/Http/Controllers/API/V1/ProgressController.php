@@ -8,6 +8,7 @@ use App\Models\AssessmentAttempt;
 use App\Models\LearningTrack;
 use App\Models\Lesson;
 use App\Models\LevelCompletion;
+use App\Models\TheoryCompletion;
 use App\Models\UserProgress;
 use App\Services\UserAnalyticsService;
 use Illuminate\Http\JsonResponse;
@@ -57,6 +58,21 @@ class ProgressController extends Controller
 
             $learningLevelsPassed = LevelCompletion::where('user_id', $userId)->where('passed', true)->count();
 
+            // --- Theory: level completions per area ---
+            $theoryAreas       = array_keys(config('theory.areas'));
+            $theoryCompletions = TheoryCompletion::where('user_id', $userId)->get();
+            $theoryLevelsPassed = $theoryCompletions->where('passed', true)->count();
+            $theoryLevelsTotal  = count($theoryAreas) * 3;
+
+            $theoryByArea = collect($theoryAreas)->map(function ($area) use ($theoryCompletions) {
+                $areaCompletions = $theoryCompletions->where('theory_area', $area);
+                return [
+                    'area'   => $area,
+                    'passed' => $areaCompletions->where('passed', true)->count(),
+                    'total'  => 3,
+                ];
+            })->values()->all();
+
             // --- Practice: quiz stats via shared analytics service ---
             $quiz = $this->analytics->quizBySubject($userId);
 
@@ -79,6 +95,8 @@ class ProgressController extends Controller
                     'quizzes_taken'          => $quizzesTaken,
                     'accuracy'               => $accuracy,
                     'learning_levels_passed' => $learningLevelsPassed,
+                    'theory_levels_passed'   => $theoryLevelsPassed,
+                    'theory_levels_total'    => $theoryLevelsTotal,
                 ],
                 'tracks'   => $trackData,
                 'practice' => [
@@ -87,6 +105,9 @@ class ProgressController extends Controller
                     'total_correct'            => $totalCorrect,
                     'accuracy'                 => $accuracy,
                     'by_subject'               => $quizBySubject,
+                ],
+                'theory'   => [
+                    'by_area' => $theoryByArea,
                 ],
             ];
         });
@@ -170,59 +191,81 @@ class ProgressController extends Controller
     {
         $userId = $request->user()->id;
 
-        $track->load('subjects.topics.lessons');
+        // SQL aggregation — avoids loading the full lesson tree into PHP memory
+        $rows = DB::select("
+            SELECT
+                s.id                                                                        AS subject_id,
+                s.title                                                                     AS subject_title,
+                t.id                                                                        AS topic_id,
+                t.title                                                                     AS topic_title,
+                l.id                                                                        AS lesson_id,
+                l.title                                                                     AS lesson_title,
+                COALESCE(up.status, 'NOT_STARTED')                                         AS lesson_status,
+                up.completed_at
+            FROM subjects s
+            JOIN topics t   ON t.subject_id = s.id
+            JOIN lessons l  ON l.topic_id   = t.id
+            LEFT JOIN user_progress up ON up.lesson_id = l.id AND up.user_id = ?
+            WHERE s.learning_track_id = ?
+            ORDER BY s.display_order, t.display_order, l.display_order
+        ", [$userId, $track->id]);
 
-        $allLessonIds = $track->subjects
-            ->flatMap(fn($s) => $s->topics->flatMap(fn($t) => $t->lessons->pluck('id')));
+        // Group the flat SQL result into the nested subjects → topics → lessons shape
+        $subjectMap = [];
+        foreach ($rows as $row) {
+            $sid = $row->subject_id;
+            $tid = $row->topic_id;
 
-        $progressMap = UserProgress::where('user_id', $userId)
-            ->whereIn('lesson_id', $allLessonIds)
-            ->get()
-            ->keyBy('lesson_id');
+            if (!isset($subjectMap[$sid])) {
+                $subjectMap[$sid] = ['id' => $sid, 'title' => $row->subject_title, 'topics' => []];
+            }
+            if (!isset($subjectMap[$sid]['topics'][$tid])) {
+                $subjectMap[$sid]['topics'][$tid] = ['id' => $tid, 'title' => $row->topic_title, 'lessons' => []];
+            }
+            $subjectMap[$sid]['topics'][$tid]['lessons'][] = [
+                'id'           => $row->lesson_id,
+                'title'        => $row->lesson_title,
+                'status'       => $row->lesson_status,
+                'completed_at' => $row->completed_at,
+            ];
+        }
 
-        $countCompleted = fn($lessonIds) => $lessonIds
-            ->filter(fn($id) => $progressMap->get($id)?->status === 'COMPLETED')
-            ->count();
+        $trackTotal = 0;
+        $trackDone  = 0;
 
-        $trackTotal     = $allLessonIds->count();
-        $trackCompleted = $countCompleted($allLessonIds);
+        $subjects = array_values(array_map(function ($subject) use (&$trackTotal, &$trackDone) {
+            $subTotal = 0;
+            $subDone  = 0;
 
-        $subjects = $track->subjects->map(function ($subject) use ($progressMap, $countCompleted) {
-            $subjectLessonIds = $subject->topics->flatMap(fn($t) => $t->lessons->pluck('id'));
-            $subjectTotal     = $subjectLessonIds->count();
-            $subjectCompleted = $countCompleted($subjectLessonIds);
+            $topics = array_values(array_map(function ($topic) use (&$subTotal, &$subDone) {
+                $topicTotal = count($topic['lessons']);
+                $topicDone  = count(array_filter($topic['lessons'], fn ($l) => $l['status'] === 'COMPLETED'));
 
-            $topics = $subject->topics->map(function ($topic) use ($progressMap, $countCompleted) {
-                $topicLessonIds = $topic->lessons->pluck('id');
-                $topicTotal     = $topicLessonIds->count();
-                $topicCompleted = $countCompleted($topicLessonIds);
-
-                $lessons = $topic->lessons->map(fn($lesson) => [
-                    'id'           => $lesson->id,
-                    'title'        => $lesson->title,
-                    'status'       => $progressMap->get($lesson->id)?->status ?? 'NOT_STARTED',
-                    'completed_at' => $progressMap->get($lesson->id)?->completed_at,
-                ]);
+                $subTotal += $topicTotal;
+                $subDone  += $topicDone;
 
                 return [
-                    'id'                => $topic->id,
-                    'title'             => $topic->title,
+                    'id'                => $topic['id'],
+                    'title'             => $topic['title'],
                     'total_lessons'     => $topicTotal,
-                    'completed_lessons' => $topicCompleted,
-                    'percentage'        => $topicTotal > 0 ? round($topicCompleted / $topicTotal * 100, 1) : 0.0,
-                    'lessons'           => $lessons,
+                    'completed_lessons' => $topicDone,
+                    'percentage'        => $topicTotal > 0 ? round($topicDone / $topicTotal * 100, 1) : 0.0,
+                    'lessons'           => $topic['lessons'],
                 ];
-            });
+            }, $subject['topics']));
+
+            $trackTotal += $subTotal;
+            $trackDone  += $subDone;
 
             return [
-                'id'                => $subject->id,
-                'title'             => $subject->title,
-                'total_lessons'     => $subjectTotal,
-                'completed_lessons' => $subjectCompleted,
-                'percentage'        => $subjectTotal > 0 ? round($subjectCompleted / $subjectTotal * 100, 1) : 0.0,
+                'id'                => $subject['id'],
+                'title'             => $subject['title'],
+                'total_lessons'     => $subTotal,
+                'completed_lessons' => $subDone,
+                'percentage'        => $subTotal > 0 ? round($subDone / $subTotal * 100, 1) : 0.0,
                 'topics'            => $topics,
             ];
-        });
+        }, $subjectMap));
 
         return response()->json([
             'success' => true,
@@ -233,8 +276,8 @@ class ProgressController extends Controller
                     'title'             => $track->title,
                     'slug'              => $track->slug,
                     'total_lessons'     => $trackTotal,
-                    'completed_lessons' => $trackCompleted,
-                    'percentage'        => $trackTotal > 0 ? round($trackCompleted / $trackTotal * 100, 1) : 0.0,
+                    'completed_lessons' => $trackDone,
+                    'percentage'        => $trackTotal > 0 ? round($trackDone / $trackTotal * 100, 1) : 0.0,
                 ],
                 'subjects' => $subjects,
             ],

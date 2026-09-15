@@ -22,6 +22,8 @@ use App\Http\Controllers\Api\V1\LevelController;
 use App\Http\Controllers\Api\V1\PlaygroundController;
 use App\Http\Controllers\Api\V1\CodingProblemController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
+use App\Http\Controllers\Api\V1\TheoryLevelController;
+use App\Http\Controllers\Api\V1\TheoryQuestionController;
 
 Route::middleware('throttle:5,1')->prefix('v1/auth')->group(function () {
 
@@ -31,11 +33,18 @@ Route::middleware('throttle:5,1')->prefix('v1/auth')->group(function () {
     Route::post('/otp/send',   [AuthController::class, 'sendOtp']);
     Route::post('/otp/verify', [AuthController::class, 'verifyOtp']);
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me',      [AuthController::class, 'me']);
-    });
+    // logout stays throttled to protect against token-cycling attacks
+    Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 });
+
+// Password reset — separate from the 5/min auth throttle; Laravel's broker adds its own 60s cooldown
+Route::middleware('throttle:10,1')->prefix('v1/auth')->group(function () {
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password',  [AuthController::class, 'resetPassword']);
+});
+
+// /me is called on every app mount — must not share the 5/min auth throttle
+Route::middleware('auth:sanctum')->get('/v1/auth/me', [AuthController::class, 'me']);
 
 Route::get('/v1/auth/google',          [SocialAuthController::class, 'redirectToGoogle']);
 Route::get('/v1/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
@@ -72,7 +81,7 @@ Route::middleware('auth:sanctum')
         Route::get('lessons/{lesson}', [LessonController::class, 'show']);
 
         Route::get('topics/{topic}/questions', [QuestionController::class, 'index']);
-        Route::post('assessments/submit', [QuestionController::class, 'submit']);
+        Route::middleware('throttle:10,1')->post('assessments/submit', [QuestionController::class, 'submit']);
         Route::get('assessments/{attempt}', [QuestionController::class, 'result']);
 
         Route::get('skills', [SkillController::class, 'index']);
@@ -83,6 +92,17 @@ Route::middleware('auth:sanctum')
         Route::get('activity/recent', [ProgressController::class, 'recentActivity']);
         Route::post('lessons/{lesson}/complete', [ProgressController::class, 'completeLesson']);
         Route::get('tracks/{track}/progress', [ProgressController::class, 'trackProgress']);
+
+        // Theory level system (MCQ-based, area → levels → exam)
+        Route::get('theory/areas',                        [TheoryLevelController::class, 'areas']);
+        Route::get('theory/{area}/levels',                [TheoryLevelController::class, 'levels']);
+        Route::get('theory/{area}/levels/{level}/exam',                                      [TheoryLevelController::class, 'examQuestions']);
+        Route::middleware('throttle:10,1')->post('theory/{area}/levels/{level}/exam',  [TheoryLevelController::class, 'submitExam']);
+
+        // Theory Q&A (topic-based, written answers pending review)
+        Route::get('topics/{topic}/theory-questions',     [TheoryQuestionController::class, 'index']);
+        Route::post('theory-questions/{question}/submit', [TheoryQuestionController::class, 'submit']);
+        Route::get('theory-answers/{answer}',             [TheoryQuestionController::class, 'show']);
     });
 
 

@@ -70,6 +70,24 @@ const ForgotPasswordPage = lazy(
 const ResetPasswordPage = lazy(
   () => import("../features/auth/pages/ResetPasswordPage"),
 );
+const ProgressPage = lazy(
+  () => import("../features/progress/pages/ProgressPage"),
+);
+const TheoryHomePage = lazy(
+  () => import("../features/theory/pages/TheoryHomePage"),
+);
+const TheoryAreaPage = lazy(
+  () => import("../features/theory/pages/TheoryAreaPage"),
+);
+const TheoryExamPage = lazy(
+  () => import("../features/theory/pages/TheoryExamPage"),
+);
+const TheoryQuestionsPage = lazy(
+  () => import("../features/theory/pages/TheoryQuestionsPage"),
+);
+const TheoryAnswerPage = lazy(
+  () => import("../features/theory/pages/TheoryAnswerPage"),
+);
 
 const router = createBrowserRouter([
   // Old auth paths — redirect to landing page modal
@@ -144,8 +162,15 @@ const router = createBrowserRouter([
             path: "/practice/results/:attemptId",
             element: <AssessmentResultPage />,
           },
-          { path: "/progress", element: <OverviewPage /> },
+          { path: "/progress", element: <ProgressPage /> },
           { path: "/playground", element: <PlaygroundPage /> },
+          // Theory level system
+          { path: "/theory", element: <TheoryHomePage /> },
+          { path: "/theory/:area", element: <TheoryAreaPage /> },
+          { path: "/theory/:area/:level/exam", element: <TheoryExamPage /> },
+          // Theory Q&A (topic-based written answers)
+          { path: "/theory/practice", element: <TheoryQuestionsPage /> },
+          { path: "/theory/answers/:answerId", element: <TheoryAnswerPage /> },
         ],
       },
     ],

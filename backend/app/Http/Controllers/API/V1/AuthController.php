@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -75,6 +76,20 @@ class AuthController extends Controller
             ]);
         }
 
+        // Rate-limit per email: block if an unexpired OTP was sent in the last 2 minutes
+        $recentExists = OtpToken::where('email', $email)
+            ->whereNull('used_at')
+            ->where('expires_at', '>', now())
+            ->where('created_at', '>', now()->subMinutes(2))
+            ->exists();
+
+        if ($recentExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please wait a moment before requesting another OTP.',
+            ], 429);
+        }
+
         OtpToken::where('email', $email)
             ->whereNull('used_at')
             ->where('expires_at', '>', now())
@@ -84,7 +99,7 @@ class AuthController extends Controller
 
         OtpToken::create([
             'email'      => $email,
-            'code'       => $code,
+            'code'       => Hash::make($code),
             'expires_at' => now()->addMinutes(5),
         ]);
 
@@ -100,13 +115,12 @@ class AuthController extends Controller
     public function verifyOtp(VerifyOtpRequest $request): JsonResponse
     {
         $otp = OtpToken::where('email', $request->email)
-            ->where('code', $request->code)
             ->whereNull('used_at')
             ->where('expires_at', '>', now())
             ->latest()
             ->first();
 
-        if (!$otp) {
+        if (!$otp || !Hash::check($request->code, $otp->code)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid or expired OTP.',
@@ -144,6 +158,53 @@ class AuthController extends Controller
             'message' => 'Logged out successfully.',
             'data'    => [],
         ]);
+    }
+
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $request->validate(['email' => ['required', 'email']]);
+
+        Password::sendResetLink($request->only('email'));
+
+        // Always return success to prevent email enumeration
+        return response()->json([
+            'success' => true,
+            'message' => 'If this email is registered, you will receive a password reset link shortly.',
+        ]);
+    }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'token'                 => ['required', 'string'],
+            'email'                 => ['required', 'email'],
+            'password'              => ['required', 'string', 'min:8', 'confirmed'],
+            'password_confirmation' => ['required'],
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password): void {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+                $user->tokens()->delete(); // revoke all sessions after password change
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successfully. Please log in with your new password.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => match ($status) {
+                Password::INVALID_TOKEN => 'This password reset link is invalid or has expired.',
+                Password::INVALID_USER  => 'No account found with this email address.',
+                default                 => 'Unable to reset password. Please try again.',
+            },
+        ], 422);
     }
 
     public function me(Request $request): JsonResponse

@@ -8,9 +8,9 @@ trait ExecutesCode
     private const EXEC_MAX_OUT = 10000;
 
     private const BLOCKED = [
-        'php'        => '/\b(exec|shell_exec|system|passthru|popen|pcntl_exec)\s*\(/i',
-        'javascript' => '/require\s*\(\s*[\'"]child_process[\'"]\s*\)/',
-        'python'     => '/\b(os\.system|subprocess\.(run|call|Popen|check_output))\s*\(/',
+        'php'        => '/\b(exec|shell_exec|system|passthru|popen|pcntl_exec|proc_open|eval|base64_decode|create_function|file_get_contents|file_put_contents|unlink|rename|copy|mkdir|rmdir|scandir|glob|include|require|include_once|require_once)\s*\(/i',
+        'javascript' => '/require\s*\(\s*[\'"]child_process[\'"]\s*\)|require\s*\(\s*[\'"]fs[\'"]\s*\)|require\s*\(\s*[\'"]path[\'"]\s*\)|require\s*\(\s*[\'"]os[\'"]\s*\)|process\.env|process\.exit/',
+        'python'     => '/\b(os\.system|os\.popen|os\.remove|os\.unlink|subprocess\.(run|call|Popen|check_output)|open\s*\(|__import__)\s*\(/',
     ];
 
     protected function isDangerous(string $language, string $code): bool

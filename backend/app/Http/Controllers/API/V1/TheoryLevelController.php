@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Models\TheoryCompletion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TheoryLevelController extends Controller
 {
@@ -15,30 +16,19 @@ class TheoryLevelController extends Controller
     const PASS_THRESHOLDS  = [1 => 8, 2 => 9, 3 => 10];
     const PASS_PERCENTAGES = [1 => 75, 2 => 85, 3 => 95];
 
-    const AREAS = [
-        'languages'         => 'Languages',
-        'frameworks'        => 'Frameworks',
-        'networking'        => 'Networking',
-        'operating-systems' => 'Operating Systems',
-        'databases'         => 'Databases',
-        'system-design'     => 'System Design',
-        'sdlc'              => 'SDLC',
-        'data-structures'   => 'Data Structures',
-    ];
-
-    const ACTIVE_AREAS = ['languages'];
-
     public function areas(Request $request): JsonResponse
     {
+        $areas       = config('theory.areas');
+        $activeAreas = config('theory.active_areas');
         $completions = TheoryCompletion::where('user_id', $request->user()->id)->get();
 
-        $areas = collect(self::AREAS)->map(function (string $label, string $slug) use ($completions) {
+        $areas = collect($areas)->map(function (string $label, string $slug) use ($completions, $activeAreas) {
             $areaCompletions = $completions->where('theory_area', $slug);
 
             return [
                 'slug'             => $slug,
                 'title'            => $label,
-                'available'        => in_array($slug, self::ACTIVE_AREAS),
+                'available'        => in_array($slug, $activeAreas),
                 'levels_completed' => $areaCompletions->where('passed', true)->count(),
                 'total_levels'     => 3,
             ];
@@ -49,7 +39,7 @@ class TheoryLevelController extends Controller
 
     public function levels(Request $request, string $area): JsonResponse
     {
-        if (!array_key_exists($area, self::AREAS)) {
+        if (!array_key_exists($area, config('theory.areas'))) {
             return response()->json(['message' => 'Area not found.'], 404);
         }
 
@@ -77,7 +67,7 @@ class TheoryLevelController extends Controller
 
     public function examQuestions(Request $request, string $area, int $level): JsonResponse
     {
-        if (!array_key_exists($area, self::AREAS)) {
+        if (!array_key_exists($area, config('theory.areas'))) {
             return response()->json(['message' => 'Area not found.'], 404);
         }
 
@@ -109,16 +99,23 @@ class TheoryLevelController extends Controller
             return response()->json(['message' => 'Not enough questions available for this level yet.'], 422);
         }
 
-        $questions->each(function ($question) {
-            $question->options->each(fn ($opt) => $opt->makeHidden('is_correct'));
-        });
-
-        return response()->json(['data' => $questions]);
+        return response()->json([
+            'data' => $questions->map(fn ($q) => [
+                'id'         => $q->id,
+                'type'       => $q->type,
+                'difficulty' => $q->difficulty,
+                'question'   => $q->question,
+                'options'    => $q->options->shuffle()->map(fn ($o) => [
+                    'id'          => $o->id,
+                    'option_text' => $o->option_text,
+                ]),
+            ]),
+        ]);
     }
 
     public function submitExam(Request $request, string $area, int $level): JsonResponse
     {
-        if (!array_key_exists($area, self::AREAS)) {
+        if (!array_key_exists($area, config('theory.areas'))) {
             return response()->json(['message' => 'Area not found.'], 404);
         }
 
@@ -131,8 +128,11 @@ class TheoryLevelController extends Controller
             'answers.*' => ['required', 'integer'],
         ]);
 
+        // Only score questions that actually belong to this area+level (prevents answer-stuffing)
         $questionIds = array_map('intval', array_keys($validated['answers']));
         $questions   = Question::whereIn('id', $questionIds)
+            ->where('theory_area', $area)
+            ->where('theory_level', $level)
             ->with('options')
             ->get()
             ->keyBy('id');
@@ -151,10 +151,15 @@ class TheoryLevelController extends Controller
         $threshold = self::PASS_THRESHOLDS[$level] ?? 10;
         $passed    = $score >= $threshold;
 
+        $userId = $request->user()->id;
+
         TheoryCompletion::updateOrCreate(
-            ['user_id' => $request->user()->id, 'theory_area' => $area, 'level' => $level],
+            ['user_id' => $userId, 'theory_area' => $area, 'level' => $level],
             ['score' => $score, 'passed' => $passed],
         );
+
+        Cache::forget("progress.overview.{$userId}");
+        Cache::forget("dashboard.overview.{$userId}");
 
         return response()->json([
             'data' => [

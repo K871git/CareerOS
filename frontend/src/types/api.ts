@@ -95,6 +95,12 @@ export interface PracticeSubjectProgress {
     accuracy: number;
 }
 
+export interface TheoryAreaProgress {
+    area: string;
+    passed: number;
+    total: number;
+}
+
 export interface UserProgress {
     summary: {
         total_lessons: number;
@@ -103,6 +109,8 @@ export interface UserProgress {
         quizzes_taken: number;
         accuracy: number;
         learning_levels_passed: number;
+        theory_levels_passed: number;
+        theory_levels_total: number;
     };
     tracks: ProgressTrackItem[];
     practice: {
@@ -111,6 +119,9 @@ export interface UserProgress {
         total_correct: number;
         accuracy: number;
         by_subject: PracticeSubjectProgress[];
+    };
+    theory: {
+        by_area: TheoryAreaProgress[];
     };
 }
 
@@ -282,6 +293,52 @@ export interface DashboardActivity {
     description: string;
     subject_name: string | null;
     created_at: string;
+}
+
+// --- Theory Level System ---
+
+export interface TheoryArea {
+    slug: string;
+    title: string;
+    available: boolean;
+    levels_completed: number;
+    total_levels: number;
+}
+
+export interface TheoryLevelStatus {
+    level: number;
+    locked: boolean;
+    completed: boolean;
+    score: number | null;
+    pass_threshold: number;
+    pass_percentage: number;
+}
+
+export interface TheoryExamResult {
+    score: number;
+    total: number;
+    passed: boolean;
+    threshold: number;
+    percentage: number;
+}
+
+// --- Theory Q&A (topic-based, written answers) ---
+
+export interface TheoryQuestion {
+    id: number;
+    type: 'THEORY';
+    difficulty: QuestionDifficulty;
+    question: string;
+}
+
+export interface TheoryAnswer {
+    id: number;
+    question_id: number;
+    question: string;
+    answer: string;
+    status: 'pending_review' | 'reviewed';
+    feedback: string | null;
+    score: number | null;
 }
 
 export interface DashboardOverview {

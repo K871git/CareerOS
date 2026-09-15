@@ -105,7 +105,7 @@ class LevelController extends Controller
                 'id'         => $q->id,
                 'question'   => $q->question,
                 'difficulty' => $q->difficulty,
-                'options'    => $q->options->map(fn ($o) => [
+                'options'    => $q->options->shuffle()->map(fn ($o) => [
                     'id'          => $o->id,
                     'option_text' => $o->option_text,
                 ]),
@@ -157,7 +157,7 @@ class LevelController extends Controller
             }
         }
 
-        $passed = $score === 10;
+        $passed = $score >= 8; // 80% pass mark, consistent with theory level 1 threshold
 
         $userId = auth()->id();
 

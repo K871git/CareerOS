@@ -101,6 +101,14 @@ class PlaygroundController extends Controller
             $statements = array_filter(array_map('trim', explode(';', $code)));
             $output     = '';
 
+            // Block DDL — CREATE/DROP/ALTER/TRUNCATE auto-commit and can destroy playground schema
+            $ddlPattern = '/^\s*(CREATE|DROP|ALTER|TRUNCATE|RENAME)\s/i';
+            foreach ($statements as $sql) {
+                if (preg_match($ddlPattern, $sql)) {
+                    return ['ERROR: DDL statements (CREATE, DROP, ALTER, TRUNCATE, RENAME) are not allowed in the playground.', 1];
+                }
+            }
+
             $pdo->beginTransaction();
 
             try {
@@ -184,9 +192,9 @@ class PlaygroundController extends Controller
     private function connectToPlayground(): \PDO
     {
         $pdo = new \PDO(
-            sprintf('mysql:host=%s;port=%s;charset=utf8mb4', env('DB_HOST', '127.0.0.1'), env('DB_PORT', '3306')),
-            env('DB_USERNAME', 'root'),
-            env('DB_PASSWORD', ''),
+            sprintf('mysql:host=%s;port=%s;charset=utf8mb4', config('database.connections.mysql.host', '127.0.0.1'), config('database.connections.mysql.port', '3306')),
+            config('database.connections.mysql.username', 'root'),
+            config('database.connections.mysql.password', ''),
             [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_TIMEOUT => 5]
         );
 

@@ -74,9 +74,12 @@ class QuestionController extends Controller
             'submitted_at'    => now(),
         ]);
 
-        foreach ($records as $record) {
-            AssessmentAnswer::create(array_merge($record, ['attempt_id' => $attempt->id]));
-        }
+        $now = now();
+        AssessmentAnswer::insert(array_map(fn ($r) => array_merge($r, [
+            'attempt_id' => $attempt->id,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]), $records));
 
         Cache::forget("dashboard.overview.{$user->id}");
         Cache::forget("progress.overview.{$user->id}");
