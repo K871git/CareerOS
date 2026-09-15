@@ -44,7 +44,6 @@ class PythonJuniorQuestionsSeeder extends Seeder
 
         $topic = Topic::where('slug', 'python-junior')->firstOrFail();
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
             $question = Question::create([

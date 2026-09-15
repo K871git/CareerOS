@@ -39,6 +39,7 @@ export interface ProblemListItem {
     difficulty: Difficulty;
     language:   string;
     status:     SubmitStatus | null;
+    is_locked:  boolean;
 }
 
 export interface ProblemExample {

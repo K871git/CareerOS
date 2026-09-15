@@ -13,24 +13,18 @@ class PhpIntermediateQuestionsSeeder extends Seeder
     {
         $topic = Topic::where('slug', 'php-intermediate')->firstOrFail();
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
-            $q = Question::create([
-                'topic_id'    => $topic->id,
-                'type'        => 'MCQ',
-                'difficulty'  => 'Medium',
-                'question'    => $qData['question'],
-                'explanation' => $qData['explanation'],
-            ]);
-
-            QuestionOption::insert(array_map(fn ($opt) => [
-                'question_id' => $q->id,
-                'option_text' => $opt['text'],
-                'is_correct'  => $opt['correct'],
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $qData['options']));
+            $q = Question::updateOrCreate(
+                ['topic_id' => $topic->id, 'question' => $qData['question']],
+                ['type' => 'MCQ', 'difficulty' => 'Medium', 'explanation' => $qData['explanation']]
+            );
+            foreach ($qData['options'] as $opt) {
+                QuestionOption::updateOrCreate(
+                    ['question_id' => $q->id, 'option_text' => $opt['text']],
+                    ['is_correct' => $opt['correct']]
+                );
+            }
         }
 
         $count = Question::where('topic_id', $topic->id)->count();
@@ -941,6 +935,38 @@ class PhpIntermediateQuestionsSeeder extends Seeder
                     ['text' => 'Provides access to PHP\'s internal array functions for objects', 'correct' => false],
                     ['text' => 'Converts objects to arrays automatically', 'correct' => false],
                     ['text' => 'Restricts array access to specific keys', 'correct' => false],
+                ],
+            ],
+
+            // ── Level 2 Interview Essentials ────────────────────────────────
+            [
+                'question'    => 'What is the difference between array_map() and array_filter() in PHP?',
+                'explanation' => 'array_map() applies a callback to every element and returns a new array of transformed values — the size stays the same. array_filter() applies a callback and removes elements where the callback returns false — the array can shrink. array_map() changes values; array_filter() changes which values survive.',
+                'options'     => [
+                    ['text' => 'array_map() transforms each element; array_filter() removes elements that fail the callback', 'correct' => true],
+                    ['text' => 'array_map() removes duplicates; array_filter() removes null values', 'correct' => false],
+                    ['text' => 'They are identical — both apply a callback and return the full result', 'correct' => false],
+                    ['text' => 'array_filter() transforms elements; array_map() removes falsy elements', 'correct' => false],
+                ],
+            ],
+            [
+                'question'    => 'What does a static variable inside a PHP function do?',
+                'explanation' => 'A static local variable is initialised only once — the first time the function runs. On every subsequent call, the variable retains the value from the previous call instead of being reset. This is useful for counters or caching within a recursive function. It is scoped to the function (not global).',
+                'options'     => [
+                    ['text' => 'Retains its value between function calls for the lifetime of the script', 'correct' => true],
+                    ['text' => 'Makes the variable accessible globally outside the function', 'correct' => false],
+                    ['text' => 'Prevents the variable from being modified inside the function', 'correct' => false],
+                    ['text' => 'Stores the variable in a static file rather than memory', 'correct' => false],
+                ],
+            ],
+            [
+                'question'    => 'What is constructor property promotion in PHP 8?',
+                'explanation' => 'Constructor property promotion (PHP 8.0) lets you declare and initialise class properties directly in the constructor signature by adding a visibility modifier before the parameter: public function __construct(private string $name, public int $age) {}. PHP automatically creates the property and assigns the argument — removing the need to declare the property and assign it manually in the body.',
+                'options'     => [
+                    ['text' => 'Declaring and initialising class properties directly in the constructor parameters using a visibility modifier', 'correct' => true],
+                    ['text' => 'Automatically calling the parent constructor when a child class is instantiated', 'correct' => false],
+                    ['text' => 'Promoting a private constructor to public visibility using Reflection', 'correct' => false],
+                    ['text' => 'Caching constructor arguments for repeated instantiation of the same class', 'correct' => false],
                 ],
             ],
         ];

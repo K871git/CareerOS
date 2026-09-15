@@ -17,19 +17,29 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// Guard against multiple concurrent 401s all triggering simultaneous redirects.
+// Reset on each navigation (popstate) so re-login in the same session works.
+let isLoggingOut = false;
+window.addEventListener('popstate', () => { isLoggingOut = false; });
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         const status = error.response?.status as number | undefined;
 
         if (status === 401) {
-            // Don't redirect when the login/register endpoints themselves return 401
-            // (wrong credentials) — let the form handle the error inline.
+            // Don't redirect when the login/register/oauth endpoints themselves return 401
+            // (wrong credentials / bad code) — let the caller handle the error inline.
             const url: string = error.config?.url ?? '';
-            const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
-            if (!isAuthEndpoint) {
+            const isAuthEndpoint =
+                url.includes('/auth/login') ||
+                url.includes('/auth/register') ||
+                url.includes('/auth/oauth/exchange');
+            if (!isAuthEndpoint && !isLoggingOut) {
+                isLoggingOut = true;
                 localStorage.removeItem('careeros_token');
                 localStorage.removeItem('careeros_user');
+                // Reset flag after navigation completes so re-login works.
                 window.location.href = '/?modal=login';
             }
             return Promise.reject(error);

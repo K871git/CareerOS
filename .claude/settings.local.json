@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"d:\\\\new_live\\\\CarrerOS\\\\backend\"; php artisan tinker --execute=\"App\\\\Models\\\\Topic::with\\('lessons'\\)->get\\(\\)->each\\(function\\(\\\\$t\\){ echo \\\\$t->title . ' \\(level ' . \\\\$t->level . '\\) - lessons: ' . \\\\$t->lessons->count\\(\\) . chr\\(10\\); }\\);\")",
+      "Bash(npx tsc *)",
+      "Bash(php artisan *)",
+      "Bash(php -l \"d:\\\\new_live\\\\CarrerOS\\\\backend\\\\database\\\\seeders\\\\TypeScriptPracticeSeeder.php\")",
+      "Bash(php -l \"d:\\\\new_live\\\\CarrerOS\\\\backend\\\\database\\\\seeders\\\\HtmlPracticeSeeder.php\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\new_live\\\\CarrerOS\\\\frontend\\\\src\\\\features\\\\practice\" -File)",
+      "Bash(Select-Object Name)",
+      "Bash(Remove-Item \"d:\\\\new_live\\\\CarrerOS\\\\backend\\\\database\\\\seeders\\\\NodeJsPracticeSeeder.php.tmp.5844.0c5e7fe4115d\" -Force)",
+      "PowerShell(Get-ChildItem \"D:\\\\new_live\\\\CarrerOS\\\\backend\\\\database\\\\seeders\\\\\" | Where-Object { $_.Name -match \"\\(Php|Js|Laravel|React|Python\\)\" } | Select-Object -ExpandProperty Name)",
+      "Bash(git add *)",
+      "Bash(php fix_seeders.php)",
+      "Bash(npx vite *)",
+      "Bash(npm run *)",
+      "Bash(grep -E \"\\\\.\\(php|ts\\)$\")",
+      "Bash(xargs grep -l \"middleware\\\\|auth\")",
+      "Bash(xargs grep -l \"setInterval\\\\|setTimeout\")",
+      "Bash(xargs wc -l)"
+    ]
+  }
+}

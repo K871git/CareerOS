@@ -12,6 +12,7 @@ use App\Models\Question;
 use App\Models\Topic;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class QuestionController extends Controller
 {
@@ -76,6 +77,9 @@ class QuestionController extends Controller
         foreach ($records as $record) {
             AssessmentAnswer::create(array_merge($record, ['attempt_id' => $attempt->id]));
         }
+
+        Cache::forget("dashboard.overview.{$user->id}");
+        Cache::forget("progress.overview.{$user->id}");
 
         $attempt->load(['answers.question.options', 'answers.selectedOption', 'topic']);
 

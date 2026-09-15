@@ -1981,24 +1981,18 @@ MARKDOWN,
 
     private function seedLevel4Questions(Topic $topic): void
     {
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->level4Questions() as $qData) {
-            $q = Question::create([
-                'topic_id'    => $topic->id,
-                'type'        => 'MCQ',
-                'difficulty'  => 'Hard',
-                'question'    => $qData['question'],
-                'explanation' => $qData['explanation'],
-            ]);
-
-            QuestionOption::insert(array_map(fn ($opt) => [
-                'question_id' => $q->id,
-                'option_text' => $opt['text'],
-                'is_correct'  => $opt['correct'],
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $qData['options']));
+            $q = Question::updateOrCreate(
+                ['topic_id' => $topic->id, 'question' => $qData['question']],
+                ['type' => 'MCQ', 'difficulty' => 'Hard', 'explanation' => $qData['explanation']]
+            );
+            foreach ($qData['options'] as $opt) {
+                QuestionOption::updateOrCreate(
+                    ['question_id' => $q->id, 'option_text' => $opt['text']],
+                    ['is_correct' => $opt['correct']]
+                );
+            }
         }
 
         $count = Question::where('topic_id', $topic->id)->count();
@@ -2155,24 +2149,18 @@ MARKDOWN,
 
     private function seedLevel5Questions(Topic $topic): void
     {
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->level5Questions() as $qData) {
-            $q = Question::create([
-                'topic_id'    => $topic->id,
-                'type'        => 'MCQ',
-                'difficulty'  => 'Hard',
-                'question'    => $qData['question'],
-                'explanation' => $qData['explanation'],
-            ]);
-
-            QuestionOption::insert(array_map(fn ($opt) => [
-                'question_id' => $q->id,
-                'option_text' => $opt['text'],
-                'is_correct'  => $opt['correct'],
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $qData['options']));
+            $q = Question::updateOrCreate(
+                ['topic_id' => $topic->id, 'question' => $qData['question']],
+                ['type' => 'MCQ', 'difficulty' => 'Hard', 'explanation' => $qData['explanation']]
+            );
+            foreach ($qData['options'] as $opt) {
+                QuestionOption::updateOrCreate(
+                    ['question_id' => $q->id, 'option_text' => $opt['text']],
+                    ['is_correct' => $opt['correct']]
+                );
+            }
         }
 
         $count = Question::where('topic_id', $topic->id)->count();

@@ -60,7 +60,11 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? [
-                PDO::MYSQL_ATTR_SSL_CA                 => env('MYSQL_ATTR_SSL_CA', '/etc/ssl/certs/ca-certificates.crt'),
+                // SSL_CA is only injected when env var is explicitly set.
+                // The old default (/etc/ssl/certs/ca-certificates.crt) is a Linux path
+                // that breaks PDO on Windows. TiDB Cloud / Render set MYSQL_ATTR_SSL_CA
+                // to the correct cert; local MySQL connects without SSL.
+                ...array_filter([PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA')]),
                 PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
                 PDO::ATTR_TIMEOUT                      => 30,
             ] : [],

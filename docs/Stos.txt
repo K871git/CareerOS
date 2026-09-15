@@ -1,0 +1,84 @@
+# PHP artisan migrate:fresh --seed
+-- delete the existing tables and create new one
+
+# API Token authentication :
+
+install sanctum :
+publish resources :
+configure database 
+running migrations : personal_access_token table created 
+configure user model : added HasApiTokens trait 
+register API controller and request class to validate requests : RegisterRequest, LoginRequest
+register the API's  in api.php file
+register the api.php file in bootstrap/app.php
+controller register method token created
+controller login method token created       : $token=$user->createToken('token-name')->plainTextToken;
+
+using that token to send request in protected API routes : auth:sanctum 
+in logout method, delete the currentUser token : $request->user()->currentAccessToken()->delete();
+testing the endpoints via postman : done 
+
+
+# Explain the laravel test cases and its implementation?
+php artisan make:test Example_test
+-- an test class is an php class which is automated checks about application functionality
+-- lives inside test directory where it contains the two folders : 1) unit 2) feature 
+-unit : unit test class written for the specific function or specific code testing 
+-feature : feature test class are for the testing the whole feature 
+-- the custom created test classes extends the TestCase class of laravel where it inherits functionality from TestCase class
+-- getJson(), postJson(), assertDatabaseHas()
+-- using $this I can access the methods inside the TestCase class : 
+$this->getJson('/api/example'):no browser, no postman just laravel test enviorment
+`->` this is method chaining 
+
+# What is the imperative programming ?
+-> imperative programming is simply telling the computer what to do in order and step by step
+-> like traditional jquery->dom manipulation approach, telling the browser what to do with UI and manipulate the dom nodes
+
+# What is react ? 
+-- React is an javascript library for building user interfaces using reusable and composable components
+-- React follows the declarative programming model, were I declare how the UI should look like based on the current state 
+-- React handles the DOM updates efficiently 
+
+# why react even exists?
+-- manually manipulate DOM is ok for the small apps, but when application grows, then this become very dificult to manage it 
+-- so react uses the UI components and compose those components and make an complex UI's possible and more organized
+
+# what is virtual DOM?
+Virtual DOM is an lightweight copy of the Real Browser DOM
+when any change done by user or event clicks, the react make new VDOM and compare with Real DOM and update only part of the Real DOM without changing full page 
+
+# When we return component: at least one parent must be return by the component 
+not : return (
+  <h1>Hello</h1>
+  <p>Welcome</p>
+);
+
+correct : return (
+  <div>
+    <h1>Hello</h1>
+    <p>Welcome</p>
+  </div>
+);
+
+# what is fragment in react? 
+when i want to return multiple element from component but dont want the extra div as parent then i use parent 
+1) : it works but it adds extra div in the html
+return (
+  <div>
+    <h1>Hello</h1>
+    <p>Welcome</p>
+  </div>
+); 
+
+2) : this does not create extra div element in html
+return (
+  <>
+    <h1>Hello</h1>
+    <p>Welcome</p>
+  </>
+); 
+
+# what does the event.preventDefault() does ?
+it stops browsers default behavior. commonly used when form submission.
+

@@ -1087,9 +1087,40 @@ class PhpAdvancedQuestionsSeeder extends Seeder
                 ],
             ],
 
+            // ─── Level 3 Interview Essentials ────────────────────────────────
+            [
+                'question'    => 'What are PHP Fibers introduced in PHP 8.1?',
+                'explanation' => 'Fibers are a cooperative multitasking primitive. A Fiber runs until it calls Fiber::suspend(), which pauses execution and returns control to the caller. The caller can later resume the Fiber from the suspension point. Unlike threads, Fibers share one OS thread and have no race conditions — they are the building block for async libraries like ReactPHP and Amp.',
+                'options'     => [
+                    ['text' => 'A coroutine-like mechanism for pausing and resuming execution cooperatively in a single thread', 'is_correct' => true],
+                    ['text' => 'A true multi-threading model that runs PHP code in parallel OS threads',                         'is_correct' => false],
+                    ['text' => 'A stream wrapper for reading large files in chunks without blocking',                            'is_correct' => false],
+                    ['text' => 'A new array datatype optimised for large in-memory datasets',                                   'is_correct' => false],
+                ],
+            ],
+            [
+                'question'    => 'What does declaring a property as readonly in PHP 8.1 guarantee?',
+                'explanation' => 'A readonly property can be written exactly once — at the point of declaration with a default value, or inside the constructor. Any attempt to reassign it after that first write throws an Error. This enforces immutability without a full value-object pattern. PHP 8.2 extended this to allow readonly on the entire class.',
+                'options'     => [
+                    ['text' => 'The property can be written exactly once then becomes immutable for the object\'s lifetime', 'is_correct' => true],
+                    ['text' => 'The property is only readable from outside the class but freely writable inside',            'is_correct' => false],
+                    ['text' => 'The property is stored in CPU read-only memory for performance benefits',                    'is_correct' => false],
+                    ['text' => 'The property cannot be serialised or cloned',                                                'is_correct' => false],
+                ],
+            ],
+            [
+                'question'    => 'What are intersection types in PHP 8.1 and how do they differ from union types?',
+                'explanation' => 'An intersection type (A&B) requires a value to satisfy ALL listed type constraints simultaneously. For example, Iterator&Countable means the argument must implement both interfaces. A union type (A|B) accepts a value that satisfies ANY one of the types. Use intersection types when a parameter must fulfill multiple contracts at once.',
+                'options'     => [
+                    ['text' => 'A type requiring a value to implement ALL specified interfaces simultaneously, unlike union types which accept ANY one', 'is_correct' => true],
+                    ['text' => 'A type accepting either of several types — exactly the same behaviour as union types',                                   'is_correct' => false],
+                    ['text' => 'A way to compare two object instances for structural equality',                                                         'is_correct' => false],
+                    ['text' => 'A type for values that must be non-null AND non-false at the same time',                                               'is_correct' => false],
+                ],
+            ],
+
         ];
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($questions as $qData) {
             $question = Question::create([

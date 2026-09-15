@@ -1,0 +1,5 @@
+#Illuminate\Database\QueryException
+SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 767 bytes 
+(Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: studyosDB, SQL: alter table users add unique users_email_unique(email))
+-> inside the app/Providers/AppServiceProvider.php
+-> inside the boot method : Schema::defaultStringLength(191); and load the Schema class as well : use Illuminate\Support\Facades\Schema;

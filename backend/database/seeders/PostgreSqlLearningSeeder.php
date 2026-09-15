@@ -2727,24 +2727,18 @@ MD;
             ],
         ];
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($questions as $qData) {
-            $question = Question::create([
-                'topic_id'    => $topic->id,
-                'type'        => 'MCQ',
-                'difficulty'  => $qData['difficulty'],
-                'question'    => $qData['question'],
-                'explanation' => $qData['explanation'],
-            ]);
-
-            QuestionOption::insert(array_map(fn ($opt) => [
-                'question_id' => $question->id,
-                'option_text' => $opt['text'],
-                'is_correct'  => $opt['correct'],
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $qData['options']));
+            $question = Question::updateOrCreate(
+                ['topic_id' => $topic->id, 'question' => $qData['question']],
+                ['type' => 'MCQ', 'difficulty' => $qData['difficulty'], 'explanation' => $qData['explanation']]
+            );
+            foreach ($qData['options'] as $opt) {
+                QuestionOption::updateOrCreate(
+                    ['question_id' => $question->id, 'option_text' => $opt['text']],
+                    ['is_correct' => $opt['correct']]
+                );
+            }
         }
     }
 
@@ -2865,24 +2859,18 @@ MD;
             ],
         ];
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($questions as $qData) {
-            $question = Question::create([
-                'topic_id'    => $topic->id,
-                'type'        => 'MCQ',
-                'difficulty'  => $qData['difficulty'],
-                'question'    => $qData['question'],
-                'explanation' => $qData['explanation'],
-            ]);
-
-            QuestionOption::insert(array_map(fn ($opt) => [
-                'question_id' => $question->id,
-                'option_text' => $opt['text'],
-                'is_correct'  => $opt['correct'],
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $qData['options']));
+            $question = Question::updateOrCreate(
+                ['topic_id' => $topic->id, 'question' => $qData['question']],
+                ['type' => 'MCQ', 'difficulty' => $qData['difficulty'], 'explanation' => $qData['explanation']]
+            );
+            foreach ($qData['options'] as $opt) {
+                QuestionOption::updateOrCreate(
+                    ['question_id' => $question->id, 'option_text' => $opt['text']],
+                    ['is_correct' => $opt['correct']]
+                );
+            }
         }
     }
 }

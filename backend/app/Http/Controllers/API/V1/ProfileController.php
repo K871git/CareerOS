@@ -14,18 +14,10 @@ class ProfileController extends Controller
     {
         $profile = $request->user()->profile;
 
-        if (!$profile) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Profile not found.',
-                'data'    => null,
-            ], 404);
-        }
-
         return response()->json([
             'success' => true,
             'message' => 'Profile retrieved successfully.',
-            'data'    => new ProfileResource($profile),
+            'data'    => $profile ? new ProfileResource($profile) : null,
         ]);
     }
 

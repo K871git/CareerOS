@@ -28,7 +28,6 @@ class ReactIntermediateQuestionsSeeder extends Seeder
             ['subject_id' => $subject->id, 'title' => 'React Intermediate', 'display_order' => 2]
         );
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
             $question = Question::create([

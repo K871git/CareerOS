@@ -2162,7 +2162,6 @@ MD;
 
     private function insertQuestions(Topic $topic, array $questions): void
     {
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($questions as $qData) {
             $question = Question::create([

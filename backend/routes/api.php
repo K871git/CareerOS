@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\TopicController;
 use App\Http\Controllers\Api\V1\LevelController;
 use App\Http\Controllers\Api\V1\PlaygroundController;
 use App\Http\Controllers\Api\V1\CodingProblemController;
+use App\Http\Controllers\Api\V1\SocialAuthController;
 
 Route::middleware('throttle:5,1')->prefix('v1/auth')->group(function () {
 
@@ -35,6 +36,10 @@ Route::middleware('throttle:5,1')->prefix('v1/auth')->group(function () {
         Route::get('/me',      [AuthController::class, 'me']);
     });
 });
+
+Route::get('/v1/auth/google',          [SocialAuthController::class, 'redirectToGoogle']);
+Route::get('/v1/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+
 
 Route::middleware('auth:sanctum')->prefix('v1/profile')->group(function () {
     Route::get('/', [ProfileController::class, 'show']);

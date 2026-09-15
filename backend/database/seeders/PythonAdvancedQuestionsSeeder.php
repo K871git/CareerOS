@@ -30,7 +30,6 @@ class PythonAdvancedQuestionsSeeder extends Seeder
 
         $topic = Topic::where('slug', 'python-advanced')->firstOrFail();
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
             $question = Question::create([

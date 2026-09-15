@@ -637,17 +637,25 @@ export default function PlaygroundPage() {
 
     /* ── Refs ────────────────────────────────────── */
 
-    const abortRef   = useRef<AbortController | null>(null);
-    const editorRef  = useRef<Parameters<OnMount>[0] | null>(null);
-    const bodyRef    = useRef<HTMLDivElement>(null);
-    const dragging   = useRef(false);
+    const abortRef      = useRef<AbortController | null>(null);
+    const editorRef     = useRef<Parameters<OnMount>[0] | null>(null);
+    const bodyRef       = useRef<HTMLDivElement>(null);
+    const dragging      = useRef(false);
     const codeSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const copyTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     /* ── Data hooks ──────────────────────────────── */
 
     const { mutate: runCode, isPending }                   = useRunCode();
     const { data: schema, isLoading: schemaLoading }       = usePlaygroundSchema(language);
     const { mutate: resetPlayground, isPending: isResetting } = useResetPlayground();
+
+    /* ── Cleanup timers on unmount ───────────────── */
+
+    useEffect(() => () => {
+        if (codeSaveTimer.current) clearTimeout(codeSaveTimer.current);
+        if (copyTimer.current)     clearTimeout(copyTimer.current);
+    }, []);
 
     /* ── Persist settings ────────────────────────── */
 
@@ -748,7 +756,8 @@ export default function PlaygroundPage() {
         if (!output) return;
         navigator.clipboard.writeText(output).then(() => {
             setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
+            if (copyTimer.current) clearTimeout(copyTimer.current);
+            copyTimer.current = setTimeout(() => setCopied(false), 1500);
         }).catch(() => {});
     }, [output]);
 

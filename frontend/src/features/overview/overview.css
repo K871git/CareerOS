@@ -16,6 +16,10 @@
   flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 1.75rem;
+  padding: 1.375rem 1.5rem;
+  background: linear-gradient(135deg, rgba(79,70,229,0.05) 0%, rgba(124,58,237,0.03) 100%);
+  border: 1.5px solid rgba(79,70,229,0.12);
+  border-radius: var(--radius-xl);
 }
 
 .dash-welcome-title {
@@ -71,7 +75,19 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  position: relative;
+  overflow: hidden;
   transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease-fast);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), #7c3aed);
+  opacity: 0.45;
+  transition: opacity var(--ease);
 }
 
 .stat-card:hover {
@@ -79,6 +95,12 @@
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
+
+.stat-card:hover::before { opacity: 0.9; }
+
+.stat-card--success::before { background: linear-gradient(90deg, #22c55e, #16a34a); opacity: 0.65; }
+.stat-card--warning::before { background: linear-gradient(90deg, #fbbf24, #d97706); opacity: 0.65; }
+.stat-card--danger::before  { background: linear-gradient(90deg, #f87171, #dc2626); opacity: 0.65; }
 
 .stat-icon {
   width: 40px;
@@ -107,27 +129,28 @@
   line-height: 1.3;
 }
 
-/* --- Main Grid ------------------------------------------------------- */
+/* --- Main Grid & Named Areas ----------------------------------------- */
 
 .dash-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
-  gap: 1.25rem;
+  grid-template-areas:
+    "tracks   skill"
+    "perf     achieve"
+    "attempts weak"
+    "activity recs";
+  gap: 1.375rem;
   align-items: start;
 }
 
-.dash-col-main {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  min-width: 0;
-}
-
-.dash-col-side {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
+.dash-area--tracks   { grid-area: tracks; }
+.dash-area--perf     { grid-area: perf; }
+.dash-area--attempts { grid-area: attempts; }
+.dash-area--activity { grid-area: activity; }
+.dash-area--skill    { grid-area: skill; }
+.dash-area--achieve  { grid-area: achieve; }
+.dash-area--weak     { grid-area: weak; }
+.dash-area--recs     { grid-area: recs; }
 
 /* --- Cards ----------------------------------------------------------- */
 
@@ -136,12 +159,14 @@
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 1.5rem;
-  transition: border-color var(--ease), box-shadow var(--ease);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease-fast);
 }
 
 .dash-card:hover {
-  border-color: rgba(79, 70, 229, 0.14);
-  box-shadow: var(--shadow-sm);
+  border-color: rgba(79, 70, 229, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
 }
 
 .dash-card-header {
@@ -588,8 +613,14 @@
   flex-shrink: 0;
 }
 
-.dash-section-icon--practice { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
-.dash-section-icon--learning { background: rgba(34, 197, 94, 0.1);  color: #16a34a; }
+.dash-section-icon--practice {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.16), rgba(124, 58, 237, 0.08));
+  color: #4f46e5;
+}
+.dash-section-icon--learning {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(34, 197, 94, 0.07));
+  color: #059669;
+}
 
 .dash-section-body {
   flex: 1;
@@ -616,7 +647,7 @@
 }
 
 .dash-section-bar {
-  height: 4px;
+  height: 5px;
   background: var(--gray-100);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -642,6 +673,27 @@
   transform: translateX(2px);
 }
 
+/* Per-card bg tints for the two section shortcuts */
+.dash-section-cards > .dash-section-card:nth-child(1) {
+  background: linear-gradient(135deg, rgba(79,70,229,0.05) 0%, rgba(124,58,237,0.03) 100%);
+  border-color: rgba(79,70,229,0.18);
+}
+.dash-section-cards > .dash-section-card:nth-child(1):hover {
+  border-color: rgba(79,70,229,0.32);
+  box-shadow: 0 4px 18px rgba(79,70,229,0.11), 0 1px 4px rgba(0,0,0,0.04);
+}
+.dash-section-cards > .dash-section-card:nth-child(2) {
+  background: linear-gradient(135deg, rgba(5,150,105,0.05) 0%, rgba(16,185,129,0.03) 100%);
+  border-color: rgba(5,150,105,0.18);
+}
+.dash-section-cards > .dash-section-card:nth-child(2):hover {
+  border-color: rgba(5,150,105,0.32);
+  box-shadow: 0 4px 18px rgba(5,150,105,0.11), 0 1px 4px rgba(0,0,0,0.04);
+}
+.dash-section-cards > .dash-section-card:nth-child(2):hover .dash-section-arrow {
+  color: #059669;
+}
+
 /* --- Skill Level Card ------------------------------------------------ */
 
 .skill-level-display {
@@ -652,8 +704,12 @@
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--text-primary);
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0.75rem;
+  display: inline-block;
 }
 
 .skill-level-bar {
@@ -1096,75 +1152,74 @@
   margin-top: 2px;
 }
 
-/* --- Responsive ------------------------------------------------------ */
+/* ====================================================================
+   Responsive — 3 intentional breakpoints
+   ==================================================================== */
 
-@media (max-width: 1080px) {
+/* Tablet (680px – 1099px): equal 2-col, priority-reordered
+   Most-actionable cards (Skill + Weak) surface to the top.
+   Full-width rows for track list and activity feed. */
+@media (max-width: 1099px) {
+  .dash-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "skill    weak"
+      "tracks   tracks"
+      "perf     attempts"
+      "recs     achieve"
+      "activity activity";
+  }
+}
+
+/* Mobile (< 680px): single column, priority order */
+@media (max-width: 679px) {
   .dash-grid {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "skill"
+      "recs"
+      "weak"
+      "tracks"
+      "perf"
+      "attempts"
+      "achieve"
+      "activity";
+    gap: 1rem;
   }
-  .dash-col-side {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
-@media (max-width: 900px) {
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
+  }
+
   .dash-section-cards {
-    grid-template-columns: 1fr;
-    gap: 0.625rem;
-  }
-}
-
-@media (max-width: 800px) {
-  .dash-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .prog-track-bar {
-    width: 72px;
-  }
-}
-
-@media (max-width: 640px) {
-  .dash-stats {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.625rem;
   }
-  .dash-col-side {
-    grid-template-columns: 1fr;
-  }
+
   .dash-welcome {
     flex-direction: column;
     align-items: flex-start;
   }
-  .stat-card {
-    padding: 1rem 0.875rem;
-    gap: 0.625rem;
-  }
-  .stat-icon {
-    width: 34px;
-    height: 34px;
-  }
-  .stat-value {
-    font-size: 1.125rem;
-  }
-  .stat-label {
-    font-size: 0.72rem;
-  }
-  .dash-card {
-    padding: 1.125rem;
-  }
-  .dash-welcome-title {
-    font-size: 1.375rem;
-  }
-  .prog-track-header {
-    padding: 0.875rem 1rem;
-  }
+
+  .dash-welcome-title { font-size: 1.375rem; }
+  .dash-card          { padding: 1.125rem; }
+  .onboard-card       { padding: 1.125rem; }
+  .onboard-step       { padding: 0.625rem 0.75rem; gap: 0.625rem; }
+  .onboard-steps      { gap: 0.25rem; }
+  .prog-track-bar     { width: 72px; }
+  .prog-track-header  { padding: 0.875rem 1rem; }
 }
 
-@media (max-width: 440px) {
-  .prog-track-bar {
-    display: none;
-  }
+/* Small phone (< 480px): tighten everything, 1-col section cards */
+@media (max-width: 479px) {
+  .dash-section-cards { grid-template-columns: 1fr; }
+  .stat-card          { padding: 0.875rem; gap: 0.5rem; }
+  .stat-icon          { width: 34px; height: 34px; }
+  .stat-value         { font-size: 1.125rem; }
+  .stat-label         { font-size: 0.72rem; }
+  .prog-track-bar     { display: none; }
+  .onboard-step-icon  { width: 30px; height: 30px; }
 }
 
 /* ====================================================================
@@ -1176,11 +1231,11 @@
   min-width: 0;
 }
 
-.dash-welcome--new     { border-left: 3px solid var(--primary); padding-left: 1rem; }
-.dash-welcome--starter { border-left: 3px solid #6366f1;        padding-left: 1rem; }
-.dash-welcome--learner { border-left: 3px solid #06b6d4;        padding-left: 1rem; }
-.dash-welcome--achiever{ border-left: 3px solid #d97706;        padding-left: 1rem; }
-.dash-welcome--advanced{ border-left: 3px solid #16a34a;        padding-left: 1rem; }
+.dash-welcome--new     { border-left-color: var(--primary); border-left-width: 3px; }
+.dash-welcome--starter { border-left-color: #6366f1;        border-left-width: 3px; }
+.dash-welcome--learner { border-left-color: #06b6d4;        border-left-width: 3px; }
+.dash-welcome--achiever{ border-left-color: #d97706;        border-left-width: 3px; }
+.dash-welcome--advanced{ border-left-color: #16a34a;        border-left-width: 3px; }
 
 /* ====================================================================
    Onboarding Card
@@ -1479,15 +1534,91 @@
 .badge-pill--locked:hover { transform: none; }
 
 /* ====================================================================
-   Responsive additions
+   Grid Card — per-area accent tints
    ==================================================================== */
 
-@media (max-width: 900px) {
-  .onboard-steps { gap: 0.25rem; }
+/* Your Level — indigo */
+.dash-area--skill .dash-card {
+  background: linear-gradient(135deg, rgba(79,70,229,0.05) 0%, rgba(124,58,237,0.03) 100%);
+  border-color: rgba(79,70,229,0.18);
+}
+.dash-area--skill .dash-card:hover {
+  border-color: rgba(79,70,229,0.3);
+  box-shadow: 0 4px 18px rgba(79,70,229,0.09), 0 1px 4px rgba(0,0,0,0.04);
 }
 
-@media (max-width: 640px) {
-  .onboard-card { padding: 1.125rem; }
-  .onboard-step { padding: 0.625rem 0.75rem; gap: 0.625rem; }
-  .onboard-step-icon { width: 30px; height: 30px; }
+/* Achievements — amber/trophy */
+.dash-area--achieve .dash-card {
+  background: linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(251,191,36,0.03) 100%);
+  border-color: rgba(245,158,11,0.2);
 }
+.dash-area--achieve .dash-card:hover {
+  border-color: rgba(245,158,11,0.32);
+  box-shadow: 0 4px 18px rgba(245,158,11,0.1), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* Weak Areas — red alert */
+.dash-area--weak {
+  background: linear-gradient(135deg, rgba(239,68,68,0.04) 0%, rgba(220,38,38,0.02) 100%);
+  border-color: rgba(239,68,68,0.18);
+}
+.dash-area--weak:hover {
+  border-color: rgba(239,68,68,0.3);
+  box-shadow: 0 4px 18px rgba(239,68,68,0.09), 0 1px 4px rgba(0,0,0,0.04);
+  transform: translateY(-1px);
+}
+
+/* Recommendations — amber/wisdom */
+.dash-area--recs {
+  background: linear-gradient(135deg, rgba(245,158,11,0.04) 0%, rgba(217,119,6,0.02) 100%);
+  border-color: rgba(245,158,11,0.18);
+}
+.dash-area--recs:hover {
+  border-color: rgba(245,158,11,0.3);
+  box-shadow: 0 4px 18px rgba(245,158,11,0.09), 0 1px 4px rgba(0,0,0,0.04);
+  transform: translateY(-1px);
+}
+
+/* ====================================================================
+   Dark Mode — accent tints
+   ==================================================================== */
+
+[data-theme="dark"] .dash-welcome {
+  background: linear-gradient(135deg, rgba(99,102,241,0.09) 0%, rgba(167,139,250,0.05) 100%);
+  border-color: rgba(99,102,241,0.22);
+}
+
+[data-theme="dark"] .dash-section-cards > .dash-section-card:nth-child(1) {
+  background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(167,139,250,0.06) 100%);
+  border-color: rgba(99,102,241,0.24);
+}
+[data-theme="dark"] .dash-section-cards > .dash-section-card:nth-child(1):hover {
+  border-color: rgba(99,102,241,0.38);
+  box-shadow: 0 4px 18px rgba(99,102,241,0.16);
+}
+[data-theme="dark"] .dash-section-cards > .dash-section-card:nth-child(2) {
+  background: linear-gradient(135deg, rgba(16,185,129,0.09) 0%, rgba(52,211,153,0.05) 100%);
+  border-color: rgba(16,185,129,0.22);
+}
+[data-theme="dark"] .dash-section-cards > .dash-section-card:nth-child(2):hover {
+  border-color: rgba(16,185,129,0.36);
+  box-shadow: 0 4px 18px rgba(16,185,129,0.15);
+}
+
+[data-theme="dark"] .dash-area--skill .dash-card {
+  background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(167,139,250,0.06) 100%);
+  border-color: rgba(99,102,241,0.24);
+}
+[data-theme="dark"] .dash-area--achieve .dash-card {
+  background: linear-gradient(135deg, rgba(245,158,11,0.09) 0%, rgba(251,191,36,0.05) 100%);
+  border-color: rgba(245,158,11,0.24);
+}
+[data-theme="dark"] .dash-area--weak {
+  background: linear-gradient(135deg, rgba(239,68,68,0.09) 0%, rgba(220,38,38,0.05) 100%);
+  border-color: rgba(239,68,68,0.24);
+}
+[data-theme="dark"] .dash-area--recs {
+  background: linear-gradient(135deg, rgba(245,158,11,0.09) 0%, rgba(217,119,6,0.05) 100%);
+  border-color: rgba(245,158,11,0.22);
+}
+

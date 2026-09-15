@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import {
     ChevronDown, Play, Check, X, Clock, AlertTriangle,
-    ChevronRight, Loader2, Trophy, Sun, Moon, Settings2,
+    ChevronRight, Loader2, Trophy, Sun, Moon, Settings2, Lock,
 } from 'lucide-react';
 import { useProblemList, useProblemDetail } from '../hooks/useBattleground';
 import { useSubmitSolution }                from '../hooks/useSubmitSolution';
@@ -65,14 +65,29 @@ function ProblemListPanel({
                 <button
                     key={p.slug}
                     type="button"
-                    className={`bg-problem-row${selectedSlug === p.slug ? ' active' : ''}`}
-                    onClick={() => onSelect(p.slug)}
+                    className={[
+                        'bg-problem-row',
+                        selectedSlug === p.slug ? 'active' : '',
+                        p.is_locked ? 'bg-problem-row--locked' : '',
+                    ].filter(Boolean).join(' ')}
+                    onClick={() => !p.is_locked && onSelect(p.slug)}
+                    disabled={p.is_locked}
+                    title={
+                        p.is_locked
+                            ? p.difficulty === 'medium'
+                                ? 'Solve 3 easy problems to unlock'
+                                : 'Solve 2 medium problems to unlock'
+                            : undefined
+                    }
                 >
                     <span className="bg-problem-num">{i + 1}.</span>
                     <span className="bg-problem-title">{p.title}</span>
                     <div className="bg-problem-meta">
                         {diffBadge(p.difficulty)}
-                        {statusIcon(p.status, 12)}
+                        {p.is_locked
+                            ? <Lock size={11} className="bg-icon-lock" />
+                            : statusIcon(p.status, 12)
+                        }
                     </div>
                 </button>
             ))}

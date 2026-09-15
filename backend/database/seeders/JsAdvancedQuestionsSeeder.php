@@ -28,24 +28,18 @@ class JsAdvancedQuestionsSeeder extends Seeder
             ['subject_id' => $subject->id, 'title' => 'JavaScript Advanced', 'description' => 'Advanced JavaScript: design patterns, performance, memory, module systems, WeakMap/WeakRef, and generators.', 'display_order' => 3]
         );
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
-            $q = Question::create([
-                'topic_id'    => $topic->id,
-                'type'        => 'MCQ',
-                'difficulty'  => 'Hard',
-                'question'    => $qData['question'],
-                'explanation' => $qData['explanation'],
-            ]);
-
-            QuestionOption::insert(array_map(fn ($opt) => [
-                'question_id' => $q->id,
-                'option_text' => $opt['text'],
-                'is_correct'  => $opt['correct'],
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $qData['options']));
+            $q = Question::updateOrCreate(
+                ['topic_id' => $topic->id, 'question' => $qData['question']],
+                ['type' => 'MCQ', 'difficulty' => 'Hard', 'explanation' => $qData['explanation']]
+            );
+            foreach ($qData['options'] as $opt) {
+                QuestionOption::updateOrCreate(
+                    ['question_id' => $q->id, 'option_text' => $opt['text']],
+                    ['is_correct' => $opt['correct']]
+                );
+            }
         }
 
         $count = Question::where('topic_id', $topic->id)->count();

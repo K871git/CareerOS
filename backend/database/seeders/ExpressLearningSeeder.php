@@ -2776,7 +2776,6 @@ MD; }
             ],
         ];
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($questions as $q) {
             $question = Question::create([
@@ -2912,7 +2911,6 @@ MD; }
             ],
         ];
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($questions as $q) {
             $question = Question::create([

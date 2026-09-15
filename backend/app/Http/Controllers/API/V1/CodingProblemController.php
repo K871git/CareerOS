@@ -23,13 +23,28 @@ class CodingProblemController extends Controller
             ->orderBy('id')
             ->get(['id', 'title', 'slug', 'difficulty', 'language', 'order']);
 
-        // Attach best submission status per problem for this user
+        // Best submission status per problem
         $bestStatuses = ProblemSubmission::where('user_id', $userId)
             ->whereIn('problem_id', $problems->pluck('id'))
             ->selectRaw('problem_id, MAX(CASE WHEN status = "accepted" THEN 1 ELSE 0 END) as is_accepted')
             ->groupBy('problem_id')
             ->pluck('is_accepted', 'problem_id')
-            ->map(fn($isAccepted) => $isAccepted ? 'accepted' : 'attempted');
+            ->map(fn($v) => $v ? 'accepted' : 'attempted');
+
+        // Count distinct accepted problems per difficulty tier for lock logic
+        $acceptedIds = ProblemSubmission::where('user_id', $userId)
+            ->whereIn('problem_id', $problems->pluck('id'))
+            ->where('status', 'accepted')
+            ->distinct()
+            ->pluck('problem_id');
+
+        $acceptedByDiff = $problems->whereIn('id', $acceptedIds)->groupBy('difficulty');
+        $acceptedEasy   = ($acceptedByDiff['easy']   ?? collect())->count();
+        $acceptedMedium = ($acceptedByDiff['medium'] ?? collect())->count();
+
+        // Medium unlocks after 3 easy solved; Hard unlocks after 2 medium solved
+        $mediumUnlocked = $acceptedEasy   >= 3;
+        $hardUnlocked   = $acceptedMedium >= 2;
 
         $data = $problems->map(fn($p) => [
             'id'         => $p->id,
@@ -38,6 +53,11 @@ class CodingProblemController extends Controller
             'difficulty' => $p->difficulty,
             'language'   => $p->language,
             'status'     => $bestStatuses[$p->id] ?? null,
+            'is_locked'  => match ($p->difficulty) {
+                'medium' => !$mediumUnlocked,
+                'hard'   => !$hardUnlocked,
+                default  => false,
+            },
         ]);
 
         return response()->json(['success' => true, 'data' => $data]);

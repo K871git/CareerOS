@@ -9,93 +9,67 @@ use App\Models\LearningTrack;
 use App\Models\Lesson;
 use App\Models\LevelCompletion;
 use App\Models\UserProgress;
+use App\Services\UserAnalyticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ProgressController extends Controller
 {
+    public function __construct(private UserAnalyticsService $analytics) {}
+
     public function index(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
 
-        // --- Learning: tracks + lessons ---
-        $tracks = LearningTrack::with(['subjects.topics.lessons'])->get();
+        $data = Cache::remember("progress.overview.{$userId}", 30, function () use ($userId) {
+            // --- Learning: SQL aggregation avoids loading the entire track tree into memory ---
+            $tracks = DB::select("
+                SELECT
+                    lt.id,
+                    lt.title,
+                    lt.slug,
+                    COUNT(DISTINCT l.id)                                                    AS total_lessons,
+                    COUNT(DISTINCT CASE WHEN up.status = 'COMPLETED' THEN up.lesson_id END) AS completed_lessons
+                FROM learning_tracks lt
+                LEFT JOIN subjects s  ON s.learning_track_id = lt.id
+                LEFT JOIN topics t    ON t.subject_id = s.id
+                LEFT JOIN lessons l   ON l.topic_id = t.id
+                LEFT JOIN user_progress up ON up.lesson_id = l.id AND up.user_id = ?
+                GROUP BY lt.id, lt.title, lt.slug
+                ORDER BY lt.display_order
+            ", [$userId]);
 
-        $completedIds = UserProgress::where('user_id', $userId)
-            ->where('status', 'COMPLETED')
-            ->pluck('lesson_id');
+            $totalLessons   = (int) array_sum(array_column($tracks, 'total_lessons'));
+            $totalCompleted = (int) array_sum(array_column($tracks, 'completed_lessons'));
 
-        $totalLessons   = 0;
-        $totalCompleted = 0;
-        $trackData      = [];
+            $trackData = collect($tracks)->map(fn ($t) => [
+                'id'                => $t->id,
+                'title'             => $t->title,
+                'slug'              => $t->slug,
+                'total_lessons'     => (int) $t->total_lessons,
+                'completed_lessons' => (int) $t->completed_lessons,
+                'percentage'        => $t->total_lessons > 0
+                    ? round($t->completed_lessons / $t->total_lessons * 100, 1)
+                    : 0.0,
+            ])->values()->all();
 
-        foreach ($tracks as $track) {
-            $lessonIds = $track->subjects
-                ->flatMap(fn ($s) => $s->topics->flatMap(fn ($t) => $t->lessons->pluck('id')));
+            $learningLevelsPassed = LevelCompletion::where('user_id', $userId)->where('passed', true)->count();
 
-            $trackTotal     = $lessonIds->count();
-            $trackCompleted = $lessonIds->intersect($completedIds)->count();
+            // --- Practice: quiz stats via shared analytics service ---
+            $quiz = $this->analytics->quizBySubject($userId);
 
-            $totalLessons   += $trackTotal;
-            $totalCompleted += $trackCompleted;
+            $quizzesTaken  = $quiz['quizzesTaken'];
+            $totalAnswered = $quiz['totalAnswered'];
+            $totalCorrect  = $quiz['totalCorrect'];
+            $accuracy      = $quiz['accuracy'];
 
-            $trackData[] = [
-                'id'                => $track->id,
-                'title'             => $track->title,
-                'slug'              => $track->slug,
-                'total_lessons'     => $trackTotal,
-                'completed_lessons' => $trackCompleted,
-                'percentage'        => $trackTotal > 0 ? round($trackCompleted / $trackTotal * 100, 1) : 0.0,
-            ];
-        }
+            $quizBySubject = collect($quiz['bySubject'])->map(fn ($d) => array_merge($d, [
+                'accuracy' => $d['avg_score'],
+            ]))->sortByDesc('accuracy')->values()->all();
 
-        $learningLevelsPassed = LevelCompletion::where('user_id', $userId)->where('passed', true)->count();
-
-        // --- Practice: quiz attempts ---
-
-        $practiceAttempts = AssessmentAttempt::where('user_id', $userId)
-            ->with(['topic.subject'])
-            ->orderByDesc('submitted_at')
-            ->get();
-
-        $quizzesTaken  = $practiceAttempts->count();
-        $totalAnswered = $practiceAttempts->sum('total_questions');
-        $totalCorrect  = $practiceAttempts->sum('score');
-        $accuracy      = $totalAnswered > 0
-            ? round($totalCorrect / $totalAnswered * 100, 1)
-            : 0.0;
-
-        $subjectMap = [];
-        foreach ($practiceAttempts as $attempt) {
-            $subject = $attempt->topic?->subject;
-            if (! $subject) {
-                continue;
-            }
-            $sid = $subject->id;
-            if (! isset($subjectMap[$sid])) {
-                $subjectMap[$sid] = [
-                    'subject_id'      => $sid,
-                    'subject_title'   => $subject->title,
-                    'attempts'        => 0,
-                    'total_questions' => 0,
-                    'total_correct'   => 0,
-                ];
-            }
-            $subjectMap[$sid]['attempts']++;
-            $subjectMap[$sid]['total_questions'] += $attempt->total_questions;
-            $subjectMap[$sid]['total_correct']   += $attempt->score;
-        }
-
-        $quizBySubject = collect($subjectMap)->map(fn ($d) => array_merge($d, [
-            'accuracy' => $d['total_questions'] > 0
-                ? round($d['total_correct'] / $d['total_questions'] * 100, 1)
-                : 0.0,
-        ]))->sortByDesc('accuracy')->values();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Progress dashboard retrieved successfully.',
-            'data'    => [
+            return [
                 'summary' => [
                     'total_lessons'          => $totalLessons,
                     'completed_lessons'      => $totalCompleted,
@@ -114,7 +88,13 @@ class ProgressController extends Controller
                     'accuracy'                 => $accuracy,
                     'by_subject'               => $quizBySubject,
                 ],
-            ],
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Progress dashboard retrieved successfully.',
+            'data'    => $data,
         ]);
     }
 
@@ -167,16 +147,15 @@ class ProgressController extends Controller
 
     public function completeLesson(Request $request, Lesson $lesson): JsonResponse
     {
+        $userId = $request->user()->id;
+
         $progress = UserProgress::updateOrCreate(
-            [
-                'user_id'   => $request->user()->id,
-                'lesson_id' => $lesson->id,
-            ],
-            [
-                'status'       => 'COMPLETED',
-                'completed_at' => now(),
-            ],
+            ['user_id' => $userId, 'lesson_id' => $lesson->id],
+            ['status' => 'COMPLETED', 'completed_at' => now()],
         );
+
+        Cache::forget("progress.overview.{$userId}");
+        Cache::forget("dashboard.overview.{$userId}");
 
         $progress->load('lesson');
 

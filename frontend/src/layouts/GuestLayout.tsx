@@ -8,6 +8,29 @@ import Footer from '../components/layout/Footer';
 import AuthModal from '../components/ui/AuthModal';
 import './layout.css';
 
+function useActiveSection(ids: string[]) {
+    const [active, setActive] = useState('');
+    useEffect(() => {
+        let observer: IntersectionObserver;
+        const raf = requestAnimationFrame(() => {
+            observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) setActive(entry.target.id);
+                    });
+                },
+                { threshold: 0.35, rootMargin: '-64px 0px -25% 0px' }
+            );
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) observer.observe(el);
+            });
+        });
+        return () => { cancelAnimationFrame(raf); observer?.disconnect(); };
+    }, []);
+    return active;
+}
+
 export type GuestOutletContext = {
     openModal: (mode: 'login' | 'register') => void;
 };
@@ -31,6 +54,7 @@ export default function GuestLayout() {
     }
 
     const { theme, toggleTheme } = useTheme();
+    const activeSection = useActiveSection(['features', 'how-it-works', 'for-who']);
 
     const openModal = (mode: 'login' | 'register') => setModalMode(mode);
     const closeModal = () => setModalMode(null);
@@ -41,6 +65,11 @@ export default function GuestLayout() {
             <header className="header">
                 <Link to="/" className="header-brand">CareerOS</Link>
                 <nav className="header-nav">
+                    <div className="header-nav-links">
+                        <a href="#features"    className={`header-nav-link${activeSection === 'features'    ? ' header-nav-link--active' : ''}`}>Features</a>
+                        <a href="#how-it-works" className={`header-nav-link${activeSection === 'how-it-works' ? ' header-nav-link--active' : ''}`}>How it works</a>
+                        <a href="#for-who"     className={`header-nav-link${activeSection === 'for-who'     ? ' header-nav-link--active' : ''}`}>For who</a>
+                    </div>
                     <button
                         className="header-theme-btn"
                         onClick={toggleTheme}

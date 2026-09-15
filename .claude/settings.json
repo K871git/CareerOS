@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /d \"d:\\\\new_live\\\\CarrerOS\")",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -First 30)"
+    ]
+  }
+}

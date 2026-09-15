@@ -13,24 +13,18 @@ class PhpJuniorQuestionsSeeder extends Seeder
     {
         $topic = Topic::where('slug', 'php-basics-junior')->firstOrFail();
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
-            $q = Question::create([
-                'topic_id'    => $topic->id,
-                'type'        => 'MCQ',
-                'difficulty'  => 'Easy',
-                'question'    => $qData['question'],
-                'explanation' => $qData['explanation'],
-            ]);
-
-            QuestionOption::insert(array_map(fn ($opt) => [
-                'question_id' => $q->id,
-                'option_text' => $opt['text'],
-                'is_correct'  => $opt['correct'],
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $qData['options']));
+            $q = Question::updateOrCreate(
+                ['topic_id' => $topic->id, 'question' => $qData['question']],
+                ['type' => 'MCQ', 'difficulty' => 'Easy', 'explanation' => $qData['explanation']]
+            );
+            foreach ($qData['options'] as $opt) {
+                QuestionOption::updateOrCreate(
+                    ['question_id' => $q->id, 'option_text' => $opt['text']],
+                    ['is_correct' => $opt['correct']]
+                );
+            }
         }
 
         $count = Question::where('topic_id', $topic->id)->count();
@@ -1045,6 +1039,48 @@ class PhpJuniorQuestionsSeeder extends Seeder
                     ['text' => 'Fills position 0 to 5 of an existing array', 'correct' => false],
                     ['text' => 'Creates an associative array from 0 to 5', 'correct' => false],
                     ['text' => 'Fills empty array positions with "x"', 'correct' => false],
+                ],
+            ],
+
+            // ── Level 1 Interview Essentials ────────────────────────────────
+            [
+                'question'    => 'What is the difference between isset() and empty() in PHP?',
+                'explanation' => 'isset() returns true if a variable exists AND is not null. empty() returns true if a variable does not exist OR is falsy (null, false, 0, "", "0", []). Key difference: empty() never raises an "undefined variable" notice, but isset() also does not — both are language constructs that handle undefined variables safely.',
+                'options'     => [
+                    ['text' => 'isset() checks existence and non-null; empty() is true for falsy values including undefined', 'correct' => true],
+                    ['text' => 'They are identical — both check if a variable is null', 'correct' => false],
+                    ['text' => 'isset() returns true for empty strings; empty() does not', 'correct' => false],
+                    ['text' => 'empty() requires the variable to be declared first', 'correct' => false],
+                ],
+            ],
+            [
+                'question'    => 'What is the key difference between echo and print in PHP?',
+                'explanation' => 'Both output text, but print returns the integer 1 — so it can be used inside an expression (e.g. $x = print "hi"). echo returns nothing (void) and can accept multiple comma-separated arguments. echo is marginally faster. Both are language constructs, not functions.',
+                'options'     => [
+                    ['text' => 'print returns 1 and can be used in expressions; echo returns nothing and accepts multiple arguments', 'correct' => true],
+                    ['text' => 'echo is for HTML output; print is for plain text output', 'correct' => false],
+                    ['text' => 'They are completely identical with no difference', 'correct' => false],
+                    ['text' => 'print flushes the output buffer; echo does not', 'correct' => false],
+                ],
+            ],
+            [
+                'question'    => 'What does the Elvis operator ?: do in PHP?',
+                'explanation' => 'The Elvis operator ?: is a shorthand ternary introduced in PHP 5.3. $a ?: $b returns $a if $a is truthy, otherwise returns $b. It is equivalent to $a ? $a : $b. Do not confuse it with the null coalescing operator ?? (PHP 7), which only checks for null/undefined, not all falsy values.',
+                'options'     => [
+                    ['text' => 'Returns the left operand if truthy, otherwise returns the right operand', 'correct' => true],
+                    ['text' => 'Returns null if either operand is null', 'correct' => false],
+                    ['text' => 'It is exactly the same as the null coalescing operator ??', 'correct' => false],
+                    ['text' => 'It compares two values and returns a boolean', 'correct' => false],
+                ],
+            ],
+            [
+                'question'    => 'What does the compact() function do in PHP?',
+                'explanation' => 'compact() creates an associative array from existing variables — it takes variable names as strings and returns an array where each key is the variable name and each value is that variable\'s current value. compact("name", "age") returns ["name" => $name, "age" => $age]. Its counterpart is extract(), which does the reverse.',
+                'options'     => [
+                    ['text' => 'Creates an associative array from variable names and their current values', 'correct' => true],
+                    ['text' => 'Compresses an array to remove duplicate values', 'correct' => false],
+                    ['text' => 'Converts an array to a compact JSON string', 'correct' => false],
+                    ['text' => 'Merges two arrays into a single flat array', 'correct' => false],
                 ],
             ],
         ];

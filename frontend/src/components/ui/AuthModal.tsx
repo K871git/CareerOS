@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Mail, Lock, User, Phone, KeyRound, AlertCircle, ArrowRight, LogIn } from 'lucide-react';
+import { X, Mail, Lock, User, Phone, KeyRound, AlertCircle, ArrowRight, LogIn, Eye, EyeOff } from 'lucide-react';
 import { isAxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import {
@@ -13,6 +14,8 @@ import { useRegister }   from '../../features/auth/hooks/useRegister';
 import { useSendOtp }    from '../../features/auth/hooks/useSendOtp';
 import { useVerifyOtp }  from '../../features/auth/hooks/useVerifyOtp';
 import './auth-modal.css';
+
+// ── Icons ──────────────────────────────────────────────────────────────────────
 
 const GoogleIcon = () => (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -29,17 +32,86 @@ const GitHubIcon = () => (
     </svg>
 );
 
+// ── Password strength ──────────────────────────────────────────────────────────
+
+const PW_LEVELS = [
+    { level: 1, label: 'Easy',        color: '#ef4444' },
+    { level: 2, label: 'Medium',      color: '#f97316' },
+    { level: 3, label: 'Excellent',   color: '#eab308' },
+    { level: 4, label: 'Expert',      color: '#3b82f6' },
+    { level: 5, label: 'Exceptional', color: '#22c55e' },
+] as const;
+
+function getStrength(pw: string) {
+    if (!pw) return null;
+    let score = 0;
+    if (pw.length >= 6)  score++;
+    if (pw.length >= 8)  score++;
+    if (pw.length >= 12) score++;
+    if (/[a-z]/.test(pw)) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score += 2;
+    // score 0-8 → level 1-5
+    const idx = score <= 2 ? 0 : score <= 4 ? 1 : score === 5 ? 2 : score === 6 ? 3 : 4;
+    return PW_LEVELS[idx];
+}
+
+function PasswordStrengthPopover({ password }: { password: string }) {
+    const strength = getStrength(password);
+
+    const reqs = [
+        { label: '8+ characters',    met: password.length >= 8 },
+        { label: 'Uppercase letter',  met: /[A-Z]/.test(password) },
+        { label: 'Number',            met: /[0-9]/.test(password) },
+        { label: 'Special character', met: /[^a-zA-Z0-9]/.test(password) },
+    ];
+
+    return (
+        <div className="pw-popover" role="status" aria-live="polite">
+            <div className="pw-bars-row">
+                <div className="pw-bars">
+                    {PW_LEVELS.map(({ level }) => (
+                        <div
+                            key={level}
+                            className="pw-bar"
+                            style={strength && level <= strength.level ? { background: strength.color } : {}}
+                        />
+                    ))}
+                </div>
+                <span className="pw-label" style={strength ? { color: strength.color } : {}}>
+                    {strength ? strength.label : 'Strength'}
+                </span>
+            </div>
+            <ul className="pw-reqs">
+                {reqs.map(req => (
+                    <li key={req.label} className={`pw-req${req.met ? ' pw-req--met' : ''}`}>
+                        <span className="pw-req-dot" />
+                        {req.label}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+// ── Shared helpers ─────────────────────────────────────────────────────────────
+
 function SocialButtons() {
-    const handleSocial = (provider: string) => {
-        toast('Coming soon — ' + provider + ' login is on the way!', { icon: '🚀' });
+    const handleGoogle = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'}/v1/auth/google`);
+            const data = await res.json();
+            window.location.href = data.url;
+        } catch {
+            toast.error('Could not connect to Google. Please try again.');
+        }
     };
+
     return (
         <div className="mf-social">
-            <button type="button" className="mf-social-btn" onClick={() => handleSocial('Google')}>
+            <button type="button" className="mf-social-btn" onClick={handleGoogle}>
                 <GoogleIcon /> Google
-            </button>
-            <button type="button" className="mf-social-btn mf-social-btn--github" onClick={() => handleSocial('GitHub')}>
-                <GitHubIcon /> GitHub
             </button>
         </div>
     );
@@ -82,11 +154,15 @@ function formatTimer(seconds: number): string {
     return `${m}:${s}`;
 }
 
-function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEmail?: string }) {
-    const [method, setMethod]     = useState<LoginMethod>('email');
-    const [otpStep, setOtpStep]   = useState<OtpStep>('enter_email');
-    const [otpEmail, setOtpEmail] = useState('');
-    const [timer, setTimer]       = useState(0);
+// ── Login form ─────────────────────────────────────────────────────────────────
+
+function LoginForm({ onSwitch, onClose, prefillEmail }: { onSwitch: () => void; onClose: () => void; prefillEmail?: string }) {
+    const navigate                    = useNavigate();
+    const [method, setMethod]         = useState<LoginMethod>('email');
+    const [otpStep, setOtpStep]       = useState<OtpStep>('enter_email');
+    const [otpEmail, setOtpEmail]     = useState('');
+    const [timer, setTimer]           = useState(0);
+    const [showPassword, setShowPw]   = useState(false);
 
     const { mutate: login, isPending, isError, error, reset } = useLogin();
     const sendOtpMutation   = useSendOtp();
@@ -113,6 +189,7 @@ function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEm
     const handleMethodChange = (next: LoginMethod) => {
         setMethod(next);
         setOtpStep('enter_email');
+        setShowPw(false);
         sendForm.reset();
         otpForm.reset();
         sendOtpMutation.reset();
@@ -145,7 +222,7 @@ function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEm
 
     return (
         <>
-            {/* Method tabs: Email / Email OTP */}
+            {/* Method tabs */}
             <div className="mf-method-tabs">
                 <button
                     type="button"
@@ -163,7 +240,7 @@ function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEm
                 </button>
             </div>
 
-            {/* ── Email + password ───────────────────────────────── */}
+            {/* ── Email + password ── */}
             {method === 'email' && (
                 <form onSubmit={handleSubmit((data) => { reset(); login(data); })} noValidate>
                     {apiError && (
@@ -190,18 +267,32 @@ function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEm
                     <div className="mf">
                         <div className="mf-label-row">
                             <label className="mf-label">Password</label>
-                            <button type="button" className="mf-forgot" tabIndex={-1}>
+                            <button
+                                type="button"
+                                className="mf-forgot"
+                                tabIndex={-1}
+                                onClick={() => { onClose(); navigate('/auth/forgot-password'); }}
+                            >
                                 Forgot password?
                             </button>
                         </div>
                         <div className="mf-input-wrap">
                             <span className="mf-icon"><Lock size={15} /></span>
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="••••••••"
-                                className={`mf-input${apiError ? ' mf-input-err' : ''}`}
+                                className={`mf-input mf-input--eye${apiError ? ' mf-input-err' : ''}`}
                                 {...register('password')}
                             />
+                            <button
+                                type="button"
+                                className="mf-eye-btn"
+                                onClick={() => setShowPw(p => !p)}
+                                tabIndex={-1}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                            </button>
                         </div>
                         {errors.password && <p className="mf-error">{errors.password.message}</p>}
                     </div>
@@ -217,7 +308,7 @@ function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEm
                 </form>
             )}
 
-            {/* ── Email OTP: enter email ─────────────────────────── */}
+            {/* ── Email OTP: enter email ── */}
             {method === 'emailOtp' && otpStep === 'enter_email' && (
                 <form onSubmit={handleSendOtp} noValidate>
                     {sendOtpMutation.error && (
@@ -254,7 +345,7 @@ function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEm
                 </form>
             )}
 
-            {/* ── Email OTP: enter code ──────────────────────────── */}
+            {/* ── Email OTP: enter code ── */}
             {method === 'emailOtp' && otpStep === 'enter_otp' && (
                 <form onSubmit={handleVerifyOtp} noValidate>
                     <p className="mf-otp-hint">
@@ -324,6 +415,8 @@ function LoginForm({ onSwitch, prefillEmail }: { onSwitch: () => void; prefillEm
     );
 }
 
+// ── Register form ──────────────────────────────────────────────────────────────
+
 function RegisterForm({
     onSwitch,
     onEmailExists,
@@ -331,14 +424,20 @@ function RegisterForm({
     onSwitch: (email?: string) => void;
     onEmailExists: (email: string) => void;
 }) {
+    const [showPassword, setShowPw]   = useState(false);
+    const [showConfirm,  setShowCfm]  = useState(false);
+    const [hoveredPw,    setHoveredPw] = useState(false);
+
     const { mutate: register_, isPending, isError, error, reset } = useRegister();
     const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
     });
 
-    const apiError   = isError ? getApiError(error) : null;
-    const emailTaken = isError && isEmailTaken(error);
-    const watchedEmail = watch('email', '');
+    const apiError       = isError ? getApiError(error) : null;
+    const emailTaken     = isError && isEmailTaken(error);
+    const watchedEmail   = watch('email', '');
+    const watchedPassword = watch('password', '');
+    const mobileReg      = register('mobile');
 
     useEffect(() => {
         if (emailTaken) onEmailExists(watchedEmail);
@@ -371,6 +470,7 @@ function RegisterForm({
                 </div>
             )}
 
+            {/* Full name */}
             <div className="mf">
                 <label className="mf-label">Full name</label>
                 <div className="mf-input-wrap">
@@ -380,6 +480,7 @@ function RegisterForm({
                 {errors.name && <p className="mf-error">{errors.name.message}</p>}
             </div>
 
+            {/* Email */}
             <div className="mf">
                 <label className="mf-label">Email address</label>
                 <div className="mf-input-wrap">
@@ -394,31 +495,82 @@ function RegisterForm({
                 {errors.email && <p className="mf-error">{errors.email.message}</p>}
             </div>
 
+            {/* Mobile */}
             <div className="mf">
                 <label className="mf-label">Mobile number</label>
                 <div className="mf-input-wrap">
                     <span className="mf-icon"><Phone size={15} /></span>
-                    <input type="tel" placeholder="9876543210" className="mf-input" {...register('mobile')} />
+                    <input
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="10-digit number"
+                        maxLength={10}
+                        className="mf-input"
+                        {...mobileReg}
+                        onChange={(e) => {
+                            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                            mobileReg.onChange(e);
+                        }}
+                    />
                 </div>
                 {errors.mobile && <p className="mf-error">{errors.mobile.message}</p>}
             </div>
 
+            {/* Password + strength meter */}
             <div className="mf">
                 <label className="mf-label">Password</label>
-                <div className="mf-input-wrap">
-                    <span className="mf-icon"><Lock size={15} /></span>
-                    <input type="password" placeholder="Min. 8 characters" className="mf-input" {...register('password')} />
+                <div
+                    className="pw-field"
+                    onMouseEnter={() => setHoveredPw(true)}
+                    onMouseLeave={() => setHoveredPw(false)}
+                >
+                    <div className="mf-input-wrap">
+                        <span className="mf-icon"><Lock size={15} /></span>
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Min. 8 characters"
+                            className="mf-input mf-input--eye"
+                            {...register('password')}
+                        />
+                        <button
+                            type="button"
+                            className="mf-eye-btn"
+                            onClick={() => setShowPw(p => !p)}
+                            tabIndex={-1}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                    </div>
+                    {hoveredPw && <PasswordStrengthPopover password={watchedPassword} />}
                 </div>
                 {errors.password && <p className="mf-error">{errors.password.message}</p>}
             </div>
 
+            {/* Confirm password */}
             <div className="mf">
                 <label className="mf-label">Confirm password</label>
                 <div className="mf-input-wrap">
                     <span className="mf-icon"><Lock size={15} /></span>
-                    <input type="password" placeholder="Repeat your password" className="mf-input" {...register('password_confirmation')} />
+                    <input
+                        type={showConfirm ? 'text' : 'password'}
+                        placeholder="Repeat your password"
+                        className="mf-input mf-input--eye"
+                        {...register('password_confirmation')}
+                    />
+                    <button
+                        type="button"
+                        className="mf-eye-btn"
+                        onClick={() => setShowCfm(p => !p)}
+                        tabIndex={-1}
+                        aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                    >
+                        {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
                 </div>
-                {errors.password_confirmation && <p className="mf-error">{errors.password_confirmation.message}</p>}
+                {errors.password_confirmation && (
+                    <p className="mf-error">{errors.password_confirmation.message}</p>
+                )}
             </div>
 
             <button type="submit" disabled={isPending} className="mf-btn">
@@ -433,15 +585,26 @@ function RegisterForm({
     );
 }
 
+// ── Modal shell ────────────────────────────────────────────────────────────────
+
 export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
     const [signInHighlight, setSignInHighlight] = useState(false);
     const [prefillEmail, setPrefillEmail]       = useState<string | undefined>();
+    const [isExiting, setIsExiting]             = useState(false);
+    const exitTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+    const handleClose = useCallback(() => {
+        setIsExiting(true);
+        exitTimer.current = setTimeout(onClose, 210);
+    }, [onClose]);
+
+    useEffect(() => () => clearTimeout(exitTimer.current), []);
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
-    }, [onClose]);
+    }, [handleClose]);
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -464,14 +627,17 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
     };
 
     return (
-        <div className="modal-backdrop" onClick={onClose}>
+        <div
+            className={`modal-backdrop${isExiting ? ' modal-backdrop--out' : ''}`}
+            onClick={handleClose}
+        >
             <div
-                className="modal-card"
+                className={`modal-card${isExiting ? ' modal-card--out' : ''}`}
                 onClick={(e) => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
             >
-                <button className="modal-close" onClick={onClose} aria-label="Close">
+                <button className="modal-close" onClick={handleClose} aria-label="Close">
                     <X size={16} />
                 </button>
 
@@ -498,7 +664,7 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
                     </button>
                 </div>
 
-                <div className="modal-headline">
+                <div className="modal-headline" key={`headline-${mode}`}>
                     <h2 className="modal-title">
                         {mode === 'login' ? 'Welcome back' : 'Start for free'}
                     </h2>
@@ -512,16 +678,19 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
                 <SocialButtons />
                 <OrDivider />
 
-                {mode === 'login'
-                    ? <LoginForm
-                        onSwitch={() => onSwitch('register')}
-                        prefillEmail={prefillEmail}
-                      />
-                    : <RegisterForm
-                        onSwitch={handleSwitchFromRegister}
-                        onEmailExists={handleEmailExists}
-                      />
-                }
+                <div className="modal-form-area" key={`form-${mode}`}>
+                    {mode === 'login'
+                        ? <LoginForm
+                            onSwitch={() => onSwitch('register')}
+                            onClose={handleClose}
+                            prefillEmail={prefillEmail}
+                          />
+                        : <RegisterForm
+                            onSwitch={handleSwitchFromRegister}
+                            onEmailExists={handleEmailExists}
+                          />
+                    }
+                </div>
             </div>
         </div>
     );

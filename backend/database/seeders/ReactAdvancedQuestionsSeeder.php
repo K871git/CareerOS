@@ -28,7 +28,6 @@ class ReactAdvancedQuestionsSeeder extends Seeder
             ['subject_id' => $subject->id, 'title' => 'React Advanced', 'display_order' => 3]
         );
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
             $question = Question::create([

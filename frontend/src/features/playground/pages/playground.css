@@ -1256,7 +1256,12 @@
     transition:     background 0.12s;
     position:       relative;
 }
-.bg-problem-row:hover { background: var(--pg-icon-bg); }
+.bg-problem-row:hover:not(.bg-problem-row--locked) { background: var(--pg-icon-bg); }
+.bg-problem-row--locked {
+    opacity:        0.45;
+    cursor:         not-allowed;
+}
+.bg-icon-lock { color: var(--pg-muted, #6b7280); }
 .bg-problem-row.active {
     background: color-mix(in srgb, #a855f7 8%, transparent);
     color:      var(--pg-text);

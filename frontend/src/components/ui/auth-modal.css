@@ -13,12 +13,22 @@
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
-    animation: modal-fade-in 0.18s ease;
+    animation: modal-fade-in 0.2s ease both;
+}
+
+.modal-backdrop--out {
+    animation: modal-fade-out 0.18s ease forwards;
+    pointer-events: none;
 }
 
 @keyframes modal-fade-in {
     from { opacity: 0; }
     to   { opacity: 1; }
+}
+
+@keyframes modal-fade-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
 }
 
 .modal-card {
@@ -34,7 +44,11 @@
         0 0 0 1px rgba(79, 70, 229, 0.12),
         0 8px 32px rgba(0, 0, 0, 0.12),
         0 32px 90px rgba(0, 0, 0, 0.22);
-    animation: modal-slide-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: modal-slide-in 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.modal-card--out {
+    animation: modal-slide-out 0.18s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 /* Gradient accent line along the top edge */
@@ -53,6 +67,35 @@
 @keyframes modal-slide-in {
     from { opacity: 0; transform: translateY(24px) scale(0.96); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes modal-slide-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to   { opacity: 0; transform: translateY(14px) scale(0.97); }
+}
+
+/* --- Headline & form area — fade+slide in when mode switches --------- */
+
+.modal-headline,
+.modal-form-area {
+    animation: modal-content-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modal-content-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduced motion — keep functionality, drop movement */
+@media (prefers-reduced-motion: reduce) {
+    .modal-backdrop,
+    .modal-backdrop--out,
+    .modal-card,
+    .modal-card--out,
+    .modal-headline,
+    .modal-form-area {
+        animation: none;
+    }
 }
 
 /* --- Close button ---------------------------------------------------- */
@@ -404,6 +447,120 @@
     box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.11);
 }
 
+/* --- Password show/hide toggle --------------------------------------- */
+
+.mf-input--eye {
+    padding-right: 2.75rem;
+}
+
+.mf-eye-btn {
+    position: absolute;
+    right: 0.825rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-radius: 5px;
+    transition: color 0.15s ease, background 0.15s ease;
+    line-height: 1;
+}
+
+.mf-eye-btn:hover {
+    color: var(--text-secondary);
+    background: var(--gray-100);
+}
+
+/* --- Password strength popover --------------------------------------- */
+
+.pw-field {
+    position: relative;
+}
+
+.pw-popover {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    padding: 0.625rem 0.75rem 0.5rem;
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+    animation: pw-pop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pw-pop {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.pw-bars-row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 0.5rem;
+}
+
+.pw-bars {
+    display: flex;
+    gap: 3px;
+    flex: 1;
+}
+
+.pw-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 99px;
+    background: var(--gray-200, #e5e7eb);
+    transition: background 0.25s ease;
+}
+
+.pw-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    min-width: 74px;
+    text-align: right;
+    transition: color 0.25s ease;
+}
+
+.pw-reqs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.225rem 0.5rem;
+}
+
+.pw-req {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.pw-req--met {
+    color: #16a34a;
+}
+
+.pw-req-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+}
+
 /* --- Submit button --------------------------------------------------- */
 
 .mf-btn {
@@ -687,6 +844,24 @@
 
 [data-theme="dark"] .modal-close:hover {
     background: var(--gray-200);
+}
+
+[data-theme="dark"] .mf-eye-btn:hover {
+    background: var(--gray-200);
+}
+
+[data-theme="dark"] .pw-popover {
+    background: var(--bg-surface);
+    border-color: var(--border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .pw-bar {
+    background: var(--gray-300, #374151);
+}
+
+[data-theme="dark"] .pw-req--met {
+    color: #4ade80;
 }
 
 /* ====================================================================

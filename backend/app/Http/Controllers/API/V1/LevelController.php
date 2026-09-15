@@ -8,6 +8,7 @@ use App\Models\Question;
 use App\Models\Subject;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LevelController extends Controller
 {
@@ -26,23 +27,29 @@ class LevelController extends Controller
     // GET /v1/subjects/{subject}/levels
     public function index(Subject $subject)
     {
-        $completions = LevelCompletion::where('user_id', auth()->id())
-            ->where('subject_id', $subject->id)
-            ->get()
-            ->keyBy('level');
+        $userId = auth()->id();
 
-        $levels = [];
-        for ($level = 1; $level <= 5; $level++) {
-            $completion = $completions->get($level);
-            $locked     = $level > 1 && ! ($completions->get($level - 1)?->passed ?? false);
+        $levels = Cache::remember("level.status.{$userId}.{$subject->id}", 300, function () use ($userId, $subject) {
+            $completions = LevelCompletion::where('user_id', $userId)
+                ->where('subject_id', $subject->id)
+                ->get()
+                ->keyBy('level');
 
-            $levels[] = [
-                'level'     => $level,
-                'locked'    => $locked,
-                'completed' => $completion?->passed ?? false,
-                'score'     => $completion?->score,
-            ];
-        }
+            $levels = [];
+            for ($level = 1; $level <= 5; $level++) {
+                $completion = $completions->get($level);
+                $locked     = $level > 1 && ! ($completions->get($level - 1)?->passed ?? false);
+
+                $levels[] = [
+                    'level'     => $level,
+                    'locked'    => $locked,
+                    'completed' => $completion?->passed ?? false,
+                    'score'     => $completion?->score,
+                ];
+            }
+
+            return $levels;
+        });
 
         return response()->json([
             'success' => true,
@@ -152,17 +159,16 @@ class LevelController extends Controller
 
         $passed = $score === 10;
 
+        $userId = auth()->id();
+
         LevelCompletion::updateOrCreate(
-            [
-                'user_id'    => auth()->id(),
-                'subject_id' => $subject->id,
-                'level'      => $level,
-            ],
-            [
-                'score'  => $score,
-                'passed' => $passed,
-            ]
+            ['user_id' => $userId, 'subject_id' => $subject->id, 'level' => $level],
+            ['score' => $score, 'passed' => $passed]
         );
+
+        Cache::forget("level.status.{$userId}.{$subject->id}");
+        Cache::forget("dashboard.overview.{$userId}");
+        Cache::forget("progress.overview.{$userId}");
 
         return response()->json([
             'success' => true,

@@ -30,7 +30,6 @@ class PythonIntermediateQuestionsSeeder extends Seeder
 
         $topic = Topic::where('slug', 'python-intermediate')->firstOrFail();
 
-        Question::where('topic_id', $topic->id)->delete();
 
         foreach ($this->questions() as $qData) {
             $question = Question::create([

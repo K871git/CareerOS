@@ -6,6 +6,7 @@ import { profileSchema, type ProfileFormData } from '../schemas';
 import { useUpdateProfile } from '../hooks/useProfile';
 import { EXPERIENCE_LEVELS } from '../types';
 import type { UserProfile } from '../../../types/api';
+import '../profile.css';
 
 interface ProfileFormProps {
     profile: UserProfile | null;
