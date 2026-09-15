@@ -2,6 +2,8 @@
    Auth Modal
    ==================================================================== */
 
+/* ── Backdrop ─────────────────────────────────────────────────────── */
+
 .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -13,23 +15,42 @@
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
-    animation: modal-fade-in 0.2s ease both;
+    animation: modal-fade-in 0.32s ease both;
 }
 
 .modal-backdrop--out {
-    animation: modal-fade-out 0.18s ease forwards;
+    animation: modal-fade-out 0.22s ease forwards;
     pointer-events: none;
 }
 
+/* Backdrop animates the blur in/out — feels like focusing a lens */
 @keyframes modal-fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 }
 
 @keyframes modal-fade-out {
-    from { opacity: 1; }
-    to   { opacity: 0; }
+    from {
+        opacity: 1;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    to {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
 }
+
+/* ── Modal card ───────────────────────────────────────────────────── */
 
 .modal-card {
     position: relative;
@@ -44,11 +65,13 @@
         0 0 0 1px rgba(79, 70, 229, 0.12),
         0 8px 32px rgba(0, 0, 0, 0.12),
         0 32px 90px rgba(0, 0, 0, 0.22);
-    animation: modal-slide-in 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    /* Bigger spring: starts further down, starts smaller, bounces into place */
+    animation: modal-slide-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 .modal-card--out {
-    animation: modal-slide-out 0.18s cubic-bezier(0.4, 0, 1, 1) forwards;
+    /* Exit is snappier and more definite */
+    animation: modal-slide-out 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 /* Gradient accent line along the top edge */
@@ -65,36 +88,63 @@
 }
 
 @keyframes modal-slide-in {
-    from { opacity: 0; transform: translateY(24px) scale(0.96); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(52px) scale(0.86); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
 @keyframes modal-slide-out {
-    from { opacity: 1; transform: translateY(0) scale(1); }
-    to   { opacity: 0; transform: translateY(14px) scale(0.97); }
+    from { opacity: 1; transform: translateY(0)    scale(1); }
+    to   { opacity: 0; transform: translateY(22px) scale(0.9); }
 }
 
-/* --- Headline & form area — fade+slide in when mode switches --------- */
+/* ── Content inside the card ──────────────────────────────────────── */
 
-.modal-headline,
+/* Social buttons — first visible content, tiny delay */
+.mf-social {
+    animation: modal-content-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+/* Divider */
+.mf-divider {
+    animation: modal-content-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.13s both;
+}
+
+/* Headline re-animates on mode switch (has key prop) */
+.modal-headline {
+    animation: modal-content-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Form area re-animates on mode switch (has key prop) */
 .modal-form-area {
-    animation: modal-content-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: modal-content-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
 }
 
+/* Content fade+rise+unblur — gives a cinematic depth feel */
 @keyframes modal-content-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0px);
+    }
 }
 
-/* Reduced motion — keep functionality, drop movement */
+/* ── Reduced motion ───────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
     .modal-backdrop,
     .modal-backdrop--out,
     .modal-card,
     .modal-card--out,
     .modal-headline,
-    .modal-form-area {
+    .modal-form-area,
+    .mf-social,
+    .mf-divider {
         animation: none;
+        filter: none;
     }
 }
 
