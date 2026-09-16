@@ -15,21 +15,29 @@ import { SkillLevelCard } from '../components/SkillLevelCard';
 import { AchievementsCard, buildBadges } from '../components/AchievementsCard';
 import { WeakAreasList } from '../components/WeakAreasList';
 import { RecommendationsList } from '../components/RecommendationsList';
-import type { ProgressTrackItem } from '../../../types/api';
+import type { ProgressTrackItem, QuizBySubject } from '../../../types/api';
 import '../overview.css';
 
-function LearningTracksSection({ tracks }: { tracks: ProgressTrackItem[] }) {
+function LearningTracksSection({
+    tracks,
+    quizBySubject,
+}: {
+    tracks: ProgressTrackItem[];
+    quizBySubject: QuizBySubject[];
+}) {
     if (tracks.length === 0) {
         return (
             <div className="dash-empty">
                 <BookOpen size={34} className="dash-empty-icon" />
-                <p>No tracks started yet. <Link to="/learning">Browse learning tracks</Link>.</p>
+                <p>No learning tracks found. <Link to="/learning">Browse all</Link>.</p>
             </div>
         );
     }
     return (
-        <div className="prog-tracks-list">
-            {tracks.map(track => <TrackProgress key={track.id} track={track} />)}
+        <div className="tcard-list">
+            {tracks.map(track => (
+                <TrackProgress key={track.id} track={track} quizBySubject={quizBySubject} />
+            ))}
         </div>
     );
 }
@@ -86,7 +94,12 @@ export default function OverviewPage() {
                         <h2 className="dash-card-title">Learning Tracks</h2>
                         <Link to="/learning" className="dash-card-link">Browse all</Link>
                     </div>
-                    {progressLoading ? <SkeletonCard rows={3} /> : <LearningTracksSection tracks={progress?.tracks ?? []} />}
+                    {progressLoading
+                        ? <SkeletonCard rows={3} />
+                        : <LearningTracksSection
+                            tracks={progress?.tracks ?? []}
+                            quizBySubject={overview?.quiz_by_subject ?? []}
+                        />}
                 </div>
 
                 {/* Subject Performance */}

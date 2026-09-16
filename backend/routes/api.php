@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\CodingProblemController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
 use App\Http\Controllers\Api\V1\TheoryLevelController;
 use App\Http\Controllers\Api\V1\TheoryQuestionController;
+use App\Http\Controllers\Api\V1\AiController;
 
 Route::middleware('throttle:5,1')->prefix('v1/auth')->group(function () {
 
@@ -118,3 +119,9 @@ Route::middleware(['auth:sanctum', 'throttle:15,1'])->prefix('v1/battleground')-
     Route::post('/problems/{codingProblem:slug}/submit', [CodingProblemController::class, 'submit']);
     Route::get('/problems/{codingProblem:slug}/submissions', [CodingProblemController::class, 'submissions']);
 });
+
+Route::middleware(['auth:sanctum', 'throttle:20,1'])
+    ->post('v1/ai/explain', [AiController::class, 'explain']);
+
+Route::middleware(['auth:sanctum', 'throttle:20,1'])
+    ->post('v1/ai/explain/stream', [AiController::class, 'explainStream']);

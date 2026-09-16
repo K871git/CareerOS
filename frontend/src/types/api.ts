@@ -172,14 +172,22 @@ export interface MCQQuestion {
     options: QuestionOption[];
 }
 
+export interface AnswerOption {
+    id: number;
+    option_text: string;
+    is_correct: boolean;
+}
+
 export interface AssessmentAnswerResult {
     question_id: number;
     question: string;
+    difficulty: string | null;
     selected_option_id: number | null;
     selected_option: string | null;
     is_correct: boolean;
     correct_option: string | null;
     explanation: string | null;
+    options: AnswerOption[];
 }
 
 export interface AssessmentAttemptResult {

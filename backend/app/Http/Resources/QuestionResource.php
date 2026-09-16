@@ -14,7 +14,7 @@ class QuestionResource extends JsonResource
             'type'        => $this->type,
             'difficulty'  => $this->difficulty,
             'question'    => $this->question,
-            'options'     => $this->options->map(fn ($option) => [
+            'options'     => $this->options->shuffle()->map(fn ($option) => [
                 'id'          => $option->id,
                 'option_text' => $option->option_text,
             ]),
