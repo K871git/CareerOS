@@ -6,6 +6,7 @@ import QuestionProgress from '../../assessment/components/QuestionProgress';
 import QuestionCard from '../../assessment/components/QuestionCard';
 import QuestionOption from '../../assessment/components/QuestionOption';
 import PageLoader from '../../../components/ui/PageLoader';
+import type { MCQQuestion } from '../../../types/api';
 import '../../assessment/assessment.css';
 
 const TIMER_SECONDS = 15 * 60;
@@ -14,6 +15,13 @@ function formatTime(s: number) {
     const m   = Math.floor(s / 60);
     const sec = s % 60;
     return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+interface SavedQuizState {
+    questions:    MCQQuestion[];
+    answers:      Record<number, number>;
+    flagged:      number[];
+    currentIndex: number;
 }
 
 /* ── Submit confirm dialog ── */
@@ -59,22 +67,39 @@ export default function PracticeSessionPage() {
     const topicTitle  = (location.state as { topicTitle?: string } | null)?.topicTitle;
 
     const TIMER_KEY = `quiz-timer-${id}`;
+    const QUIZ_KEY  = `quiz-state-${id}`;
 
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [answers, setAnswers]           = useState<Record<number, number>>({});
-    const [flagged, setFlagged]           = useState<Set<number>>(new Set());
+    /* ── Restore persisted quiz state (lazy initialiser — runs once) ── */
+    const [savedQuiz] = useState<SavedQuizState | null>(() => {
+        if (!id) return null;
+        try {
+            const raw = sessionStorage.getItem(QUIZ_KEY);
+            return raw ? (JSON.parse(raw) as SavedQuizState) : null;
+        } catch { return null; }
+    });
+
+    const [currentIndex, setCurrentIndex] = useState(savedQuiz?.currentIndex ?? 0);
+    const [answers, setAnswers]           = useState<Record<number, number>>(savedQuiz?.answers ?? {});
+    const [flagged, setFlagged]           = useState<Set<number>>(new Set(savedQuiz?.flagged ?? []));
     const [submitError, setSubmitError]   = useState<string | null>(null);
     const [showConfirm, setShowConfirm]   = useState(false);
 
-    /* Timer — restored from sessionStorage on mount */
+    /* ── Timer — restored from sessionStorage ── */
     const [timerOn, setTimerOn]   = useState(false);
     const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const { data: questions = [], isLoading } = useQuestions(id);
+    /* Use saved questions as initialData so the question set stays identical after refresh */
+    const { data: questions = [], isLoading } = useQuestions(id, savedQuiz?.questions);
     const submitAttempt = useSubmitAttempt();
 
-    /* Restore timer from sessionStorage */
+    /* Refs so the timer auto-submit always reads the latest answers/questions (no stale closure) */
+    const answersRef   = useRef(answers);
+    const questionsRef = useRef(questions);
+    useEffect(() => { answersRef.current   = answers;   }, [answers]);
+    useEffect(() => { questionsRef.current = questions; }, [questions]);
+
+    /* ── Restore timer from sessionStorage ── */
     useEffect(() => {
         const saved = sessionStorage.getItem(TIMER_KEY);
         if (saved) {
@@ -82,13 +107,11 @@ export default function PracticeSessionPage() {
                 const { on, left } = JSON.parse(saved) as { on: boolean; left: number };
                 if (left > 0) { setTimerOn(on); setTimeLeft(left); }
                 else sessionStorage.removeItem(TIMER_KEY);
-            } catch {
-                sessionStorage.removeItem(TIMER_KEY);
-            }
+            } catch { sessionStorage.removeItem(TIMER_KEY); }
         }
     }, [TIMER_KEY]);
 
-    /* Persist timer state */
+    /* ── Persist timer state on every tick ── */
     useEffect(() => {
         if (timerOn) {
             sessionStorage.setItem(TIMER_KEY, JSON.stringify({ on: timerOn, left: timeLeft }));
@@ -97,7 +120,19 @@ export default function PracticeSessionPage() {
         }
     }, [timerOn, timeLeft, TIMER_KEY]);
 
-    /* Tick */
+    /* ── Persist full quiz state whenever answers / flags / position change ── */
+    useEffect(() => {
+        if (questions.length === 0) return;
+        const state: SavedQuizState = {
+            questions,
+            answers,
+            flagged:      Array.from(flagged),
+            currentIndex,
+        };
+        sessionStorage.setItem(QUIZ_KEY, JSON.stringify(state));
+    }, [questions, answers, flagged, currentIndex, QUIZ_KEY]);
+
+    /* ── Timer tick ── */
     useEffect(() => {
         if (timerOn && timeLeft > 0) {
             timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
@@ -107,12 +142,27 @@ export default function PracticeSessionPage() {
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
     }, [timerOn, timeLeft]);
 
-    /* Auto-submit on zero */
+    /* ── Handlers ── */
+    function clearSavedState() {
+        sessionStorage.removeItem(TIMER_KEY);
+        sessionStorage.removeItem(QUIZ_KEY);
+    }
+
+    function doSubmit() {
+        clearSavedState();
+        submitAttempt.mutate({
+            answers: questionsRef.current.map(q => ({
+                question_id:        q.id,
+                selected_option_id: answersRef.current[q.id],
+            })),
+        });
+    }
+
+    /* Auto-submit when timer hits zero — uses refs, never stale */
     useEffect(() => {
         if (timerOn && timeLeft === 0) doSubmit();
     }, [timerOn, timeLeft]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    /* ── Handlers ── */
     function handleSelectAnswer(questionId: number, optionId: number) {
         setAnswers(prev => ({ ...prev, [questionId]: optionId }));
         setSubmitError(null);
@@ -120,16 +170,6 @@ export default function PracticeSessionPage() {
 
     function handleNext() { if (currentIndex < questions.length - 1) setCurrentIndex(i => i + 1); }
     function handlePrev() { if (currentIndex > 0) setCurrentIndex(i => i - 1); }
-
-    function doSubmit() {
-        sessionStorage.removeItem(TIMER_KEY);
-        submitAttempt.mutate({
-            answers: questions.map(q => ({
-                question_id:        q.id,
-                selected_option_id: answers[q.id],
-            })),
-        });
-    }
 
     function handleSubmitRequest() {
         const firstUnanswered = questions.findIndex(q => answers[q.id] === undefined);
@@ -149,7 +189,7 @@ export default function PracticeSessionPage() {
         });
     }
 
-    /* ── Keyboard ── */
+    /* ── Keyboard shortcuts ── */
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (submitAttempt.isPending || isLoading || questions.length === 0 || showConfirm) return;
         const tag = (e.target as HTMLElement).tagName;
@@ -180,7 +220,7 @@ export default function PracticeSessionPage() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [handleKeyDown]);
 
-    /* ── States ── */
+    /* ── Loading / empty states ── */
     if (isLoading) {
         return (
             <div className="practice-page">
@@ -245,6 +285,12 @@ export default function PracticeSessionPage() {
                     </button>
 
                     <div className="quiz-top-right">
+                        {/* Restored-session indicator */}
+                        {savedQuiz && answeredCount > 0 && (
+                            <span className="quiz-restored-badge" title="Progress restored from your last session">
+                                ↩ Resumed
+                            </span>
+                        )}
                         {timerOn && (
                             <span className={`quiz-timer${timerWarning ? ' quiz-timer--warn' : ''}`}>
                                 <Clock size={13} />

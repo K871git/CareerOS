@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { assessmentService, type MCQSubmitPayload } from '../services/assessmentService';
 import type { MCQQuestion, AssessmentAttemptResult } from '../../../types/api';
 
-export function useQuestions(topicId: number) {
+export function useQuestions(topicId: number, initialData?: MCQQuestion[]) {
     return useQuery<MCQQuestion[]>({
         queryKey: ['questions', topicId],
         queryFn: async () => {
@@ -12,9 +12,12 @@ export function useQuestions(topicId: number) {
             return res.data.data ?? [];
         },
         enabled: topicId > 0,
-        staleTime: 0,
-        gcTime: 0,
-        refetchOnMount: 'always',
+        /* When restoring a saved session, use persisted questions so the set
+           stays identical to what the user was answering. */
+        staleTime:      initialData ? Infinity : 0,
+        gcTime:         0,
+        refetchOnMount: initialData ? false : 'always',
+        initialData,
     });
 }
 

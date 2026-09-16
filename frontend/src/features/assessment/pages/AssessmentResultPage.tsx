@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Sparkles } from 'lucide-react';
 import { useAttemptResult } from '../hooks/useMCQ';
@@ -28,12 +28,13 @@ function inlineFormat(text: string, autoCodeTerm?: string): string {
         }
     }
 
-    // Merge adjacent backtick terms that have only short plain text between them.
-    // The model often writes `SELECT` CustomerName `FROM` table → collapse into one chip.
+    // Merge adjacent backtick terms separated by whitespace only.
+    // e.g. `SELECT` `FROM` → `SELECT FROM`. Stops at non-whitespace to avoid
+    // destroying semantic text like `SELECT` CustomerName `FROM`.
     let prev = '';
     while (prev !== t) {
         prev = t;
-        t = t.replace(/`([^`\n]+)`([^`\n]{0,18})`([^`\n]+)`/, '`$1$2$3`');
+        t = t.replace(/`([^`\n]+)`(\s+)`([^`\n]+)`/, '`$1 $3`');
     }
 
     return t
@@ -154,13 +155,25 @@ function ExplainPanel({
     correctAnswer,
     wrongOptionId,
     variant = 'explain',
+    cachedText,
+    onCached,
 }: {
     questionId: number;
     correctAnswer?: string;
     wrongOptionId?: number | null;
     variant?: 'explain' | 'learn-more';
+    cachedText?: string;
+    onCached?: (text: string) => void;
 }) {
-    const [state, setState] = useState<ExplainState>({ status: 'idle' });
+    /* Initialise directly from cache when available — no fetch needed */
+    const [state, setState] = useState<ExplainState>(() =>
+        cachedText ? { status: 'done', text: cachedText } : { status: 'idle' }
+    );
+
+    /* Persist completed explanation to parent cache so re-mounts skip the fetch */
+    useEffect(() => {
+        if (state.status === 'done' && onCached) onCached(state.text);
+    }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function fetchExplanation() {
         setState({ status: 'loading' });
@@ -346,6 +359,8 @@ export default function AssessmentResultPage() {
 
     const { data: result, isLoading } = useAttemptResult(id);
     const [showWrongOnly, setShowWrongOnly] = useState(false);
+    /* Explanation cache — persists across "wrong only" filter toggles */
+    const explainCache = useRef<Map<number, string>>(new Map());
 
     if (isLoading) return <ResultSkeleton />;
 
@@ -539,12 +554,16 @@ export default function AssessmentResultPage() {
                                                 questionId={answer.question_id}
                                                 correctAnswer={answer.correct_option ?? undefined}
                                                 variant="learn-more"
+                                                cachedText={explainCache.current.get(answer.question_id)}
+                                                onCached={text => explainCache.current.set(answer.question_id, text)}
                                             />
                                         ) : (
                                             <ExplainPanel
                                                 questionId={answer.question_id}
                                                 correctAnswer={answer.correct_option ?? undefined}
                                                 wrongOptionId={answer.selected_option_id}
+                                                cachedText={explainCache.current.get(answer.question_id)}
+                                                onCached={text => explainCache.current.set(answer.question_id, text)}
                                             />
                                         )}
                                     </div>
