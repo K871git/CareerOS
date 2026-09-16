@@ -134,9 +134,10 @@ class LevelController extends Controller
             'answers.*' => 'required|integer',
         ]);
 
-        $topicIds    = Topic::where('subject_id', $subject->id)
-            ->where('level', $level)
-            ->pluck('id');
+        $topics       = Topic::where('subject_id', $subject->id)->where('level', $level)->get();
+        $topicIds     = $topics->pluck('id');
+        $topicTitleMap = $topics->pluck('title', 'id');
+
         $questionIds = array_keys($request->answers);
 
         $questions = Question::whereIn('id', $questionIds)
@@ -145,20 +146,35 @@ class LevelController extends Controller
             ->get()
             ->keyBy('id');
 
-        $score = 0;
+        $score         = 0;
+        $answerDetails = [];
+
         foreach ($request->answers as $questionId => $selectedOptionId) {
             $question = $questions->get($questionId);
             if (! $question) {
                 continue;
             }
-            $correct = $question->options->firstWhere('is_correct', true);
-            if ($correct && $correct->id == $selectedOptionId) {
+            $correctOption  = $question->options->firstWhere('is_correct', true);
+            $selectedOption = $question->options->firstWhere('id', $selectedOptionId);
+            $isCorrect      = $correctOption && $correctOption->id == $selectedOptionId;
+
+            if ($isCorrect) {
                 $score++;
             }
+
+            $answerDetails[] = [
+                'question_id'     => $question->id,
+                'question'        => $question->question,
+                'topic_id'        => $question->topic_id,
+                'topic_title'     => $topicTitleMap->get($question->topic_id, 'General'),
+                'difficulty'      => $question->difficulty,
+                'is_correct'      => $isCorrect,
+                'selected_option' => $selectedOption?->option_text ?? 'Not answered',
+                'correct_option'  => $correctOption?->option_text ?? '',
+            ];
         }
 
-        $passed = $score >= 8; // 80% pass mark, consistent with theory level 1 threshold
-
+        $passed = $score >= 8;
         $userId = auth()->id();
 
         LevelCompletion::updateOrCreate(
@@ -174,9 +190,10 @@ class LevelController extends Controller
             'success' => true,
             'message' => $passed ? 'Congratulations! Level completed.' : 'Keep practicing.',
             'data'    => [
-                'score'  => $score,
-                'total'  => 10,
-                'passed' => $passed,
+                'score'   => $score,
+                'total'   => 10,
+                'passed'  => $passed,
+                'answers' => $answerDetails,
             ],
         ]);
     }
