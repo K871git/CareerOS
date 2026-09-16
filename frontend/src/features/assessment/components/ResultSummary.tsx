@@ -33,9 +33,27 @@ function ScoreCircle({ pct }: { pct: number }) {
     );
 }
 
+const DIFFICULTY_ORDER = ['easy', 'medium', 'hard'];
+const DIFFICULTY_LABEL: Record<string, string> = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+const DIFFICULTY_COLOR: Record<string, string> = {
+    easy:   '#10b981',
+    medium: '#f59e0b',
+    hard:   '#ef4444',
+};
+
 export default function ResultSummary({ result }: Props) {
-    const wrong = result.total_questions - result.score;
+    const wrong  = result.total_questions - result.score;
     const passed = result.percentage >= 60;
+
+    // Group answers by difficulty
+    const byDiff: Record<string, { correct: number; total: number }> = {};
+    for (const a of result.answers) {
+        const key = (a.difficulty ?? 'unknown').toLowerCase();
+        if (!byDiff[key]) byDiff[key] = { correct: 0, total: 0 };
+        byDiff[key].total++;
+        if (a.is_correct) byDiff[key].correct++;
+    }
+    const diffEntries = DIFFICULTY_ORDER.filter(d => byDiff[d]);
 
     return (
         <div className="result-summary">
@@ -60,6 +78,34 @@ export default function ResultSummary({ result }: Props) {
                     <span className="result-stat-key">Total</span>
                 </div>
             </div>
+
+            {diffEntries.length > 1 && (
+                <div className="result-diff-row">
+                    {diffEntries.map(d => {
+                        const { correct, total } = byDiff[d];
+                        const pct = Math.round((correct / total) * 100);
+                        return (
+                            <div key={d} className="result-diff-chip">
+                                <span
+                                    className="result-diff-dot"
+                                    style={{ background: DIFFICULTY_COLOR[d] }}
+                                />
+                                <span className="result-diff-label">{DIFFICULTY_LABEL[d]}</span>
+                                <span className="result-diff-score">{correct}/{total}</span>
+                                <div className="result-diff-bar-bg">
+                                    <div
+                                        className="result-diff-bar-fill"
+                                        style={{
+                                            width: `${pct}%`,
+                                            background: DIFFICULTY_COLOR[d],
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }

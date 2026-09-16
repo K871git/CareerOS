@@ -331,3 +331,19 @@ h1, h2, h3, h4, h5, h6 {
 [data-theme="dark"] h4 {
   color: #f0f6fc;
 }
+
+/* ── Theme transition ─────────────────────────────────────────────────
+   Applied for ~400ms via JS when the user toggles light ↔ dark.
+   Uses !important so it overrides the shorter per-component transitions.
+   ──────────────────────────────────────────────────────────────────── */
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition:
+    background-color 0.35s ease !important,
+    color            0.35s ease !important,
+    border-color     0.35s ease !important,
+    box-shadow       0.35s ease !important,
+    fill             0.35s ease !important,
+    stroke           0.35s ease !important;
+}

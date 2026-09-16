@@ -671,7 +671,7 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
                     <p className="modal-subtitle">
                         {mode === 'login'
                             ? 'Sign in to continue your journey'
-                            : 'Join engineers preparing for their next role'}
+                            : 'Join engineers building their foundations'}
                     </p>
                 </div>
 

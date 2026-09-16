@@ -1,70 +1,102 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { Lock, CheckCircle2, ChevronRight, ArrowRight } from 'lucide-react';
+import { Lock, CheckCircle2, ChevronRight, ArrowRight, ClipboardList, Clock } from 'lucide-react';
 import { useTopics } from '../../learning/hooks/useLearning';
 import type { Topic } from '../../../types/api';
 import '../practice.css';
 
 const STRIP_COLORS = [
-    'linear-gradient(90deg, #6366f1, #8b5cf6)',
-    'linear-gradient(90deg, #8b5cf6, #a855f7)',
-    'linear-gradient(90deg, #f59e0b, #ef4444)',
+    'linear-gradient(135deg,#4f46e5,#7c3aed)',
+    'linear-gradient(135deg,#7c3aed,#a855f7)',
+    'linear-gradient(135deg,#f59e0b,#ef4444)',
 ];
 
-const LEVEL_LABELS = ['J', 'M', 'S'];
+const LEVEL_META = [
+    { label: 'J', name: 'Junior',  color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
+    { label: 'M', name: 'Mid',     color: '#7c3aed', bg: 'rgba(124,58,237,0.1)' },
+    { label: 'S', name: 'Senior',  color: '#d97706', bg: 'rgba(217,119,6,0.1)' },
+];
+
+/* Extract skill chips from topic description */
+function descToChips(description: string): string[] {
+    if (!description || description === '10 multiple choice questions.') return [];
+    return description
+        .split(/[,;]+/)
+        .map(s => s.trim().replace(/^(and|or)\s+/i, ''))
+        .filter(s => s.length > 2 && s.length < 32)
+        .slice(0, 5);
+}
 
 function LevelCard({ topic, index }: { topic: Topic; index: number }) {
-    const isFirst = index === 0;
-
-    const scoreBarWidth = topic.best_score > 0 ? `${(topic.best_score / 10) * 100}%` : '0%';
-    const isPassing = topic.best_score >= 7;
+    const meta       = LEVEL_META[index % LEVEL_META.length];
+    const scoreBarW  = topic.best_score > 0 ? `${(topic.best_score / 10) * 100}%` : '0%';
+    const isPassing  = topic.best_score >= 7;
+    const chips      = descToChips(topic.description);
 
     return (
-        <div
-            className={[
-                'prac-level-card',
-                topic.is_locked ? 'prac-level-card--locked' : '',
-                topic.is_completed ? 'prac-level-card--completed' : '',
-            ]
-                .filter(Boolean)
-                .join(' ')}
-        >
-            {/* Top color strip */}
-            <div
-                className="prac-level-strip"
-                style={{ background: STRIP_COLORS[index % STRIP_COLORS.length] }}
-            />
+        <div className={[
+            'prac-level-card',
+            topic.is_locked    ? 'prac-level-card--locked'    : '',
+            topic.is_completed ? 'prac-level-card--completed' : '',
+        ].filter(Boolean).join(' ')}>
 
-            {/* Body */}
+            {/* Gradient top strip */}
+            <div className="prac-level-strip" style={{ background: STRIP_COLORS[index % STRIP_COLORS.length] }} />
+
             <div className="prac-level-body">
-                <div className="prac-level-icon-wrap">
-                    <div className={`prac-level-icon prac-level-icon--${(index % 3) + 1}`}>
-                        {LEVEL_LABELS[index % LEVEL_LABELS.length]}
+                {/* Level badge row */}
+                <div className="prac-level-badge-row">
+                    <div
+                        className="prac-level-badge"
+                        style={{ background: meta.bg, color: meta.color, border: `1.5px solid ${meta.color}30` }}
+                    >
+                        <span className="prac-level-badge-letter">{meta.label}</span>
+                        <span className="prac-level-badge-name">{meta.name}</span>
                     </div>
+
                     {topic.is_locked && (
-                        <div className="prac-lock-badge">
-                            <Lock size={16} />
-                        </div>
+                        <div className="prac-lock-badge"><Lock size={12} /></div>
                     )}
                     {topic.is_completed && (
-                        <div className="prac-completed-badge">
-                            <CheckCircle2 size={11} /> Passed
-                        </div>
+                        <div className="prac-completed-badge"><CheckCircle2 size={11} /> Passed</div>
                     )}
                 </div>
 
                 <h3 className="prac-level-title">{topic.title}</h3>
-                <p className="prac-level-desc">
-                    {topic.description || '10 multiple choice questions.'}
-                </p>
 
-                {/* Score bar — only shown if attempted */}
+                {/* Skill chips from description */}
+                {chips.length > 0 ? (
+                    <div className="prac-level-chips">
+                        {chips.map(chip => (
+                            <span key={chip} className="prac-level-chip">{chip}</span>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="prac-level-desc">
+                        {topic.description || 'Multiple-choice questions on core concepts.'}
+                    </p>
+                )}
+
+                {/* Quiz info row */}
+                <div className="prac-level-info-row">
+                    <span className="prac-level-info">
+                        <ClipboardList size={11} /> 10 Questions
+                    </span>
+                    <span className="prac-level-info">
+                        <Clock size={11} /> 15 min
+                    </span>
+                    <span className="prac-level-info prac-level-info--pass">
+                        7/10 to unlock next
+                    </span>
+                </div>
+
+                {/* Best score bar */}
                 {topic.best_score > 0 && (
                     <div className="prac-score-row">
                         <span className="prac-score-label">Best</span>
                         <div className="prac-score-bar">
                             <div
                                 className={`prac-score-fill${isPassing ? ' prac-score-fill--pass' : ''}`}
-                                style={{ width: scoreBarWidth }}
+                                style={{ width: scoreBarW }}
                             />
                         </div>
                         <span className="prac-score-num">{topic.best_score}/10</span>
@@ -72,14 +104,12 @@ function LevelCard({ topic, index }: { topic: Topic; index: number }) {
                 )}
             </div>
 
-            {/* Footer */}
+            {/* Footer CTA */}
             <div className="prac-level-footer">
                 {topic.is_locked ? (
                     <p className="prac-locked-hint">
                         <Lock size={12} />
-                        {isFirst
-                            ? 'Locked'
-                            : 'Complete the previous level to unlock'}
+                        {index === 0 ? 'Locked' : 'Complete the previous level to unlock'}
                     </p>
                 ) : topic.is_completed ? (
                     <Link
@@ -105,11 +135,11 @@ function LevelCard({ topic, index }: { topic: Topic; index: number }) {
 
 export default function PracticeLevelPage() {
     const { subjectId } = useParams<{ subjectId: string }>();
-    const id = Number(subjectId);
-    const location = useLocation();
-    const subjectTitle = (location.state as any)?.subjectTitle as string | undefined;
-    const trackTitle   = (location.state as any)?.trackTitle  as string | undefined;
-    const arenaId      = (location.state as any)?.arenaId     as string | undefined;
+    const id            = Number(subjectId);
+    const location      = useLocation();
+    const subjectTitle  = (location.state as { subjectTitle?: string; trackTitle?: string; arenaId?: string } | null)?.subjectTitle;
+    const trackTitle    = (location.state as { subjectTitle?: string; trackTitle?: string; arenaId?: string } | null)?.trackTitle;
+    const arenaId       = (location.state as { subjectTitle?: string; trackTitle?: string; arenaId?: string } | null)?.arenaId;
 
     const { data: topics = [], isLoading } = useTopics(id);
 
@@ -120,9 +150,9 @@ export default function PracticeLevelPage() {
                     <div className="skeleton" style={{ height: 14, width: 200, borderRadius: 6, marginBottom: 24 }} />
                     <div className="skeleton" style={{ height: 32, width: 260, borderRadius: 8, marginBottom: 8 }} />
                     <div className="skeleton" style={{ height: 18, width: 380, borderRadius: 6, marginBottom: 32 }} />
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                        {[0, 1, 2].map((i) => (
-                            <div key={i} className="skeleton" style={{ height: 260, borderRadius: 16 }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1rem' }}>
+                        {[0, 1, 2].map(i => (
+                            <div key={i} className="skeleton" style={{ height: 280, borderRadius: 16 }} />
                         ))}
                     </div>
                 </div>
@@ -133,6 +163,7 @@ export default function PracticeLevelPage() {
     return (
         <div className="practice-page">
             <div className="practice-inner">
+
                 {/* Breadcrumb */}
                 <div className="prac-breadcrumb">
                     <Link to="/practice" className="prac-breadcrumb-link">Practice</Link>
@@ -151,12 +182,9 @@ export default function PracticeLevelPage() {
                 {/* Header */}
                 <div className="prac-level-header">
                     <h1 className="prac-level-subject-title">{subjectTitle ?? 'Practice Levels'}</h1>
-                    {trackTitle && (
-                        <p className="prac-level-subject-desc">{trackTitle}</p>
-                    )}
+                    {trackTitle && <p className="prac-level-subject-desc">{trackTitle}</p>}
                 </div>
 
-                {/* Empty state */}
                 {topics.length === 0 ? (
                     <div className="practice-empty">
                         <p>No practice levels available for this subject yet.</p>
@@ -172,12 +200,6 @@ export default function PracticeLevelPage() {
                     </div>
                 )}
 
-                {/* Unlock rule */}
-                {topics.length > 0 && (
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                        Score 7 or more out of 10 to unlock the next level.
-                    </p>
-                )}
             </div>
         </div>
     );

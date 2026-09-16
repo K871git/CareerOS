@@ -24,12 +24,21 @@ class AssessmentAttemptResource extends JsonResource
             'answers'         => $this->answers->map(fn ($answer) => [
                 'question_id'        => $answer->question_id,
                 'question'           => $answer->question->question,
+                'difficulty'         => $answer->question->difficulty,
                 'selected_option_id' => $answer->selected_option_id,
                 'selected_option'    => $answer->selectedOption?->option_text,
                 'is_correct'         => $answer->is_correct,
                 'correct_option'     => $answer->question->options
                     ->firstWhere('is_correct', true)?->option_text,
                 'explanation'        => $answer->question->explanation,
+                'options'            => $answer->question->options
+                    ->sortBy('option_text')   // alphabetical → correct answer not always first
+                    ->values()
+                    ->map(fn ($opt) => [
+                        'id'          => $opt->id,
+                        'option_text' => $opt->option_text,
+                        'is_correct'  => (bool) $opt->is_correct,
+                    ]),
             ]),
         ];
     }

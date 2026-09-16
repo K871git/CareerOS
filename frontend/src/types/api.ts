@@ -63,10 +63,22 @@ export interface LevelStatus {
     score: number | null;
 }
 
+export interface ExamAnswerDetail {
+    question_id: number;
+    question: string;
+    topic_id: number;
+    topic_title: string;
+    difficulty: string;
+    is_correct: boolean;
+    selected_option: string;
+    correct_option: string;
+}
+
 export interface ExamResult {
     score: number;
     total: number;
     passed: boolean;
+    answers: ExamAnswerDetail[];
 }
 
 export interface Lesson {
@@ -172,14 +184,22 @@ export interface MCQQuestion {
     options: QuestionOption[];
 }
 
+export interface AnswerOption {
+    id: number;
+    option_text: string;
+    is_correct: boolean;
+}
+
 export interface AssessmentAnswerResult {
     question_id: number;
     question: string;
+    difficulty: string | null;
     selected_option_id: number | null;
     selected_option: string | null;
     is_correct: boolean;
     correct_option: string | null;
     explanation: string | null;
+    options: AnswerOption[];
 }
 
 export interface AssessmentAttemptResult {

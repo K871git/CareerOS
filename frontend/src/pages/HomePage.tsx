@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Users, Code2, BarChart2 } from 'lucide-react';
+import { Link, useOutletContext } from 'react-router-dom';
+import {
+    ArrowRight, CheckCircle, Users, Code2, BarChart2,
+    BookOpen, GitMerge, Cpu, Shield, TrendingUp, Zap,
+} from 'lucide-react';
 import type { GuestOutletContext } from '../layouts/GuestLayout';
 import StarCanvas from '../components/ui/StarCanvas';
 import './home.css';
 
-/* Scroll animation — adds .is-visible to every [data-animate] element
-   as it enters the viewport. CSS handles the actual transition.          */
 function useScrollAnimation() {
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -24,106 +25,214 @@ function useScrollAnimation() {
     }, []);
 }
 
-/* ── Data ─────────────────────────────────────────────────────────────── */
+/* ── Data ─────────────────────────────────────────────────────── */
 
-const painPoints = [
+const engineerTraits = [
+    'Understand programming and software engineering fundamentals',
+    'Review and verify AI-generated code critically',
+    'Identify bugs, security risks, and performance problems',
+    'Make informed technical and architectural decisions',
+    'Use AI tools effectively — without blindly trusting them',
+    'Test, validate, and take ownership of software behavior',
+];
+
+const capabilities = [
     {
-        emoji: '📚',
-        title: 'Endless tutorials, zero structure',
-        desc: "You watch videos, read blogs, switch courses. But nothing tells you what to study next or whether you're covering the right topics.",
+        icon: <BookOpen size={20} />,
+        title: 'Strong Fundamentals',
+        desc: 'Deep understanding of programming, system design, databases, APIs, and the principles that hold real software together.',
     },
     {
-        emoji: '🎯',
-        title: "You don't know what interviewers ask",
-        desc: "Generic study content rarely matches what actually gets asked. You're guessing what matters and hoping for the best.",
+        icon: <Code2 size={20} />,
+        title: 'Practical Problem-Solving',
+        desc: 'Apply concepts to real engineering scenarios — not just theoretical exercises. Build the ability to reason through actual problems.',
     },
     {
-        emoji: '📉',
-        title: 'No way to measure readiness',
-        desc: "You practice, but have no feedback loop. No one tells you where you're weak or how close you are to being interview-ready.",
+        icon: <GitMerge size={20} />,
+        title: 'Code Review & Debugging',
+        desc: 'Read code critically. Identify issues, performance problems, and security risks the way experienced engineers do.',
+    },
+    {
+        icon: <Cpu size={20} />,
+        title: 'AI-Assisted Engineering',
+        desc: 'Work effectively with AI tools — using them as force multipliers while retaining full engineering understanding and judgment.',
+    },
+    {
+        icon: <Shield size={20} />,
+        title: 'Testing & Technical Judgment',
+        desc: 'Know what good software looks like. Validate behavior, understand trade-offs, and make decisions you can defend and own.',
+    },
+    {
+        icon: <TrendingUp size={20} />,
+        title: 'Continuous Growth',
+        desc: 'Engineering practices evolve. Build the habits and mindset to stay capable as technologies and workflows change around you.',
+    },
+];
+
+const pillars = [
+    {
+        key: 'understand',
+        num: '01',
+        label: 'Understand',
+        color: 'indigo',
+        desc: 'Every concept explained deeply — what it is, why it exists, how it works, when to use it, and the real-world trade-offs.',
+    },
+    {
+        key: 'practice',
+        num: '02',
+        label: 'Practice',
+        color: 'violet',
+        desc: 'MCQs, scenario-based questions, debugging problems, and practical engineering challenges that build real ability.',
+    },
+    {
+        key: 'measure',
+        num: '03',
+        label: 'Measure',
+        color: 'blue',
+        desc: 'Track your performance by topic, subject, and difficulty level. See exactly where you stand and what needs improvement.',
+    },
+    {
+        key: 'evolve',
+        num: '04',
+        label: 'Evolve',
+        color: 'emerald',
+        desc: 'Understand AI-assisted development, modern engineering practices, and the changing responsibilities of engineers.',
+    },
+];
+
+const steps = [
+    {
+        number: '01',
+        title: 'Assess Your Foundations',
+        description: 'Complete a quick engineering assessment to understand your current skills, experience level, and target role — so your path starts in the right place.',
+    },
+    {
+        number: '02',
+        title: 'Follow Structured Paths',
+        description: 'Work through engineering tracks built around real concepts, not random tutorials. Know exactly what to study and why it builds toward something meaningful.',
+    },
+    {
+        number: '03',
+        title: 'Practice, Measure & Grow',
+        description: 'Solve real engineering problems, track your performance over time, identify weak areas, and systematically close the gaps that matter.',
     },
 ];
 
 const featureRows = [
     {
         num: '01',
-        title: 'A Learning Path That Makes Sense',
-        desc: 'No more random tutorials or scattered blog posts. Follow curated tracks — subjects, topics, and bite-sized lessons in the exact order that builds real understanding.',
+        title: 'Structured Engineering Paths',
+        desc: 'Follow curated tracks across subjects, topics, and bite-sized lessons — ordered to build real engineering understanding, not surface-level familiarity with definitions.',
         visual: 'track' as const,
     },
     {
         num: '02',
-        title: 'Practice What Interviewers Actually Ask',
-        desc: 'MCQ and theory questions built around real interview patterns. Instant scoring and detailed feedback — every session makes you sharper, not just busier.',
+        title: 'Real Engineering Practice',
+        desc: 'MCQs, scenario questions, and conceptual problems built around real engineering challenges. Instant feedback so you know what you got right — and more importantly, why.',
         visual: 'question' as const,
     },
     {
         num: '03',
-        title: 'A Mirror for Your Weak Areas',
-        desc: 'See exactly where you stand across every subject and topic. Stop wasting time on what you already know — fix what is actually holding you back.',
+        title: 'Know Exactly Where You Stand',
+        desc: 'Performance tracked by subject, topic, and difficulty level. Stop spending time on what you already know — focus on what actually needs work.',
         visual: 'analytics' as const,
     },
-];
-
-const steps = [
-    { number: '01', title: 'Assess Your Level', description: 'Take a quick career assessment to pinpoint where you stand — your skills, experience, and target role captured in one place.' },
-    { number: '02', title: 'Follow Your Track', description: 'Get a structured path tailored to your level. No more wondering what to study — the track tells you exactly what to do next.' },
-    { number: '03', title: 'Practice & Track Growth', description: 'Solve real interview questions, see scores instantly, and watch your weak areas shrink — systematically, not randomly.' },
 ];
 
 const audiences = [
     {
         icon: <Users size={20} />,
-        label: 'Placement Students',
-        badge: 'Freshers',
+        label: 'Students & Beginners',
+        badge: 'Getting Started',
         color: 'green',
-        description: 'Crack campus placements at top product companies. Cover every topic that shows up — from core CS to full-stack development — with a track built for freshers.',
-        perks: ['Campus-focused question bank', 'Fundamentals to advanced', 'Track your readiness'],
+        description: 'Build strong programming fundamentals, understand how real software systems work, and develop the engineering mindset required for the modern industry.',
+        perks: ['Programming fundamentals to advanced concepts', 'Structured step-by-step learning paths', 'Measurable progress at every stage'],
     },
     {
         icon: <Code2 size={20} />,
         label: 'Junior Engineers',
         badge: '0–2 years',
         color: 'blue',
-        description: 'Fill the gaps that experience has not covered yet. Sharpen your fundamentals and walk into your first mid-level interview with real confidence — not hope.',
-        perks: ['Gap analysis across topics', 'Real-world engineering concepts', 'Interview-style practice'],
+        description: 'Identify and close the gaps experience has not yet covered. Strengthen your technical foundations and develop the engineering judgment that makes you reliable.',
+        perks: ['Gap analysis across core engineering topics', 'Real-world concepts beyond the basics', 'Multi-discipline practice and assessment'],
     },
     {
         icon: <BarChart2 size={20} />,
-        label: 'Mid-level Engineers',
+        label: 'Working Engineers',
         badge: '2–5 years',
         color: 'purple',
-        description: 'Prove your seniority. Tackle advanced questions, system concepts, and benchmark exactly where you stand before your next role switch.',
-        perks: ['Advanced & hard-level questions', 'System design coverage', 'Weak area targeting'],
+        description: 'Stay capable as engineering practices evolve. Deepen your understanding of systems, architecture, AI-assisted development, and the judgment that defines strong senior engineers.',
+        perks: ['Advanced topics and system design', 'AI-assisted development content', 'Targeted weak area improvement'],
     },
 ];
 
 const techGroups = [
-    { label: 'Languages', items: ['JavaScript', 'TypeScript', 'Python', 'PHP'] },
-    { label: 'Frameworks & Tools', items: ['React', 'Laravel', 'REST APIs'] },
-    { label: 'CS Concepts', items: ['Data Structures', 'Algorithms', 'System Design', 'OOP', 'SQL'] },
+    {
+        label: 'Languages & Frameworks',
+        icon: <Code2 size={20} />,
+        color: 'indigo',
+        desc: 'Core programming languages and the frameworks built around them — the raw material of modern software.',
+        items: ['JavaScript', 'TypeScript', 'Python', 'PHP', 'React', 'Laravel'],
+    },
+    {
+        label: 'Engineering Concepts',
+        icon: <Cpu size={20} />,
+        color: 'violet',
+        desc: 'Foundational CS and software engineering principles every professional engineer must understand deeply.',
+        items: ['Data Structures', 'System Design', 'Databases', 'APIs', 'OOP', 'Networking'],
+    },
+    {
+        label: 'Modern Engineering',
+        icon: <Zap size={20} />,
+        color: 'emerald',
+        desc: 'Practices and mindsets that define engineering today — including how to work alongside AI effectively.',
+        items: ['AI-Assisted Dev', 'Code Review', 'Testing', 'Security', 'SDLC'],
+    },
+];
+
+const aiFeatures = [
+    {
+        icon: '💡',
+        title: 'Explain why answers are correct',
+        desc: 'Understand the reasoning behind every answer, not just which option to pick.',
+    },
+    {
+        icon: '🔍',
+        title: 'Simplify difficult concepts',
+        desc: 'Get clearer, plain-language explanations for complex engineering topics on demand.',
+    },
+    {
+        icon: '🎯',
+        title: 'Hints when you are stuck',
+        desc: 'Guided thinking that points you in the right direction without giving away the answer.',
+    },
+    {
+        icon: '✅',
+        title: 'Assessment stays objective',
+        desc: 'AI assists your learning. Your scores are always based on real, verified answers.',
+    },
 ];
 
 const previewStats = [
-    { val: '24', lbl: 'Quizzes', color: '#4f46e5' },
-    { val: '78%', lbl: 'Avg Score', color: '#16a34a' },
-    { val: '8', lbl: 'Topics', color: '#d97706' },
-    { val: '5🔥', lbl: 'Streak', color: '#dc2626' },
+    { val: '12', lbl: 'Lessons', color: '#4f46e5' },
+    { val: '84%', lbl: 'Accuracy', color: '#16a34a' },
+    { val: 'L2',  lbl: 'JS Level', color: '#7c3aed' },
+    { val: '6',   lbl: 'Topics',   color: '#0ea5e9' },
 ];
 
 const previewSubjects = [
-    { label: 'JavaScript', pct: 82 },
-    { label: 'React', pct: 71 },
-    { label: 'Data Structures', pct: 58 },
+    { label: 'JavaScript',    pct: 82 },
+    { label: 'System Design', pct: 64 },
+    { label: 'Data Structures', pct: 48 },
 ];
 
-/* ── Feature visual mini-mockups ─────────────────────────────────────── */
+/* ── Feature mini-mockups ─────────────────────────────────────── */
 
 function FeatureVisualTrack() {
     return (
         <div className="fv-track">
             <div className="fv-track-header">
-                <span className="fv-track-name">JavaScript Track</span>
+                <span className="fv-track-name">JavaScript — Level 2</span>
                 <span className="fv-track-pct">64%</span>
             </div>
             <div className="fv-track-progress-bar">
@@ -140,7 +249,7 @@ function FeatureVisualTrack() {
                     <span className="fv-lesson-arrow">→</span>Async &amp; Promises
                 </div>
                 <div className="fv-lesson">
-                    <span className="fv-lesson-dot">○</span>DOM &amp; Events
+                    <span className="fv-lesson-dot">○</span>Event Loop &amp; Runtime
                 </div>
             </div>
         </div>
@@ -152,7 +261,7 @@ function FeatureVisualQuestion() {
         <div className="fv-question">
             <div className="fv-q-meta">JavaScript · Medium</div>
             <div className="fv-q-text">
-                What does <code className="fv-code">typeof null</code> return?
+                What does <code className="fv-code">typeof null</code> return in JavaScript?
             </div>
             <div className="fv-options">
                 <div className="fv-option">"null"</div>
@@ -168,9 +277,9 @@ function FeatureVisualQuestion() {
 
 function FeatureVisualAnalytics() {
     const bars = [
-        { label: 'JavaScript',      pct: 82, color: '#4f46e5' },
-        { label: 'React',           pct: 61, color: '#7c3aed' },
-        { label: 'Data Structures', pct: 38, color: '#a855f7' },
+        { label: 'JavaScript',    pct: 82, color: '#4f46e5' },
+        { label: 'System Design', pct: 54, color: '#7c3aed' },
+        { label: 'Networking',    pct: 31, color: '#a855f7' },
     ];
     return (
         <div className="fv-analytics">
@@ -185,7 +294,7 @@ function FeatureVisualAnalytics() {
             ))}
             <div className="fv-weak-box">
                 <span className="fv-weak-dot" />
-                Focus next: DS Trees &amp; Graphs
+                Focus next: Networking fundamentals
             </div>
         </div>
     );
@@ -197,7 +306,7 @@ const featureVisuals = {
     analytics: <FeatureVisualAnalytics />,
 };
 
-/* ── Page ─────────────────────────────────────────────────────────────── */
+/* ── Page ─────────────────────────────────────────────────────── */
 
 export default function HomePage() {
     const { openModal } = useOutletContext<GuestOutletContext>();
@@ -205,7 +314,7 @@ export default function HomePage() {
 
     return (
         <>
-            {/* ── Hero ───────────────────────────────────────────────── */}
+            {/* ══ 1. HERO ══════════════════════════════════════════ */}
             <section className="hero">
                 <div className="hero-blob hero-blob-1" />
                 <div className="hero-blob hero-blob-2" />
@@ -227,35 +336,36 @@ export default function HomePage() {
                     <svg className="hero-deco-shape shape-12" viewBox="0 0 32 30"><polygon points="16,3 30,27 2,27" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>
                 </div>
 
-                {/* Split: text left / mockup right */}
                 <div className="hero-split">
                     <div className="hero-text">
                         <div className="hero-badge">
                             <span className="hero-badge-dot" />
-                            Now in Beta — Free for early users
+                            CareerOS · Engineering Growth Platform
                         </div>
                         <h1 className="hero-title">
-                            Stop guessing.<br />
-                            Start{' '}<span className="hero-title-gradient">getting hired.</span>
+                            The Path for<br />
+                            <span className="hero-title-gradient">NextGen Engineers.</span>
                         </h1>
                         <p className="hero-description">
-                            CareerOS gives you a structured prep system — curated learning tracks, real interview questions, and a weak-area tracker that shows exactly what to fix next.
+                            Build strong fundamentals. Practice real engineering problems. Understand AI-assisted development. Grow into the engineer the future demands.
                         </p>
                         <div className="hero-actions">
                             <button className="btn-primary" onClick={() => openModal('register')}>
-                                Get started free <ArrowRight size={16} />
+                                Start Your Engineering Journey <ArrowRight size={16} />
                             </button>
-                            <a href="#how-it-works" className="hero-ghost-link">See how it works</a>
+                            <a href="#features" className="hero-ghost-link">
+                                See How It Works
+                            </a>
                         </div>
                         <div className="hero-value-row">
                             <span className="hero-value-item">
-                                <CheckCircle size={14} className="hero-value-icon" /> Structured tracks
+                                <CheckCircle size={14} className="hero-value-icon" /> Engineering fundamentals
                             </span>
                             <span className="hero-value-item">
-                                <CheckCircle size={14} className="hero-value-icon" /> Real interview questions
+                                <CheckCircle size={14} className="hero-value-icon" /> AI-assisted development
                             </span>
                             <span className="hero-value-item">
-                                <CheckCircle size={14} className="hero-value-icon" /> Measurable progress
+                                <CheckCircle size={14} className="hero-value-icon" /> Measurable growth
                             </span>
                         </div>
                     </div>
@@ -280,9 +390,9 @@ export default function HomePage() {
                                     <div className="preview-welcome-row">
                                         <div>
                                             <div className="preview-welcome-title">Good morning, Rahul 👋</div>
-                                            <div className="preview-welcome-sub">5-day streak — keep it up.</div>
+                                            <div className="preview-welcome-sub">JavaScript — Level 2 active.</div>
                                         </div>
-                                        <div className="preview-cta-pill">Start Practice →</div>
+                                        <div className="preview-cta-pill">Continue →</div>
                                     </div>
                                     <div className="preview-stats-row">
                                         {previewStats.map(s => (
@@ -307,16 +417,16 @@ export default function HomePage() {
                                         </div>
                                         <div className="preview-panel">
                                             <div className="preview-panel-title">Weak Areas</div>
-                                            {['JS Closures & Scope', 'Promise chaining', 'DB Indexing'].map(w => (
+                                            {['Networking basics', 'Promise chaining', 'DB Indexing'].map(w => (
                                                 <div className="preview-weak-row" key={w}>
                                                     <span className="preview-weak-dot" />
                                                     <span>{w}</span>
                                                 </div>
                                             ))}
-                                            <div className="preview-panel-title" style={{ marginTop: '0.625rem' }}>Next Up</div>
+                                            <div className="preview-panel-title" style={{ marginTop: '0.625rem' }}>Recommended</div>
                                             <div className="preview-rec-row">
                                                 <div className="preview-rec-icon-box" />
-                                                <span>Advanced JS Closures → 12 questions</span>
+                                                <span>Networking Fundamentals → 10 Q</span>
                                             </div>
                                         </div>
                                     </div>
@@ -326,7 +436,6 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Stats strip */}
                 <div className="hero-stats-strip">
                     <div className="hero-stat-item">
                         <span className="hero-stat-value">500+</span>
@@ -335,46 +444,113 @@ export default function HomePage() {
                     <div className="hero-stat-sep" />
                     <div className="hero-stat-item">
                         <span className="hero-stat-value">10+</span>
-                        <span className="hero-stat-label">Learning Tracks</span>
+                        <span className="hero-stat-label">Engineering Tracks</span>
                     </div>
                     <div className="hero-stat-sep" />
                     <div className="hero-stat-item">
-                        <span className="hero-stat-value">3</span>
-                        <span className="hero-stat-label">Engineering Levels</span>
+                        <span className="hero-stat-value">8</span>
+                        <span className="hero-stat-label">Theory Areas</span>
                     </div>
                 </div>
             </section>
 
-            {/* ── Pain Points ────────────────────────────────────────── */}
-            <section className="pain-section">
-                <StarCanvas count={50} />
-                <div className="pain-inner">
-                    <div className="pain-header" data-animate>
-                        <span className="pain-eyebrow">Sound familiar?</span>
-                        <h2 className="pain-title">Interview prep is broken.</h2>
-                        <p className="pain-sub">You're putting in the hours. But without structure, effort doesn't compound.</p>
+            {/* ══ 2. WHY CAREEROS ══════════════════════════════════ */}
+            <section className="why-section">
+                <StarCanvas count={80} />
+                <div className="why-inner">
+                    <div className="why-left" data-animate>
+                        <span className="section-label section-label--light">Why CareerOS?</span>
+                        <h2 className="why-title">
+                            Engineering is evolving.<br />Are you growing with it?
+                        </h2>
+                        <p className="why-desc">
+                            AI is becoming part of how software is built — from generating code to assisting with debugging, testing, and implementation. The role of the engineer is changing.
+                        </p>
+                        <p className="why-desc">
+                            But engineers are not becoming obsolete. The engineers who thrive are those who understand technology deeply, can verify what AI produces, and take real ownership of the software they build.
+                        </p>
+                        <blockquote className="why-belief">
+                            AI can assist with implementation. Engineering understanding, verification, responsibility, and judgment remain essential.
+                        </blockquote>
                     </div>
-                    <div className="pain-grid">
-                        {painPoints.map((p, i) => (
-                            <div className="pain-card" key={p.title} data-animate data-delay={String(i + 1)}>
-                                <div className="pain-emoji">{p.emoji}</div>
-                                <h3 className="pain-card-title">{p.title}</h3>
-                                <p className="pain-card-desc">{p.desc}</p>
+                    <div className="why-right" data-animate data-delay="1">
+                        <div className="why-traits-label">A NextGen Engineer can:</div>
+                        <ul className="why-traits-list">
+                            {engineerTraits.map(trait => (
+                                <li key={trait} className="why-trait-item">
+                                    <CheckCircle size={15} className="why-trait-check" />
+                                    {trait}
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="why-platform-note">
+                            CareerOS is built to help you develop all of these capabilities.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══ 3. CAPABILITIES ══════════════════════════════════ */}
+            <section className="capabilities-section">
+                <StarCanvas count={40} />
+                <div className="cap-inner">
+                    <div className="section-header" data-animate>
+                        <span className="section-label">What you will build</span>
+                        <h2 className="section-title">Capabilities that define<br />a strong engineer.</h2>
+                        <p className="section-description">
+                            CareerOS focuses on the real skills that matter in the modern engineering world — not just what shows up on a topic checklist.
+                        </p>
+                    </div>
+                    <div className="cap-grid">
+                        {capabilities.map((c, i) => (
+                            <div className="cap-card" key={c.title} data-animate data-delay={String((i % 3) + 1)}>
+                                <div className="cap-icon">{c.icon}</div>
+                                <h3 className="cap-title">{c.title}</h3>
+                                <p className="cap-desc">{c.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* ── How it Works ───────────────────────────────────────── */}
+            {/* ══ 4. PILLARS ════════════════════════════════════════ */}
+            <section className="pillars-section">
+                <div className="section-inner">
+                    <div className="section-header" data-animate>
+                        <span className="section-label">How it is structured</span>
+                        <h2 className="section-title">Learn. Practice. Measure. Evolve.</h2>
+                        <p className="section-description">
+                            Four pillars that work together to build real engineering capability — not just isolated knowledge.
+                        </p>
+                    </div>
+                    <div className="pillars-grid">
+                        {pillars.map((p, i) => (
+                            <div
+                                className={`pillar-card pillar-card--${p.color}`}
+                                key={p.key}
+                                data-animate
+                                data-delay={String(i + 1)}
+                            >
+                                <div className="pillar-num">{p.num}</div>
+                                <h3 className="pillar-label">{p.label}</h3>
+                                <p className="pillar-desc">{p.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ══ 5. HOW IT WORKS ══════════════════════════════════ */}
             <section className="how-it-works" id="how-it-works">
                 <StarCanvas count={120} />
                 <div className="section-inner">
                     <div className="section-header" data-animate>
-                        <span className="section-label section-label--light">How it works</span>
-                        <h2 className="section-title section-title--light">From scattered to structured — in three steps</h2>
+                        <span className="section-label section-label--light">The journey</span>
+                        <h2 className="section-title section-title--light">
+                            A clear path from where you are<br />to where you want to be.
+                        </h2>
                         <p className="section-description section-description--light">
-                            No fluff, no confusion. A clear system that takes you from where you are to where you need to be.
+                            No random tutorials. No guessing. A structured system that builds engineering capability step by step.
                         </p>
                     </div>
                     <div className="steps-grid">
@@ -389,7 +565,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── Features — alternating rows ────────────────────────── */}
+            {/* ══ 6. FEATURES ══════════════════════════════════════ */}
             <section className="features" id="features">
                 <StarCanvas count={42} />
                 <div className="features-inner">
@@ -397,7 +573,7 @@ export default function HomePage() {
                         <span className="section-label">What you get</span>
                         <h2 className="section-title">Everything you need.<br />Nothing you don't.</h2>
                         <p className="section-description">
-                            Built specifically for software engineers — not a generic quiz app, but a focused system that respects your time and rewards your effort.
+                            Built specifically for engineers — a focused system that respects your time and actually builds understanding, not just familiarity.
                         </p>
                     </div>
                     {featureRows.map((f, i) => (
@@ -420,15 +596,15 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── Audience ───────────────────────────────────────────── */}
+            {/* ══ 7. WHO IT'S FOR ══════════════════════════════════ */}
             <section className="audience-section" id="for-who">
                 <StarCanvas count={42} />
                 <div className="section-inner">
                     <div className="section-header" data-animate>
-                        <span className="section-label">Built for you</span>
-                        <h2 className="section-title">For developers at every stage</h2>
+                        <span className="section-label">Who it is for</span>
+                        <h2 className="section-title">For engineers at every stage.</h2>
                         <p className="section-description">
-                            Whether you are preparing for your first job or your next senior role, CareerOS meets you exactly where you are.
+                            Whether you are just starting out or a working engineer looking to stay sharp, CareerOS meets you where you are and grows with you.
                         </p>
                     </div>
                     <div className="audience-grid">
@@ -461,16 +637,63 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── Tech strip — grouped ───────────────────────────────── */}
+            {/* ══ 8. AI LEARNING COMPANION ═════════════════════════ */}
+            <section className="ai-section">
+                <StarCanvas count={50} />
+                <div className="ai-inner">
+                    <div className="ai-header" data-animate>
+                        <span className="section-label section-label--light">AI Learning Companion</span>
+                        <h2 className="section-title section-title--light">
+                            AI that explains.<br />Not one that replaces.
+                        </h2>
+                        <p className="section-description section-description--light">
+                            CareerOS uses an AI learning assistant powered by Ollama to help you understand — not to hand you answers or replace real, objective assessment.
+                        </p>
+                    </div>
+                    <div className="ai-features-grid" data-animate data-delay="1">
+                        {aiFeatures.map(f => (
+                            <div className="ai-feature" key={f.title}>
+                                <div className="ai-feature-icon">{f.icon}</div>
+                                <div>
+                                    <div className="ai-feature-title">{f.title}</div>
+                                    <div className="ai-feature-desc">{f.desc}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="ai-note" data-animate data-delay="2">
+                        Every time you get something wrong, you get a full explanation of why — not just the correct answer, but the reasoning behind it. So every mistake actually teaches you something.
+                    </p>
+                </div>
+            </section>
+
+            {/* ══ 9. LEARNING PATHS ════════════════════════════════ */}
             <section className="tech-section">
                 <StarCanvas count={70} />
-                <div className="tech-section-inner" data-animate>
-                    <p className="tech-label">Technologies &amp; topics covered</p>
-                    <div className="tech-groups">
-                        {techGroups.map(group => (
-                            <div className="tech-group" key={group.label}>
-                                <span className="tech-group-name">{group.label}</span>
-                                <div className="tech-group-tags">
+                <div className="tech-section-inner">
+                    <div className="section-header" data-animate>
+                        <span className="section-label section-label--light">Curriculum</span>
+                        <h2 className="section-title section-title--light">What we cover.</h2>
+                        <p className="section-description section-description--light">
+                            A growing library of engineering topics — from core fundamentals to the modern practices that matter right now.
+                        </p>
+                    </div>
+                    <div className="tech-cards-grid">
+                        {techGroups.map((group, i) => (
+                            <div
+                                className={`tech-card tech-card--${group.color}`}
+                                key={group.label}
+                                data-animate
+                                data-delay={String(i + 1)}
+                            >
+                                <div className="tech-card-header">
+                                    <div className={`tech-card-icon tech-card-icon--${group.color}`}>
+                                        {group.icon}
+                                    </div>
+                                    <h3 className="tech-card-title">{group.label}</h3>
+                                </div>
+                                <p className="tech-card-desc">{group.desc}</p>
+                                <div className="tech-card-tags">
                                     {group.items.map(t => (
                                         <span className="tech-tag" key={t}>{t}</span>
                                     ))}
@@ -481,19 +704,19 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── CTA ────────────────────────────────────────────────── */}
+            {/* ══ 10. FINAL CTA ════════════════════════════════════ */}
             <section className="cta-section">
                 <StarCanvas count={90} />
                 <div className="cta-inner" data-animate>
-                    <h2 className="cta-title">Your next interview<br />starts today.</h2>
+                    <h2 className="cta-title">Your engineering journey<br />starts today.</h2>
                     <p className="cta-description">
-                        Every hour on CareerOS builds real confidence — not just completed checkboxes. Start your first track free and see what a system actually feels like.
+                        The future of software engineering belongs to people who understand technology deeply, use AI intelligently, and take full responsibility for the software they build. Start building that foundation now.
                     </p>
                     <button className="btn-primary btn-primary--lg" onClick={() => openModal('register')}>
-                        Create free account <ArrowRight size={18} />
+                        Start Your Engineering Journey <ArrowRight size={18} />
                     </button>
-                    <a href="#features" className="cta-secondary-link">Explore features instead ↓</a>
-                    <p className="cta-note">No credit card. No fluff. Just structure.</p>
+                    <a href="#features" className="cta-secondary-link">See how it works first →</a>
+                    <p className="cta-note">Free to start. No credit card required.</p>
                 </div>
             </section>
         </>
