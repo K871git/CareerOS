@@ -319,3 +319,60 @@
   gap: 0.75rem;
   flex-shrink: 0;
 }
+
+/* == Points badge in navbar ============================================ */
+@keyframes navCapJuggle {
+  0%   { transform: rotate(0deg) translateY(0); }
+  20%  { transform: rotate(-18deg) translateY(-2px); }
+  40%  { transform: rotate(14deg) translateY(-1px); }
+  60%  { transform: rotate(-10deg) translateY(-2px); }
+  80%  { transform: rotate(6deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+@keyframes navPtsReveal {
+  from { opacity: 0; max-width: 0; transform: translateX(-4px); }
+  to   { opacity: 1; max-width: 80px; transform: translateX(0); }
+}
+
+.navbar-points-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.22rem 0.6rem;
+  background: linear-gradient(135deg, rgba(245,158,11,.13), rgba(251,191,36,.08));
+  border: 1.5px solid rgba(245,158,11,.32);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #b45309;
+  letter-spacing: 0.01em;
+  margin-left: 0.25rem;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.navbar-pts-cap {
+  display: block;
+  flex-shrink: 0;
+}
+
+.navbar-pts-cap--juggle {
+  display: block;
+  flex-shrink: 0;
+  animation: navCapJuggle 0.75s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.navbar-pts-value {
+  overflow: hidden;
+  max-width: 80px;
+  animation: navPtsReveal 0.35s cubic-bezier(.22,.68,0,1.2) both;
+}
+
+[data-theme='dark'] .navbar-points-badge {
+  background: rgba(245,158,11,.1);
+  border-color: rgba(245,158,11,.25);
+  color: #fbbf24;
+}

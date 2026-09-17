@@ -1,0 +1,970 @@
+/* ====================================================================
+   Consent — Gate page, Terms, Privacy Policy
+   ==================================================================== */
+
+/* ── Shared consent page wrapper ─────────────────────────────────── */
+
+.consent-page {
+    min-height: 100vh;
+    background: var(--bg-page, #f8f9fc);
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font, system-ui, sans-serif);
+}
+
+/* ── Consent gate (full-page overlay before app loads) ───────────── */
+
+.cgate-root {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #f0f4ff 0%, #f8faff 50%, #fff7f0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.cgate-card {
+    background: #fff;
+    border: 1.5px solid rgba(99,102,241,0.14);
+    border-radius: 20px;
+    box-shadow: 0 12px 48px rgba(79,70,229,0.10), 0 2px 8px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 560px;
+    overflow: hidden;
+}
+
+.cgate-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    padding: 2rem 2rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cgate-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 180px;
+    height: 180px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+}
+
+.cgate-header::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -30px;
+    width: 130px;
+    height: 130px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+}
+
+.cgate-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.cgate-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.03em;
+}
+
+.cgate-brand-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.cgate-heading {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.4rem;
+}
+
+.cgate-subheading {
+    font-size: 0.875rem;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Gate body ───────────────────────────────────────────────────── */
+
+.cgate-body {
+    padding: 1.75rem 2rem;
+}
+
+.cgate-notice {
+    background: rgba(99,102,241,0.05);
+    border: 1px solid rgba(99,102,241,0.14);
+    border-radius: 12px;
+    padding: 1rem 1.125rem;
+    margin-bottom: 1.5rem;
+}
+
+.cgate-notice-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #4f46e5;
+    margin-bottom: 0.5rem;
+}
+
+.cgate-notice-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.cgate-notice-list li {
+    font-size: 0.8125rem;
+    color: #374151;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.5;
+}
+
+.cgate-notice-list li::before {
+    content: '•';
+    color: #6366f1;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.05em;
+}
+
+/* ── Checkboxes ──────────────────────────────────────────────────── */
+
+.cgate-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.cgate-check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.cgate-check-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    accent-color: #4f46e5;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+    cursor: pointer;
+}
+
+.cgate-check-label {
+    font-size: 0.875rem;
+    color: #374151;
+    line-height: 1.55;
+    cursor: pointer;
+}
+
+.cgate-check-label a {
+    color: #4f46e5;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 500;
+}
+
+.cgate-check-label a:hover {
+    color: #3730a3;
+}
+
+/* ── Actions ─────────────────────────────────────────────────────── */
+
+.cgate-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.cgate-accept-btn {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: var(--font, inherit);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(79,70,229,0.3);
+    transition: opacity 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.cgate-accept-btn:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79,70,229,0.35);
+}
+
+.cgate-accept-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.cgate-decline-btn {
+    width: 100%;
+    padding: 0.625rem;
+    background: transparent;
+    color: #9ca3af;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font, inherit);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    text-align: center;
+}
+
+.cgate-decline-btn:hover {
+    color: #6b7280;
+    text-decoration: underline;
+}
+
+/* ── Declined state ──────────────────────────────────────────────── */
+
+.cgate-declined {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.cgate-declined-icon {
+    font-size: 2.5rem;
+}
+
+.cgate-declined-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.cgate-declined-desc {
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.6;
+    max-width: 380px;
+    margin: 0;
+}
+
+.cgate-declined-back {
+    padding: 0.625rem 1.5rem;
+    background: transparent;
+    color: #4f46e5;
+    border: 1.5px solid rgba(99,102,241,0.35);
+    border-radius: 10px;
+    font-family: var(--font, inherit);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    margin-top: 0.25rem;
+}
+
+.cgate-declined-back:hover {
+    background: rgba(99,102,241,0.06);
+    border-color: #6366f1;
+}
+
+/* ── Legal page shared layout ────────────────────────────────────── */
+
+.legal-page {
+    min-height: 100vh;
+    background: #f9fafb;
+    font-family: var(--font, system-ui, sans-serif);
+}
+
+.legal-topbar {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.legal-topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-decoration: none;
+}
+
+.legal-topbar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.legal-topbar-name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.015em;
+}
+
+.legal-topbar-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.875rem;
+    background: transparent;
+    color: #6b7280;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: var(--font, inherit);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.legal-topbar-back:hover {
+    color: #111827;
+    border-color: #d1d5db;
+}
+
+.legal-hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: #fff;
+}
+
+.legal-hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.legal-hero-title {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+}
+
+.legal-hero-sub {
+    font-size: 0.9375rem;
+    color: rgba(255,255,255,0.78);
+}
+
+.legal-meta-bar {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.legal-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.legal-meta-item strong {
+    color: #374151;
+}
+
+.legal-content {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+}
+
+.legal-toc {
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.legal-toc-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 0.75rem;
+}
+
+.legal-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.35rem 1rem;
+}
+
+.legal-toc-list a {
+    font-size: 0.8125rem;
+    color: #4f46e5;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color 0.12s ease;
+}
+
+.legal-toc-list a::before {
+    content: '§';
+    opacity: 0.5;
+    font-size: 0.7rem;
+}
+
+.legal-toc-list a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+}
+
+.legal-section {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: 80px;
+}
+
+.legal-section-num {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 0.25rem;
+}
+
+.legal-section h2 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.875rem;
+    padding-bottom: 0.625rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.legal-section p {
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.75;
+    margin-bottom: 0.75rem;
+}
+
+.legal-section ul,
+.legal-section ol {
+    padding-left: 1.5rem;
+    margin: 0.5rem 0 0.75rem;
+}
+
+.legal-section li {
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.7;
+    margin-bottom: 0.3rem;
+}
+
+.legal-section strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.legal-highlight-box {
+    background: rgba(99,102,241,0.05);
+    border-left: 3px solid #6366f1;
+    border-radius: 0 8px 8px 0;
+    padding: 0.875rem 1.125rem;
+    margin: 0.75rem 0;
+}
+
+.legal-highlight-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #3730a3;
+}
+
+.legal-warn-box {
+    background: rgba(245,158,11,0.06);
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 8px 8px 0;
+    padding: 0.875rem 1.125rem;
+    margin: 0.75rem 0;
+}
+
+.legal-warn-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #92400e;
+}
+
+.legal-contact-card {
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.legal-contact-card strong {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.legal-contact-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.legal-footer {
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    padding: 1.5rem 2rem;
+    text-align: center;
+}
+
+.legal-footer p {
+    font-size: 0.8125rem;
+    color: #9ca3af;
+    margin: 0;
+}
+
+.legal-footer a {
+    color: #4f46e5;
+    text-decoration: none;
+}
+
+.legal-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ── Register page — consent checkboxes ─────────────────────────── */
+
+.reg-consent-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-bottom: 1.25rem;
+}
+
+.reg-consent-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    background: #fafafa;
+    user-select: none;
+}
+
+.reg-consent-row:hover {
+    border-color: #c7d2fe;
+    background: #f5f6ff;
+}
+
+.reg-consent-row.checked {
+    border-color: #6366f1;
+    background: rgba(99,102,241,0.04);
+}
+
+.reg-consent-check-wrap {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+}
+
+.reg-consent-checkbox {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    margin: 0;
+}
+
+.reg-consent-check-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background: #fff;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    pointer-events: none;
+}
+
+.reg-consent-row.checked .reg-consent-check-wrap::before {
+    border-color: #6366f1;
+    background: #6366f1;
+}
+
+.reg-consent-tick {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #fff;
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.reg-consent-text {
+    font-size: 0.8rem;
+    color: #374151;
+    line-height: 1.6;
+    flex: 1;
+}
+
+.reg-consent-icon {
+    display: inline-flex;
+    vertical-align: middle;
+    color: #6366f1;
+    margin-right: 0.25rem;
+    margin-top: -1px;
+}
+
+.reg-consent-link {
+    color: #4f46e5;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+}
+
+.reg-consent-link:hover {
+    color: #3730a3;
+}
+
+.reg-consent-hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.74rem;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* ── Legal pages — scroll-to-accept floating bar ─────────────────── */
+
+.legal-accept-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 2px solid #e5e7eb;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    z-index: 100;
+    transform: translateY(110%);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+}
+
+.legal-accept-bar.visible {
+    transform: translateY(0);
+}
+
+.legal-accept-bar-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.legal-accept-bar-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.legal-accept-bar-sub {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.legal-accept-bar-btn {
+    padding: 0.625rem 1.375rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font, inherit);
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+    transition: opacity 0.15s ease, transform 0.12s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.legal-accept-bar-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.legal-accept-bar-done {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: rgba(16,185,129,0.08);
+    border: 1.5px solid rgba(16,185,129,0.25);
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #059669;
+}
+
+.legal-scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    transition: width 0.1s ease;
+    z-index: 200;
+    border-radius: 0 2px 2px 0;
+}
+
+[data-theme='dark'] .legal-accept-bar {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme='dark'] .legal-accept-bar-title {
+    color: #f9fafb;
+}
+
+[data-theme='dark'] .legal-accept-bar-sub {
+    color: #9ca3af;
+}
+
+[data-theme='dark'] .reg-consent-row {
+    background: rgba(255,255,255,0.03);
+    border-color: #374151;
+}
+
+[data-theme='dark'] .reg-consent-row:hover {
+    border-color: #6366f1;
+    background: rgba(99,102,241,0.06);
+}
+
+[data-theme='dark'] .reg-consent-row.checked {
+    background: rgba(99,102,241,0.08);
+}
+
+[data-theme='dark'] .reg-consent-check-wrap::before {
+    background: #1f2937;
+    border-color: #4b5563;
+}
+
+[data-theme='dark'] .reg-consent-text {
+    color: #d1d5db;
+}
+
+/* ── Dark mode ───────────────────────────────────────────────────── */
+
+[data-theme='dark'] .cgate-root {
+    background: linear-gradient(160deg, #0f0e1a 0%, #13121e 50%, #1a0f0a 100%);
+}
+
+[data-theme='dark'] .cgate-card {
+    background: #1e1d2e;
+    border-color: rgba(99,102,241,0.2);
+}
+
+[data-theme='dark'] .cgate-notice {
+    background: rgba(99,102,241,0.08);
+    border-color: rgba(99,102,241,0.2);
+}
+
+[data-theme='dark'] .cgate-notice-list li {
+    color: #d1d5db;
+}
+
+[data-theme='dark'] .cgate-check-label {
+    color: #d1d5db;
+}
+
+[data-theme='dark'] .legal-page {
+    background: #111827;
+}
+
+[data-theme='dark'] .legal-topbar {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme='dark'] .legal-topbar-name {
+    color: #f9fafb;
+}
+
+[data-theme='dark'] .legal-topbar-back {
+    color: #9ca3af;
+    border-color: #374151;
+}
+
+[data-theme='dark'] .legal-meta-bar {
+    border-color: #374151;
+}
+
+[data-theme='dark'] .legal-toc {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme='dark'] .legal-section h2 {
+    color: #f9fafb;
+    border-color: #374151;
+}
+
+[data-theme='dark'] .legal-section p,
+[data-theme='dark'] .legal-section li {
+    color: #d1d5db;
+}
+
+[data-theme='dark'] .legal-section strong {
+    color: #f3f4f6;
+}
+
+[data-theme='dark'] .legal-contact-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme='dark'] .legal-contact-card p {
+    color: #9ca3af;
+}
+
+[data-theme='dark'] .legal-footer {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .cgate-header {
+        padding: 1.5rem 1.25rem 1.25rem;
+    }
+
+    .cgate-body {
+        padding: 1.25rem;
+    }
+
+    .cgate-heading {
+        font-size: 1.15rem;
+    }
+
+    .legal-hero {
+        padding: 2rem 1.25rem;
+    }
+
+    .legal-hero-title {
+        font-size: 1.5rem;
+    }
+
+    .legal-content {
+        padding: 1.5rem 1.25rem 3rem;
+    }
+
+    .legal-toc-list {
+        grid-template-columns: 1fr;
+    }
+
+    .legal-topbar {
+        padding: 0.875rem 1.25rem;
+    }
+}

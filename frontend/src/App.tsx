@@ -6,6 +6,7 @@ import { AuthProvider } from './store/authStore';
 import { AuthOverlayProvider } from './contexts/AuthOverlayContext';
 import AuthOverlay from './components/ui/AuthOverlay';
 import ErrorBoundary from './components/ui/ErrorBoundary';
+import ConsentGate from './components/ConsentGate';
 import queryClient from './api/queryClient';
 import router from './routes';
 
@@ -22,6 +23,7 @@ function PageLoader() {
 
 export default function App() {
     return (
+        <ConsentGate>
         <AuthProvider>
             <AuthOverlayProvider>
                 <QueryClientProvider client={queryClient}>
@@ -42,5 +44,6 @@ export default function App() {
                 <AuthOverlay />
             </AuthOverlayProvider>
         </AuthProvider>
+        </ConsentGate>
     );
 }

@@ -7,7 +7,8 @@ export interface AssessmentPayload {
 }
 
 export interface MCQSubmitPayload {
-    answers: { question_id: number; selected_option_id: number }[];
+    answers:              { question_id: number; selected_option_id: number }[];
+    hinted_question_ids?: number[];
 }
 
 export const assessmentService = {

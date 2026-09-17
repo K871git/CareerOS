@@ -2,6 +2,7 @@ import { Bell, Search, GraduationCap, ChevronRight, Menu, Moon, Sun } from 'luci
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
 import { useTheme } from '../../hooks/useTheme';
+import { usePoints } from '../../features/practice/hooks/usePoints';
 import './navbar.css';
 
 interface NavbarProps {
@@ -13,6 +14,8 @@ interface NavbarProps {
 export default function Navbar({ title, onToggleCollapse, onMenuToggle }: NavbarProps) {
     useAuth();
     const { theme, toggleTheme } = useTheme();
+    const { data: points, isFetching } = usePoints();
+    const isLoading = isFetching && points === undefined;
 
     return (
         <header className="dash-navbar">
@@ -58,6 +61,15 @@ export default function Navbar({ title, onToggleCollapse, onMenuToggle }: Navbar
                     >
                         {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
                     </button>
+                    <span className="navbar-points-badge" title="Your points balance">
+                        <GraduationCap
+                            size={13}
+                            className={isLoading ? 'navbar-pts-cap--juggle' : 'navbar-pts-cap'}
+                        />
+                        {!isLoading && (
+                            <span className="navbar-pts-value">{points?.balance ?? 0} pts</span>
+                        )}
+                    </span>
                 </div>
             </div>
         </header>

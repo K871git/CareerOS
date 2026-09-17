@@ -10,6 +10,7 @@ export interface AuthUser {
     id: number;
     name: string;
     email: string;
+    consent_version?: string;
 }
 
 interface AuthState {

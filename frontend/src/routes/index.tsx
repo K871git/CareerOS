@@ -64,6 +64,12 @@ const PlaygroundPage = lazy(
 const AuthCallbackPage = lazy(
   () => import("../features/auth/pages/AuthCallbackPage"),
 );
+const TermsPage = lazy(
+  () => import("../features/consent/pages/TermsPage"),
+);
+const PrivacyPage = lazy(
+  () => import("../features/consent/pages/PrivacyPage"),
+);
 const ForgotPasswordPage = lazy(
   () => import("../features/auth/pages/ForgotPasswordPage"),
 );
@@ -102,6 +108,10 @@ const router = createBrowserRouter([
   // Password reset pages (public, standalone)
   { path: "/auth/forgot-password", element: <ForgotPasswordPage /> },
   { path: "/reset-password",       element: <ResetPasswordPage /> },
+
+  // Legal pages (public, no auth required)
+  { path: "/terms",   element: <TermsPage /> },
+  { path: "/privacy", element: <PrivacyPage /> },
 
   // Public routes — landing page with modal auth
   {

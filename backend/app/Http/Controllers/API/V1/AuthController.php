@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use App\Mail\OtpMail;
 use App\Models\OtpToken;
 use App\Models\User;
+use App\Models\UserConsent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,10 +24,21 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'mobile'   => $request->mobile,
-            'password' => Hash::make($request->password),
+            'name'                => $request->name,
+            'email'               => $request->email,
+            'mobile'              => $request->mobile,
+            'password'            => Hash::make($request->password),
+            'consent_version'     => \App\Http\Controllers\Api\V1\ConsentController::CURRENT_VERSION,
+            'consent_accepted_at' => now(),
+        ]);
+
+        // Record consent event with IP and UA for DPDP Act 2023 compliance
+        UserConsent::create([
+            'user_id'         => $user->id,
+            'consent_version' => \App\Http\Controllers\Api\V1\ConsentController::CURRENT_VERSION,
+            'ip_address'      => $request->ip(),
+            'user_agent'      => $request->userAgent(),
+            'consented_at'    => now(),
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
