@@ -78,6 +78,7 @@ export interface ExamResult {
     score: number;
     total: number;
     passed: boolean;
+    points_earned?: number;
     answers: ExamAnswerDetail[];
 }
 

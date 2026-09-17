@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams, useLocation, Navigate } from 'react-router-dom';
 import {
     ChevronRight, Trophy, XCircle, AlertCircle, ClipboardList,
     CheckCircle2, AlertTriangle, Lightbulb, BookOpen, RefreshCw,
-    ChevronDown, Target, Lock, Star,
+    ChevronDown, Target, Lock, Star, Coins, Sparkles,
 } from 'lucide-react';
 import { useSubjectBySlug, useExamQuestions, useSubmitExam } from '../hooks/useLevel';
 import type { ExamResult, ExamAnswerDetail } from '../../../types/api';
@@ -393,6 +393,36 @@ function AnswerReview({ answers }: { answers: ExamAnswerDetail[] }) {
     );
 }
 
+/* ── Animated score counter ─────────────────────────────────────── */
+function AnimatedCount({ target, duration = 900 }: { target: number; duration?: number }) {
+    const [display, setDisplay] = useState(0);
+    useEffect(() => {
+        let start = 0;
+        const step = Math.ceil(target / (duration / 16));
+        const tick = setInterval(() => {
+            start = Math.min(start + step, target);
+            setDisplay(start);
+            if (start >= target) clearInterval(tick);
+        }, 16);
+        return () => clearInterval(tick);
+    }, [target, duration]);
+    return <>{display}</>;
+}
+
+/* ── Points earned banner ───────────────────────────────────────── */
+function PointsEarnedBadge({ points, passed }: { points: number; passed: boolean }) {
+    const [visible, setVisible] = useState(false);
+    useEffect(() => { const t = setTimeout(() => setVisible(true), 600); return () => clearTimeout(t); }, []);
+    if (points === 0) return null;
+    return (
+        <div className={`er-points-badge${visible ? ' er-points-badge--in' : ''}`}>
+            <Sparkles size={14} />
+            <span>+<AnimatedCount target={points} duration={700} /> pts earned</span>
+            {passed && <span className="er-points-breakdown">({Math.max(0, points - 150)} correct + 150 pass bonus)</span>}
+        </div>
+    );
+}
+
 /* ─── Main result screen ─────────────────────────────────────── */
 function ExamResultScreen({
     result, levelNum, category, subjectSlug, subjectId, onRetry,
@@ -404,35 +434,58 @@ function ExamResultScreen({
     subjectId: number;
     onRetry: () => void;
 }) {
-    const { score, total, passed, answers = [] } = result;
+    const { score, total, passed, answers = [], points_earned = 0 } = result;
     const wrongAnswers = answers.filter(a => !a.is_correct);
+
+    /* staggered section entry — add class after mount */
+    const [ready, setReady] = useState(false);
+    useEffect(() => { const t = requestAnimationFrame(() => setReady(true)); return () => cancelAnimationFrame(t); }, []);
 
     return (
         <div className="learn-page">
-            <div className="er-container">
+            <div className={`er-container${ready ? ' er-container--ready' : ''}`}>
 
                 {/* 1. Banner — score + status */}
-                <ResultBanner score={score} total={total} passed={passed} levelNum={levelNum} />
+                <div className="er-anim er-anim--1">
+                    <ResultBanner score={score} total={total} passed={passed} levelNum={levelNum} />
+                </div>
 
-                {/* 2. Mini stat cards */}
-                <MiniStats score={score} total={total} passed={passed} levelNum={levelNum} />
+                {/* 2. Points earned */}
+                {points_earned > 0 && (
+                    <div className="er-anim er-anim--2">
+                        <PointsEarnedBadge points={points_earned} passed={passed} />
+                    </div>
+                )}
 
-                {/* 3. Level progress trail */}
-                <LevelTrail currentLevel={levelNum} passed={passed} />
+                {/* 3. Mini stat cards */}
+                <div className="er-anim er-anim--3">
+                    <MiniStats score={score} total={total} passed={passed} levelNum={levelNum} />
+                </div>
 
-                {/* 4. Weak areas (only if wrong answers exist) */}
-                <WeakAreasSection wrongAnswers={wrongAnswers} />
+                {/* 4. Level progress trail */}
+                <div className="er-anim er-anim--4">
+                    <LevelTrail currentLevel={levelNum} passed={passed} />
+                </div>
 
-                {/* 5. Recommendations / study path */}
-                <StudyPath
-                    passed={passed}
-                    levelNum={levelNum}
-                    wrongCount={wrongAnswers.length}
-                    subjectSlug={subjectSlug}
-                />
+                {/* 5. Weak areas (only if wrong answers exist) */}
+                {wrongAnswers.length > 0 && (
+                    <div className="er-anim er-anim--5">
+                        <WeakAreasSection wrongAnswers={wrongAnswers} />
+                    </div>
+                )}
 
-                {/* 6. CTA buttons */}
-                <div className="er-actions">
+                {/* 6. Recommendations / study path */}
+                <div className="er-anim er-anim--6">
+                    <StudyPath
+                        passed={passed}
+                        levelNum={levelNum}
+                        wrongCount={wrongAnswers.length}
+                        subjectSlug={subjectSlug}
+                    />
+                </div>
+
+                {/* 7. CTA buttons */}
+                <div className="er-actions er-anim er-anim--7">
                     {passed ? (
                         <>
                             <Link
@@ -466,8 +519,12 @@ function ExamResultScreen({
                     )}
                 </div>
 
-                {/* 7. Full review — collapsible */}
-                {answers.length > 0 && <AnswerReview answers={answers} />}
+                {/* 8. Full review — collapsible */}
+                {answers.length > 0 && (
+                    <div className="er-anim er-anim--8">
+                        <AnswerReview answers={answers} />
+                    </div>
+                )}
 
             </div>
         </div>

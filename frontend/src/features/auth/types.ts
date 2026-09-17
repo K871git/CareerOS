@@ -9,6 +9,7 @@ export interface RegisterCredentials {
     mobile: string;
     password: string;
     password_confirmation: string;
+    consent_accepted: true;
 }
 
 export interface SendOtpPayload {

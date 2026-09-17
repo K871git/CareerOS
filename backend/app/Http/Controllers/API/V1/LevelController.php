@@ -7,6 +7,7 @@ use App\Models\LevelCompletion;
 use App\Models\Question;
 use App\Models\Subject;
 use App\Models\Topic;
+use App\Models\UserPoint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -182,6 +183,24 @@ class LevelController extends Controller
             ['score' => $score, 'passed' => $passed]
         );
 
+        // Award points — +10 per correct, +150 pass bonus
+        $pointsEarned = 0;
+        if ($score > 0) {
+            $pointsEarned += $score * 10;
+            UserPoint::credit($userId, $score * 10, 'quiz_correct', "Level {$level} exam — {$score} correct answers", [
+                'subject_id' => $subject->id,
+                'level'      => $level,
+                'score'      => $score,
+            ]);
+        }
+        if ($passed) {
+            $pointsEarned += 150;
+            UserPoint::credit($userId, 150, 'quiz_perfect', "Level {$level} exam passed — completion bonus", [
+                'subject_id' => $subject->id,
+                'level'      => $level,
+            ]);
+        }
+
         Cache::forget("level.status.{$userId}.{$subject->id}");
         Cache::forget("dashboard.overview.{$userId}");
         Cache::forget("progress.overview.{$userId}");
@@ -190,10 +209,11 @@ class LevelController extends Controller
             'success' => true,
             'message' => $passed ? 'Congratulations! Level completed.' : 'Keep practicing.',
             'data'    => [
-                'score'   => $score,
-                'total'   => 10,
-                'passed'  => $passed,
-                'answers' => $answerDetails,
+                'score'         => $score,
+                'total'         => 10,
+                'passed'        => $passed,
+                'points_earned' => $pointsEarned,
+                'answers'       => $answerDetails,
             ],
         ]);
     }

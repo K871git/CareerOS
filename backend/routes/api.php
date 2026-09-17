@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ConsentController;
 
 Route::get('/health', fn() => response()->json([
     'status'  => 'ok',
@@ -25,6 +26,8 @@ use App\Http\Controllers\Api\V1\SocialAuthController;
 use App\Http\Controllers\Api\V1\TheoryLevelController;
 use App\Http\Controllers\Api\V1\TheoryQuestionController;
 use App\Http\Controllers\Api\V1\AiController;
+use App\Http\Controllers\Api\V1\HintController;
+use App\Http\Controllers\Api\V1\PointController;
 
 Route::middleware('throttle:5,1')->prefix('v1/auth')->group(function () {
 
@@ -46,6 +49,12 @@ Route::middleware('throttle:10,1')->prefix('v1/auth')->group(function () {
 
 // /me is called on every app mount — must not share the 5/min auth throttle
 Route::middleware('auth:sanctum')->get('/v1/auth/me', [AuthController::class, 'me']);
+
+// DPDP Act 2023 — Consent management (authenticated)
+Route::middleware('auth:sanctum')->prefix('v1/consent')->group(function () {
+    Route::post('/',        [ConsentController::class, 'store']);    // record / re-accept
+    Route::delete('/',     [ConsentController::class, 'withdraw']); // withdraw consent
+});
 
 Route::get('/v1/auth/google',          [SocialAuthController::class, 'redirectToGoogle']);
 Route::get('/v1/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
@@ -125,3 +134,12 @@ Route::middleware(['auth:sanctum', 'throttle:20,1'])
 
 Route::middleware(['auth:sanctum', 'throttle:20,1'])
     ->post('v1/ai/explain/stream', [AiController::class, 'explainStream']);
+
+// Points & Hints
+Route::middleware('auth:sanctum')->prefix('v1/points')->group(function () {
+    Route::get('/',        [PointController::class, 'balance']);
+    Route::get('/history', [PointController::class, 'history']);
+});
+
+Route::middleware(['auth:sanctum', 'throttle:20,1'])
+    ->post('v1/hints/unlock', [HintController::class, 'unlock']);

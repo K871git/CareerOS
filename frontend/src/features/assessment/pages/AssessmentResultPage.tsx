@@ -1,11 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, Sparkles } from 'lucide-react';
+import { CheckCircle2, XCircle, Sparkles, GraduationCap } from 'lucide-react';
 import { useAttemptResult } from '../hooks/useMCQ';
 import ResultSummary from '../components/ResultSummary';
+import { splitQuestionAndCode, formatCode, tokenize } from '../utils/codeFormat';
 import '../assessment.css';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api';
+
+/* ── Inline code block for review card questions ── */
+const TOKEN_CLS: Record<string, string> = {
+    keyword: 'ck-kw', builtin: 'ck-bi', string: 'ck-str',
+    comment: 'ck-cmt', number: 'ck-num', operator: 'ck-op',
+};
+function RCardCode({ raw }: { raw: string }) {
+    const tokens = tokenize(formatCode(raw));
+    return (
+        <div className="rcard-code-block">
+            <pre className="rcard-code-pre"><code>
+                {tokens.map((t, i) =>
+                    t.value === '\n' ? <br key={i} /> :
+                    TOKEN_CLS[t.type] ? <span key={i} className={TOKEN_CLS[t.type]}>{t.value}</span> :
+                    <span key={i}>{t.value}</span>
+                )}
+            </code></pre>
+        </div>
+    );
+}
+function RCardQuestion({ text }: { text: string }) {
+    const { prose, code } = splitQuestionAndCode(text);
+    return (
+        <>
+            {prose && <p className="rcard-question">{prose}</p>}
+            {code  && <RCardCode raw={code} />}
+            {!prose && !code && <p className="rcard-question">{text}</p>}
+        </>
+    );
+}
 
 type ExplainState =
     | { status: 'idle' }
@@ -28,12 +59,13 @@ function inlineFormat(text: string, autoCodeTerm?: string): string {
         }
     }
 
-    // Merge adjacent backtick terms that have only short plain text between them.
-    // The model often writes `SELECT` CustomerName `FROM` table → collapse into one chip.
+    // Merge adjacent backtick terms separated by whitespace only.
+    // e.g. `SELECT` `FROM` → `SELECT FROM`. Stops at non-whitespace to avoid
+    // destroying semantic text like `SELECT` CustomerName `FROM`.
     let prev = '';
     while (prev !== t) {
         prev = t;
-        t = t.replace(/`([^`\n]+)`([^`\n]{0,18})`([^`\n]+)`/, '`$1$2$3`');
+        t = t.replace(/`([^`\n]+)`(\s+)`([^`\n]+)`/, '`$1 $3`');
     }
 
     return t
@@ -144,9 +176,23 @@ function parseBlocks(raw: string, correctAnswer?: string): Block[] {
         }
     }
 
-    if (inFence) flushFence(); // unclosed fence — still emit what the model wrote
+    if (inFence) flushFence();
     flushProse();
-    return blocks;
+
+    // Post-process: merge empty numbered blocks with the next para block
+    const merged: Block[] = [];
+    for (let i = 0; i < blocks.length; i++) {
+        const b = blocks[i];
+        if (b.kind === 'numbered' && !b.html && blocks[i + 1]?.kind === 'para') {
+            merged.push({ ...b, html: (blocks[i + 1] as { kind: 'para'; html: string }).html });
+            i++; // skip the para we just absorbed
+        } else {
+            merged.push(b);
+        }
+    }
+
+    // Remove any remaining empty numbered blocks
+    return merged.filter(b => !(b.kind === 'numbered' && !b.html));
 }
 
 function ExplainPanel({
@@ -154,13 +200,25 @@ function ExplainPanel({
     correctAnswer,
     wrongOptionId,
     variant = 'explain',
+    cachedText,
+    onCached,
 }: {
     questionId: number;
     correctAnswer?: string;
     wrongOptionId?: number | null;
     variant?: 'explain' | 'learn-more';
+    cachedText?: string;
+    onCached?: (text: string) => void;
 }) {
-    const [state, setState] = useState<ExplainState>({ status: 'idle' });
+    /* Initialise directly from cache when available — no fetch needed */
+    const [state, setState] = useState<ExplainState>(() =>
+        cachedText ? { status: 'done', text: cachedText } : { status: 'idle' }
+    );
+
+    /* Persist completed explanation to parent cache so re-mounts skip the fetch */
+    useEffect(() => {
+        if (state.status === 'done' && onCached) onCached(state.text);
+    }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function fetchExplanation() {
         setState({ status: 'loading' });
@@ -257,6 +315,7 @@ function ExplainPanel({
     if (state.status === 'loading') {
         return (
             <div className="explain-panel explain-panel--loading">
+                <GraduationCap size={14} className="explain-loading-icon" />
                 <div className="explain-dots-row">
                     <span className="explain-dot" style={{ animationDelay: '0ms' }} />
                     <span className="explain-dot" style={{ animationDelay: '160ms' }} />
@@ -346,6 +405,8 @@ export default function AssessmentResultPage() {
 
     const { data: result, isLoading } = useAttemptResult(id);
     const [showWrongOnly, setShowWrongOnly] = useState(false);
+    /* Explanation cache — persists across "wrong only" filter toggles */
+    const explainCache = useRef<Map<number, string>>(new Map());
 
     if (isLoading) return <ResultSkeleton />;
 
@@ -477,7 +538,7 @@ export default function AssessmentResultPage() {
                                     </div>
 
                                     {/* Question */}
-                                    <p className="rcard-question">{answer.question}</p>
+                                    <RCardQuestion text={answer.question} />
 
                                     {/* Options */}
                                     {answer.options?.length > 0 ? (
@@ -539,12 +600,16 @@ export default function AssessmentResultPage() {
                                                 questionId={answer.question_id}
                                                 correctAnswer={answer.correct_option ?? undefined}
                                                 variant="learn-more"
+                                                cachedText={explainCache.current.get(answer.question_id)}
+                                                onCached={text => explainCache.current.set(answer.question_id, text)}
                                             />
                                         ) : (
                                             <ExplainPanel
                                                 questionId={answer.question_id}
                                                 correctAnswer={answer.correct_option ?? undefined}
                                                 wrongOptionId={answer.selected_option_id}
+                                                cachedText={explainCache.current.get(answer.question_id)}
+                                                onCached={text => explainCache.current.set(answer.question_id, text)}
                                             />
                                         )}
                                     </div>

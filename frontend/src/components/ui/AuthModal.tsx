@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Mail, Lock, User, Phone, KeyRound, AlertCircle, ArrowRight, LogIn, Eye, EyeOff } from 'lucide-react';
+import { X, Mail, Lock, User, Phone, KeyRound, AlertCircle, ArrowRight, LogIn, Eye, EyeOff, ShieldCheck, FileText, GraduationCap } from 'lucide-react';
+import '../../features/consent/consent.css';
 import { isAxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import {
@@ -110,8 +111,8 @@ function SocialButtons() {
 
     return (
         <div className="mf-social">
-            <button type="button" className="mf-social-btn" onClick={handleGoogle}>
-                <GoogleIcon /> Google
+            <button type="button" className="mf-social-btn mf-social-btn--full" onClick={handleGoogle}>
+                <GoogleIcon /> Continue with Google
             </button>
         </div>
     );
@@ -417,6 +418,13 @@ function LoginForm({ onSwitch, onClose, prefillEmail }: { onSwitch: () => void; 
 
 // ── Register form ──────────────────────────────────────────────────────────────
 
+const TERMS_KEY   = 'careeros_terms_read';
+const PRIVACY_KEY = 'careeros_privacy_read';
+
+function checkLegalFlags() {
+    return !!localStorage.getItem(TERMS_KEY) && !!localStorage.getItem(PRIVACY_KEY);
+}
+
 function RegisterForm({
     onSwitch,
     onEmailExists,
@@ -424,14 +432,23 @@ function RegisterForm({
     onSwitch: (email?: string) => void;
     onEmailExists: (email: string) => void;
 }) {
-    const [showPassword, setShowPw]   = useState(false);
-    const [showConfirm,  setShowCfm]  = useState(false);
-    const [hoveredPw,    setHoveredPw] = useState(false);
+    const [showPassword, setShowPw]    = useState(false);
+    const [showConfirm,  setShowCfm]   = useState(false);
+    const [hoveredPw,    setHoveredPw]  = useState(false);
+    const [dataConsent,  setDataConsent]  = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(checkLegalFlags);
 
     const { mutate: register_, isPending, isError, error, reset } = useRegister();
     const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
     });
+
+    // Auto-check terms box when user returns after reading both legal pages
+    useEffect(() => {
+        const onFocus = () => { if (checkLegalFlags()) setTermsAccepted(true); };
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
+    }, []);
 
     const apiError       = isError ? getApiError(error) : null;
     const emailTaken     = isError && isEmailTaken(error);
@@ -443,8 +460,10 @@ function RegisterForm({
         if (emailTaken) onEmailExists(watchedEmail);
     }, [emailTaken]);
 
+    const canSubmit = !isPending && dataConsent && termsAccepted;
+
     return (
-        <form onSubmit={handleSubmit((data) => { reset(); register_(data); })} noValidate>
+        <form onSubmit={handleSubmit((data) => { if (!canSubmit) return; reset(); register_({ ...data, consent_accepted: true }); })} noValidate className="mf-compact">
             {apiError && !emailTaken && (
                 <div className="mf-alert" role="alert">
                     <AlertCircle size={15} />
@@ -573,7 +592,55 @@ function RegisterForm({
                 )}
             </div>
 
-            <button type="submit" disabled={isPending} className="mf-btn">
+            {/* ── DPDP Act 2023 — consent checkboxes ── */}
+            <div className="reg-consent-block">
+
+                <label className={`reg-consent-row ${dataConsent ? 'checked' : ''}`}>
+                    <div className="reg-consent-check-wrap">
+                        <input
+                            type="checkbox"
+                            className="reg-consent-checkbox"
+                            checked={dataConsent}
+                            onChange={e => setDataConsent(e.target.checked)}
+                        />
+                        {dataConsent && <span className="reg-consent-tick">✓</span>}
+                    </div>
+                    <div className="reg-consent-text">
+                        <span className="reg-consent-icon"><ShieldCheck size={12} /></span>
+                        I consent to CareerOS collecting and using my personal data to
+                        create and manage my account and deliver its services.
+                    </div>
+                </label>
+
+                <label className={`reg-consent-row ${termsAccepted ? 'checked' : ''}`}>
+                    <div className="reg-consent-check-wrap">
+                        <input
+                            type="checkbox"
+                            className="reg-consent-checkbox"
+                            checked={termsAccepted}
+                            onChange={e => setTermsAccepted(e.target.checked)}
+                        />
+                        {termsAccepted && <span className="reg-consent-tick">✓</span>}
+                    </div>
+                    <div className="reg-consent-text">
+                        <span className="reg-consent-icon"><FileText size={12} /></span>
+                        I have read and agree to the{' '}
+                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="reg-consent-link">
+                            Terms &amp; Conditions
+                        </a>
+                        {' '}and{' '}
+                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="reg-consent-link">
+                            Privacy Policy
+                        </a>.
+                        {!termsAccepted && (
+                            <span className="reg-consent-hint">Open each link, scroll to end &amp; click Accept.</span>
+                        )}
+                    </div>
+                </label>
+
+            </div>
+
+            <button type="submit" disabled={!canSubmit} className="mf-btn">
                 {isPending ? 'Creating account…' : <>Create account <ArrowRight size={15} /></>}
             </button>
 
@@ -642,6 +709,9 @@ export default function AuthModal({ mode, onClose, onSwitch }: AuthModalProps) {
                 </button>
 
                 <div className="modal-brand">
+                    <div className="modal-brand-icon">
+                        <GraduationCap size={18} strokeWidth={2.5} />
+                    </div>
                     <span className="modal-brand-wordmark">CareerOS</span>
                 </div>
 

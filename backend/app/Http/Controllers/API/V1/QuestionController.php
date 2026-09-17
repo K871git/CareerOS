@@ -10,6 +10,7 @@ use App\Models\AssessmentAnswer;
 use App\Models\AssessmentAttempt;
 use App\Models\Question;
 use App\Models\Topic;
+use App\Models\UserPoint;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -34,8 +35,9 @@ class QuestionController extends Controller
 
     public function submit(SubmitAssessmentRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-        $user      = $request->user();
+        $validated  = $request->validated();
+        $user       = $request->user();
+        $hintedIds  = collect($validated['hinted_question_ids'] ?? []);
 
         $questionIds = collect($validated['answers'])->pluck('question_id');
         $questions   = Question::with('options')->whereIn('id', $questionIds)->get()->keyBy('id');
@@ -44,16 +46,20 @@ class QuestionController extends Controller
             fn ($q) => $q->options->firstWhere('is_correct', true)?->id
         );
 
-        $score   = 0;
-        $records = [];
+        $score         = 0;
+        $earnedPoints  = 0;
+        $records       = [];
 
         foreach ($validated['answers'] as $answer) {
             $questionId       = $answer['question_id'];
             $selectedOptionId = $answer['selected_option_id'];
             $isCorrect        = $correctOptionMap[$questionId] === $selectedOptionId;
+            $wasHinted        = $hintedIds->contains($questionId);
 
-            if ($isCorrect) {
+            // Hinted questions don't count toward score or earn points
+            if ($isCorrect && !$wasHinted) {
                 $score++;
+                $earnedPoints += 10;
             }
 
             $records[] = [
@@ -61,6 +67,17 @@ class QuestionController extends Controller
                 'selected_option_id' => $selectedOptionId,
                 'is_correct'         => $isCorrect,
             ];
+        }
+
+        // Non-hinted questions only — perfect score bonus (+50)
+        $nonHintedAnswers = collect($validated['answers'])->filter(
+            fn ($a) => !$hintedIds->contains($a['question_id'])
+        );
+        $allNonHintedCorrect = $nonHintedAnswers->isNotEmpty() &&
+            $nonHintedAnswers->every(fn ($a) => $correctOptionMap[$a['question_id']] === $a['selected_option_id']);
+
+        if ($allNonHintedCorrect) {
+            $earnedPoints += 50;
         }
 
         $topicId = $questions->first()?->topic_id;
@@ -81,6 +98,18 @@ class QuestionController extends Controller
             'updated_at' => $now,
         ]), $records));
 
+        // Award points
+        if ($earnedPoints > 0) {
+            $eventType = $allNonHintedCorrect ? 'quiz_perfect' : 'quiz_correct';
+            UserPoint::credit(
+                $user->id,
+                $earnedPoints,
+                $eventType,
+                "Earned {$earnedPoints} pts from quiz attempt",
+                ['attempt_id' => $attempt->id, 'perfect' => $allNonHintedCorrect]
+            );
+        }
+
         Cache::forget("dashboard.overview.{$user->id}");
         Cache::forget("progress.overview.{$user->id}");
 
@@ -89,7 +118,10 @@ class QuestionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Assessment submitted successfully.',
-            'data'    => new AssessmentAttemptResource($attempt),
+            'data'    => array_merge(
+                (new AssessmentAttemptResource($attempt))->toArray($request),
+                ['points_earned' => $earnedPoints]
+            ),
         ], 201);
     }
 

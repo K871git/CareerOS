@@ -21,6 +21,8 @@ class SubmitAssessmentRequest extends FormRequest
             'answers'                          => ['required', 'array', 'min:1'],
             'answers.*.question_id'            => ['required', 'integer', 'exists:questions,id'],
             'answers.*.selected_option_id'     => ['required', 'integer', 'exists:question_options,id'],
+            'hinted_question_ids'              => ['sometimes', 'array'],
+            'hinted_question_ids.*'            => ['integer'],
         ];
     }
 }
