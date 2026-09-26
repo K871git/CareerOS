@@ -1,0 +1,718 @@
+================================================================================
+  CAREEROS — PROJECT CONTEXT FOR CLAUDE
+  Last updated: 2026-09-24
+  Written for: New Claude sessions that need full project context from scratch
+================================================================================
+
+
+--------------------------------------------------------------------------------
+1. WHAT IS CAREEROS?
+--------------------------------------------------------------------------------
+
+CareerOS is a modern engineering growth platform for students and software
+engineers. Official tagline: "The Path for NextGen Engineers!"
+
+It is NOT:
+  - An interview prep / quiz website
+  - An online course marketplace
+  - An AI chatbot landing page
+  - A generic SaaS dashboard
+
+It IS: A platform for building engineering judgment through five pillars:
+  A. Understand   — Teach concepts deeply (what, why, how, trade-offs, examples)
+  B. Practice     — MCQs, scenario-based, debugging, code review problems
+  C. Measure      — Topic/subject performance, weak areas, improvement over time
+  D. Explain      — Ollama AI explains answers, gives hints, simplifies concepts
+  E. Evolve       — AI-assisted development, modern engineering practices
+
+Target users:
+  - Students / beginners learning programming and SE fundamentals
+  - Junior devs (0–2y) strengthening foundations
+  - Mid-level engineers (2–5y) closing skill gaps
+
+Core belief: AI can assist with implementation, but engineering understanding,
+verification, responsibility, and judgment remain essential.
+
+Developer: Kishor — 2+ years full-stack at Biz Secure Labs (Net Protector
+Antivirus). Building CareerOS as both a real product AND a learning journey.
+Mentorship style expected: explain WHY before coding, explain trade-offs.
+
+
+--------------------------------------------------------------------------------
+2. TECH STACK
+--------------------------------------------------------------------------------
+
+Backend:
+  - Laravel 13, PHP 8.3+
+  - Laravel Sanctum (Bearer token auth)
+  - MySQL (Railway in production)
+  - Socialite (Google OAuth, stateless flow)
+
+Frontend:
+  - React + TypeScript + Vite (SPA)
+  - TanStack Query (React Query) — all data fetching + cache management
+  - React Router v6
+
+AI:
+  - Ollama (local LLM server, http://localhost:11434)
+  - Model: llama3.2:3b (Meta Llama 3.2, 3B params, ~2 GB)
+  - Used for: MCQ hints, AI answer explanations
+  - Production: OLLAMA_ENABLED=false (Render can't run Ollama)
+  - Production plan: move to VPS (Hetzner CX21) or swap to Groq API
+
+Deployment:
+  - Frontend: Netlify
+  - Backend: Render
+  - Database: Railway (MySQL)
+
+Architecture: Two fully independent apps — Laravel REST API + React SPA.
+No SSR. No monolith. Communication is REST only.
+
+API convention: /api/v1/ prefix
+Standard response shape: { success: bool, message: string, data: any }
+Namespace: App\Http\Controllers\Api\V1 (PSR-4 dir: API/V1)
+
+
+--------------------------------------------------------------------------------
+3. AUTHENTICATION
+--------------------------------------------------------------------------------
+
+Email/password:
+  - Register, Login, Logout, /me (Sanctum Bearer)
+  - OTP send + verify (hashed with bcrypt, 2-min cooldown, 5-min expiry)
+  - Password reset (Laravel Password broker → React /reset-password?token=&email=)
+
+Google OAuth:
+  - Socialite stateless flow
+  - SocialAuthController handles callback
+  - Account linking: if email exists → link google_id, if not → create user
+  - Frontend: /auth/callback page catches token from redirect
+
+Auth config:
+  - Sanctum token expiry: env('SANCTUM_EXPIRATION', 10080) = 7 days
+  - OTP: hashed (bcrypt), stored as varchar(255), not plain text
+  - Password reset: always returns success (prevents email enumeration)
+
+User model fields:
+  - id, name, email, password (nullable for Google-only accounts)
+  - google_id, avatar, email_verified_at, timestamps
+
+
+--------------------------------------------------------------------------------
+4. DATABASE — KEY TABLES
+--------------------------------------------------------------------------------
+
+Auth / Users:
+  users                 — core user table (google_id, avatar, nullable password)
+  user_profiles         — current_role, experience_level, target_role, career_goal
+  otp_tokens            — email, code (hashed), expires_at, last_sent_at
+  password_reset_tokens — Laravel default
+
+Skills:
+  skills                — skill catalog
+  user_skills           — pivot: user_id, skill_id, level, score
+
+Learning System:
+  learning_tracks       — top-level track (e.g., "Full Stack Development")
+  subjects              — belongs to track (e.g., "JavaScript", "Databases")
+  topics                — belongs to subject (e.g., "Closures", "Joins")
+  lessons               — belongs to topic (content/theory)
+  user_progress         — lesson completion tracking
+
+Level System:
+  level_completions     — user_id, subject_id, level (1–5), score, passed
+
+Theory MCQ:
+  theory_completions    — user_id, theory_area, level (1–3), score, passed
+
+Questions (shared table for all MCQ types):
+  questions             — question text, type, difficulty, topic_id,
+                          theory_area (for theory MCQs), theory_level
+  question_options      — option_text, is_correct, question_id
+
+Assessments (Practice):
+  assessment_attempts   — user_id, topic_id, total, score, percentage
+  assessment_answers    — attempt_id, question_id, selected_option_id, is_correct
+
+Theory Q&A (written answers):
+  theory_questions      — type=THEORY questions
+  theory_answers        — user_id, question_id, content, status (pending/reviewed)
+
+Gamification:
+  user_points           — user_id, balance (running total)
+  point_events          — user_id, amount, type, reason, meta (JSON), timestamps
+
+IMPORTANT: The meta column in point_events is stored as TEXT (not JSON column
+type), with 'meta' => 'array' cast in the model. This was a MySQL compatibility
+fix — $table->json('meta') caused errors.
+
+Total migrations: ~30 (as of 2026-09-24)
+
+
+--------------------------------------------------------------------------------
+5. COMPLETED MODULES
+--------------------------------------------------------------------------------
+
+5.1 Learning System
+  - Hierarchy: LearningTrack → Subject → Topic → Lesson
+  - Subjects have 5 levels, each with topics + lessons + 10-question exam
+  - Pass threshold: 80% (8/10 correct)
+  - LevelCompletion: unique per user+subject+level, tracks score + passed
+  - Cache: level.status.{userId}.{subjectId} (5 min), busted on exam submit
+  - Options shuffled on return (correct answer not always position A)
+
+5.2 Theory Level System (MCQ-based)
+  - 8 areas: languages, frameworks, networking, operating-systems, databases,
+             system-design, sdlc, data-structures
+  - 3 levels per area with progressive thresholds (L1: 8/10, L2: 9/10, L3: 10/10)
+  - TheoryCompletion: unique(user_id, theory_area, level)
+  - Unlocking: must pass L1 before L2, etc.
+  - Only 'languages' area is currently ACTIVE (config/theory.php ACTIVE_AREAS)
+  - Anti-stuffing: exam questions validated to belong to correct area+level
+  - Cache busted on submit: progress.overview.{userId} + dashboard.overview.{userId}
+
+5.3 Practice / Assessment (MCQ)
+  - MCQ questions per topic
+  - Bulk submit via AssessmentAnswer::insert() — no N+1
+  - Results: per-question breakdown, correct answer, explanation
+  - Rate-limited: throttle:10,1 on submit
+  - Hinted question IDs sent in submission (hinted_question_ids array)
+    — hinted questions excluded from accuracy scoring
+
+5.4 Code Playground (ExecutesCode trait)
+  - Languages: PHP, Python, JavaScript — exec via proc_open
+  - Dangerous pattern blocking (eval, exec, file ops, os module, process.env)
+  - MySQL playground: separate careeros_playground DB, 4 sample tables
+  - DDL blocked (CREATE/DROP/ALTER/TRUNCATE/RENAME) — would escape rollback
+  - DML rolled back after each run (sample data stays fresh)
+  - Rate: throttle:20,1
+
+5.5 Coding Battleground
+  - CodingProblem model with slug routing
+  - Submit + view submissions
+  - Rate: throttle:15,1
+
+5.6 Dashboard
+  - Cached overview: lessons %, quizzes, accuracy, learning levels passed,
+    weak areas, recommendations, recent activity
+  - Cache key: dashboard.overview.{userId} (5 min)
+  - Busted on: lesson complete + level exam submit
+
+5.7 Progress
+  - Cached overview: learning tracks, practice by-subject, theory by-area
+  - Cache key: progress.overview.{userId} (30 sec)
+  - Recent activity: lessons + quiz attempts merged + sorted
+  - Single SQL JOIN (no N+1), grouped in PHP
+
+5.8 Gamification / Points System
+  - user_points table: one row per user, stores current balance
+  - point_events table: full audit log of every credit/debit
+  - UserPoint::credit($userId, $amount, $type, $reason, $meta) — static helper
+    uses DB transaction + lockForUpdate() to prevent race conditions
+  - UserPoint::debit($userId, $amount, $type, $reason, $meta) — same, atomic
+
+  Point events (implemented so far):
+    quiz_correct   — +10 pts per correct answer in level exam
+    quiz_perfect   — +150 pts for passing level exam (score >= 8)
+    hint_used      — -50 pts per AI hint consumed
+
+  LevelController.submitExam() awards points after scoring:
+    $score * 10 per correct + 150 if passed
+
+  HintController.unlock() deducts 50 pts before calling Ollama.
+
+  API endpoints:
+    GET  /v1/points/balance          → { balance }
+    POST /v1/points/hints/{question} → { hint, new_balance } (deducts 50 pts)
+
+
+--------------------------------------------------------------------------------
+6. AI / OLLAMA INTEGRATION
+--------------------------------------------------------------------------------
+
+6.1 Hint System (BUILT + WORKING)
+  - Endpoint: POST /v1/points/hints/{questionId}
+  - Auth: Sanctum required
+  - Flow:
+    1. Check user has >= 50 pts (UserPoint::debit atomically)
+    2. Load question + options ($o->option_text — NOT $o->text!)
+    3. Build Ollama prompt: pass correct answer in system context,
+       instruct AI NOT to state it directly, ask for ONE sentence hint
+    4. Call Ollama: POST http://localhost:11434/api/generate
+    5. Ollama options: temperature=0, num_predict=60, num_ctx=512,
+       top_k=1, repeat_penalty=1.0, stop=["\n", ".", "!"]
+    6. cleanHint(): strips "Hint:" prefix, rejects if answer verbatim included
+    7. fallbackHint(): extracts first keyword from correct answer for smart fallback
+    8. Returns { hint, new_balance }
+  - Timeout: 20s
+  - Stop tokens ["\n", ".", "!"] stop at first sentence end — major speed win
+
+  IMPORTANT BUG HISTORY: The option field is option_text on QuestionOption model.
+  Using $o->text returns null → blank prompt → bad AI output. Always use option_text.
+
+6.2 AI Explanation System (BUILT + WORKING)
+  - Endpoint: GET /v1/ai/explain?question_id=X
+  - Cached per question_id for 30 days (same explanation every time)
+  - Rate limit: throttle:20,1
+  - Returns multi-paragraph explanation in numbered format
+  - Frontend: AssessmentResultPage parses AI text into structured blocks
+
+  parseBlocks post-processing (frontend):
+    - AI sometimes puts numbered section content on next line
+    - Post-processing merges empty numbered blocks with next para block
+    - Filters remaining empty numbered blocks
+    - This prevents blank "1." / "2." sections in the UI
+
+6.3 Production Limitation
+  - OLLAMA_ENABLED=false in production (Render can't run Ollama)
+  - UI gracefully hides AI features when disabled
+  - Plan: move to Hetzner VPS or swap OllamaService for Groq API
+
+6.4 Architecture Rule
+  - Laravel owns: questions, correct answers, scoring, attempts, progress, DB
+  - Ollama owns: explanations, hints, concept simplification
+  - AI content = untrusted until validated. Never expose secrets to the model.
+  - Never let missing Ollama crash the app — always check OLLAMA_ENABLED first
+
+
+--------------------------------------------------------------------------------
+7. FRONTEND STRUCTURE
+--------------------------------------------------------------------------------
+
+7.1 Auth Layout (/)
+  GuestLayout — landing page + modal for Login/Register
+  /auth/callback — Google OAuth redirect handler
+  /auth/forgot-password
+  /reset-password?token=&email=
+
+7.2 Protected Layout (/dashboard + children)
+  All routes wrapped in ProtectedRoute → DashboardLayout with Navbar + sidebar
+
+  Navigation:
+  /dashboard
+  /profile
+  /settings
+  /assessment
+
+  Learning:
+  /learning
+  /learning/:category
+  /learning/:category/:subjectSlug
+  /learning/:category/:subjectSlug/:level
+  /learning/:category/:subjectSlug/:level/exam    ← LevelExamPage
+
+  Tracks:
+  /tracks
+  /tracks/:trackId
+  /tracks/:trackId/subjects/:subjectId
+
+  Lessons:
+  /lessons/:lessonId
+
+  Practice:
+  /practice
+  /practice/fsd
+  /practice/fsd/:arena
+  /practice/databases
+  /practice/subjects/:subjectId
+  /practice/topics/:topicId               ← PracticeSessionPage (MCQ quiz)
+  /practice/results/:attemptId            ← AssessmentResultPage
+
+  Progress / Playground:
+  /progress
+  /playground
+
+  Theory:
+  /theory
+  /theory/:area
+  /theory/:area/:level/exam
+  /theory/practice                        ← TheoryQuestionsPage (written Q&A)
+  /theory/answers/:answerId               ← TheoryAnswerPage
+
+7.3 Navbar
+  - Always visible on protected routes
+  - Contains: app logo, nav links, theme toggle, user points badge
+  - Points badge: GraduationCap icon + balance number
+  - Loading state: GraduationCap "juggle" wobble animation (navCapJuggle keyframe)
+  - Points persisted via localStorage (careeros_pts_balance key)
+  - usePoints() hook: initialData from localStorage, initialDataUpdatedAt: 0
+    (always stale → refetches from API silently on mount)
+
+7.4 PracticeSessionPage (MCQ Quiz)
+  Key state:
+    hintedIds    — Set<number>  which question IDs user got hints for
+    hintTexts    — Record<number, string>  hint content per question
+    hintLoading  — boolean  while Ollama responds
+    hintApiErrors — Record<number, string>  per-question errors
+    showHintConfirm — boolean  confirm dialog visibility
+    hintClickError — string | null  "not enough points" on button click
+
+  Top bar order: [← Back] [AI Hint pill] [timer display] [clock icon]
+
+  Hint flow:
+    1. User clicks "AI Hint" pill in top bar
+    2. handleHintButtonClick(): validates balance FIRST
+       - If already hinted this question → no-op
+       - If balance < 50 → set hintClickError (shown inline below button)
+       - Else → setShowHintConfirm(true)
+    3. HintConfirmDialog: amber dialog showing cost (50 pts), warning that
+       hinted questions won't count toward score. NO balance deduction display.
+    4. handleConfirmHint(): calls unlockHint.mutateAsync → stores in hintTexts
+    5. HintResultPanel: below question card, shows only:
+       - Loading dots while fetching
+       - Hint text on success
+       - API error message on failure
+    6. hintClickError cleared on currentIndex change (useEffect)
+    7. On doSubmit: hinted_question_ids: Array.from(hintedRef.current)
+
+  CSS imports in PracticeSessionPage:
+    import '../practice.css';       (hint button styles)
+    import '../../assessment/assessment.css';  (shared question card styles)
+
+7.5 LevelExamPage (Result Screen)
+  - AnimatedCount({ target, duration }): counts up with setInterval 16ms tick
+  - PointsEarnedBadge: visible after 600ms, shows "+X pts earned" with breakdown
+  - ExamResultScreen: all sections in er-anim--N divs
+  - er-container--ready class applied via requestAnimationFrame after mount
+  - Staggered entrance: er-anim--1 through er-anim--8 with 50ms delays
+
+7.6 Code Formatting in Questions (codeFormat.ts)
+  File: frontend/src/features/assessment/utils/codeFormat.ts
+
+  Functions:
+    splitQuestionAndCode(text)
+      — Finds code trigger keywords (function, const, class, SELECT, etc.)
+      — Finds last sentence boundary (? or :) before trigger
+      — Returns { prose, code }
+
+    formatCode(raw)
+      — Adds newlines at { } ; etc.
+      — Tracks indent depth
+      — Short inline structures (≤40 chars, no nested braces) stay one line
+
+    tokenize(code) → CodeToken[]
+      — Token types: keyword | builtin | string | comment | number | operator | plain
+      — JS_KEYWORDS, SQL_KEYWORDS, BUILTINS sets
+
+    looksLikeCode(text)
+      — Detects if an option text is a code snippet
+
+  Components (QuestionCard.tsx):
+    CodeBlock — dark q-code-block with "code" lang label, Catppuccin-inspired colors
+    InlineText — splits on backtick pairs, renders inline code chips
+
+  Syntax token CSS classes (assessment.css):
+    .ck-kw  — keyword  (mauve  #cba6f7)
+    .ck-bi  — builtin  (sky    #89dceb)
+    .ck-str — string   (green  #a6e3a1)
+    .ck-num — number   (peach  #fab387)
+    .ck-cmt — comment  (gray   #585b70)
+    .ck-op  — operator (blue   #89b4fa)
+
+  QuestionOption.tsx uses OptionText component:
+    — Backtick-wrapped text → inline code chip
+    — Entire option looks like code → monospace .q-option-code
+
+
+--------------------------------------------------------------------------------
+8. FRONTEND DATA FETCHING PATTERN
+--------------------------------------------------------------------------------
+
+All data fetching uses TanStack Query (React Query).
+
+Standard pattern:
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['someKey', param],
+    queryFn: () => api.getSomething(param),
+  })
+
+Mutations:
+  const mutation = useMutation({ mutationFn: api.postSomething })
+  await mutation.mutateAsync(payload)
+
+Points hook (usePoints.ts):
+  LS_KEY = 'careeros_pts_balance'
+  readCached() — reads from localStorage, returns number | null
+  writeCache(balance) — writes to localStorage
+
+  usePoints():
+    initialData: readCached() ?? undefined
+    initialDataUpdatedAt: 0   ← forces stale, always refetches from API
+    queryFn: calls API, calls writeCache(response.balance) on success
+
+  useUnlockHint():
+    onSuccess: calls writeCache(data.new_balance)
+
+This gives: instant display on page load (from localStorage) + silent
+background refresh from API. Badge never flashes blank on reload.
+
+
+--------------------------------------------------------------------------------
+9. CSS ARCHITECTURE
+--------------------------------------------------------------------------------
+
+Global design system: CSS custom properties (--color-bg, --text-primary, etc.)
+Dark mode: data-theme="dark" (default), data-theme="light"
+Responsive breakpoints: 768px (tablet), 1024px (desktop) — non-negotiable
+
+Key CSS files:
+  frontend/src/index.css               — global vars, resets, typography
+  frontend/src/components/layout/navbar.css  — navbar + points badge animations
+  frontend/src/features/practice/practice.css  — quiz UI, hint button
+  frontend/src/features/assessment/assessment.css  — question cards, code blocks,
+                                                   result/review cards, AI panel
+  frontend/src/features/learning/learning.css    — level exam result animations
+
+Animations used:
+  navCapJuggle    — graduation cap rotation wobble (points loading state)
+  navPtsReveal    — slide-in for points value (opacity + max-width + translateX)
+  erSlideUp       — entrance for level exam result sections
+  erPointsPop     — scale bounce for points earned badge
+  erPointsGlow    — amber glow pulse on points badge
+  erCardPop       — mini stat cards entrance
+  erTrophyPulse   — trophy wobble on pass
+
+Light mode overrides: full set of [data-theme='light'] overrides for:
+  rcard, ropt-text, ropt--neutral, ropt--correct, ropt--wrong,
+  ropt-badge--correct/wrong, rcard-question, rcard-verdict,
+  result-review-header, rcard-explanation
+
+IMPORTANT: Always add light mode CSS vars when building dark-primary components.
+Text that looks fine in dark mode is often invisible (white-on-white) in light.
+
+
+--------------------------------------------------------------------------------
+10. BACKEND API ROUTES (api.php)
+--------------------------------------------------------------------------------
+
+Auth (no Sanctum):
+  POST /v1/auth/register
+  POST /v1/auth/login
+  POST /v1/auth/otp/send
+  POST /v1/auth/otp/verify
+  POST /v1/auth/forgot-password
+  POST /v1/auth/reset-password
+  GET  /v1/auth/google/redirect
+  GET  /v1/auth/google/callback
+
+Protected (Sanctum middleware):
+  POST /v1/auth/logout
+  GET  /v1/auth/me
+
+  GET  /v1/dashboard/overview
+  GET  /v1/progress/overview
+
+  GET  /v1/learning/tracks
+  GET  /v1/learning/subjects
+  GET  /v1/learning/subjects/{slug}
+  GET  /v1/learning/levels/{subjectId}/status
+  POST /v1/learning/levels/{subjectId}/{level}/submit-exam
+
+  GET  /v1/topics/{topicId}/questions
+  POST /v1/topics/{topicId}/submit              (throttle:10,1)
+
+  GET  /v1/attempts/{attemptId}/results
+  GET  /v1/ai/explain?question_id={id}          (throttle:20,1)
+
+  GET  /v1/points/balance
+  POST /v1/points/hints/{questionId}            (throttle:10,1)
+
+  GET  /v1/theory/areas
+  GET  /v1/theory/{area}/levels
+  POST /v1/theory/{area}/{level}/submit-exam
+
+  GET  /v1/playground/schema
+  POST /v1/playground/run-code                  (throttle:20,1)
+  POST /v1/playground/run-sql                   (throttle:20,1)
+
+  GET  /v1/lessons/{lessonId}
+  POST /v1/lessons/{lessonId}/complete
+
+
+--------------------------------------------------------------------------------
+11. SECURITY & CONFIG DECISIONS
+--------------------------------------------------------------------------------
+
+config/theory.php
+  — Single source of truth for theory areas, active areas, levels per area
+  — ACTIVE_AREAS = ['languages'] currently (others defined but disabled)
+
+config/services.php
+  — Ollama block: url, model, enabled (reads from .env)
+
+Security headers middleware:
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy
+  (Applied globally in AppServiceProvider bootstrap)
+
+Playground security:
+  — Uses config('database.connections.mysql.*') NOT env() — env() returns null
+    after config:cache in production
+  — DML rolled back, DDL blocked entirely
+  — Separate careeros_playground DB
+
+OTP security:
+  — Code hashed with bcrypt (varchar 255)
+  — 2-minute cooldown per email (prevents spam)
+  — 5-minute expiry
+
+Rate limiting:
+  — Assessment submit: throttle:10,1
+  — AI explain: throttle:20,1
+  — Hint unlock: throttle:10,1
+  — Playground code: throttle:20,1
+
+DPDP Act 2023 (India):
+  — Consent system already built (consent recorded before data processing)
+
+
+--------------------------------------------------------------------------------
+12. SCHEDULED TASKS
+--------------------------------------------------------------------------------
+
+db:seed-if-empty — runs every 15 minutes
+  — Idempotent: checks if data exists before seeding
+  — Catches fresh deployments that come up with empty DB
+
+
+--------------------------------------------------------------------------------
+13. BRAND / LANGUAGE RULES
+--------------------------------------------------------------------------------
+
+USE:
+  engineering journey, technical foundations, practical engineering,
+  engineering judgment, AI-assisted development, NextGen Engineers,
+  build / practice / understand / evolve
+
+AVOID:
+  "crack every interview", "get hired instantly", "AI-proof developer",
+  "guaranteed future-proof", "learn everything in 30 days"
+
+CareerOS is ambitious but honest. Never present speculative trends as facts.
+Never claim MCQ scores prove production ability.
+
+
+--------------------------------------------------------------------------------
+14. KEY ARCHITECTURAL DECISIONS & REASONS
+--------------------------------------------------------------------------------
+
+Why two separate apps (not monolith)?
+  — Independent deployability, separate scaling, cleaner separation of concerns.
+  — Netlify for SPA (CDN, free), Render for Laravel (managed hosting).
+
+Why TanStack Query (not Redux / Zustand)?
+  — Server state management built in. Caching, background refetch, stale-while-
+    revalidate. No boilerplate. Perfect for REST API consumption.
+
+Why Sanctum (not Passport)?
+  — SPA auth with cookies OR Bearer tokens. Simpler for this architecture.
+  — Passport is overkill — OAuth server features not needed.
+
+Why Ollama (not OpenAI)?
+  — Free, runs locally, no API costs during dev, data stays local.
+  — Production plan: Groq API (free tier) as drop-in replacement with same
+    interface shape, or self-host on Hetzner VPS.
+
+Why lockForUpdate() on point deduction?
+  — Prevents race condition where two concurrent hint requests both pass the
+    balance check before either deducts. DB-level locking is the safest fix.
+
+Why stop tokens ["\n", ".", "!"] in Ollama?
+  — One-sentence hints load 3–5x faster. Ollama can ramble without a stop.
+  — Users in a timed quiz want fast answers, not paragraphs.
+
+Why localStorage for points persistence?
+  — Prevents badge flickering to blank on page reload / nav.
+  — initialDataUpdatedAt: 0 in TanStack Query marks it stale immediately,
+    so API refetch happens in background. Display is instant, data is fresh.
+
+Why meta column as TEXT not JSON?
+  — $table->json('meta') failed on Railway MySQL (json_object errors).
+  — Fix: $table->text('meta') + 'meta' => 'array' cast in model.
+  — Functionally identical — Laravel handles serialization/deserialization.
+
+
+--------------------------------------------------------------------------------
+15. CURRENT STATE (2026-09-24)
+--------------------------------------------------------------------------------
+
+WORKING:
+  ✓ Full auth (email + Google OAuth)
+  ✓ Learning system (tracks → subjects → levels → exams)
+  ✓ Theory level system (MCQ, area-based, 3 levels)
+  ✓ Practice/Assessment (topic MCQs, results, difficulty breakdown)
+  ✓ AI Hint system (Ollama, 50 pt cost, fast one-sentence hints)
+  ✓ AI Explanation system (AssessmentResultPage, Ollama, 30-day cache)
+  ✓ Gamification (user_points, point_events, credit/debit atomic)
+  ✓ Level exam point awards (+10/correct, +150 pass bonus)
+  ✓ Points badge in Navbar (GraduationCap icon, localStorage persist, juggle loader)
+  ✓ Code syntax highlighting in MCQ questions (custom tokenizer, Catppuccin colors)
+  ✓ Code formatting for quiz questions (splitQuestionAndCode, formatCode)
+  ✓ Light mode CSS fixes for result/review page
+  ✓ Level exam result animations (staggered entrance, points badge pop)
+  ✓ Code playground (PHP, Python, JS, MySQL with rollback)
+  ✓ Dashboard + Progress with caching
+  ✓ Security headers middleware
+  ✓ DPDP consent system
+
+IN PROGRESS / PLANNED:
+  - Groq API as production AI alternative to Ollama
+  - Theory Q&A written answers (backend built, frontend partial)
+  - Coding Battleground (backend built, frontend partial)
+  - Landing page polish
+  - Redis + queues (future)
+  - CI/CD pipeline (future)
+  - Stage 2 assessments: scenario-based, debugging, code review (future)
+
+
+--------------------------------------------------------------------------------
+16. COMMON GOTCHAS / PITFALLS
+--------------------------------------------------------------------------------
+
+1. QuestionOption field: option_text (NOT text, NOT content)
+   — Using $o->text returns null → blank Ollama prompts → garbage output
+
+2. config() not env() in production
+   — After php artisan config:cache, env() returns null
+   — Always use config('services.ollama.url') etc.
+
+3. meta column is TEXT cast as array
+   — Do NOT change to json() column type — MySQL on Railway breaks
+   — 'meta' => 'array' cast handles encode/decode transparently
+
+4. Light mode CSS
+   — Dark mode is default. Any color defined without [data-theme='light'] override
+     WILL be invisible or broken in light mode.
+   — Always add full light mode override set for new components.
+
+5. TanStack Query initialDataUpdatedAt: 0
+   — This makes initialData immediately stale, triggering background refetch.
+   — Without it, cached data would prevent the API call until stale time expires.
+
+6. Ollama stop tokens are critical
+   — Without stop: ["\n", ".", "!"], Ollama generates long paragraphs.
+   — With stop tokens: returns in 1–2s instead of 8–15s for hints.
+
+7. parseBlocks in AssessmentResultPage
+   — AI explanation text has empty numbered sections (content on next line).
+   — Post-processing merges empty numbered blocks with the following para block.
+   — Without this, users see blank "1." "2." lines in the explanation panel.
+
+8. hinted_question_ids in assessment submit
+   — Hinted questions must be sent as an array in the submit payload.
+   — Backend excludes these from accuracy scoring (fair to user).
+
+9. CSS import in PracticeSessionPage
+   — Must import BOTH practice.css AND assessment.css
+   — practice.css has hint button styles; assessment.css has question card styles
+
+10. Point deduction must be atomic
+    — Always use DB transaction + lockForUpdate() for debit/credit
+    — Race conditions are real in concurrent HTTP requests
+
+
+================================================================================
+  END OF CAREEROS CONTEXT DOCUMENT
+================================================================================
